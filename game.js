@@ -393,7 +393,7 @@ function makeBio(c){
   var lines=[];
   var s=c.stats,hist=c.familyHistory;
   lines.push(c.first+" "+c.last+" was born in "+c.villageName+", "+c.eraName+".");
-  if(c.clanName) lines.push(hist+" The "+c.clanName+" clan's "+c.clanSpec+" runs in the family blood.");
+  if(c.clanName){lines.push(hist+" The "+c.clanName+" clan's "+c.clanSpec+" runs in the family blood.");if(c.relocated)lines.push("The family left the clan's home village a generation ago and settled in "+c.villageName+".");}
   else lines.push(hist+" No clan name sits behind yours, only a household that works.");
   var fam=c.familyWealth;
   if(fam==="poor")lines.push("The family is poor; meals are counted and the roof leaks.");
@@ -411,16 +411,18 @@ function generateLife(opts){
   var era=ERAS.find(function(e){return e.id===eraId});
   var village=opts.village&&opts.village!=="r"?opts.village:pick(Object.keys(VILLAGES));
   var v=VILLAGES[village];
-  var clanData=null,clanless=false;
+  var clanData=null,clanless=false,clanPicked=false,relocated=false;
   if(opts.clan&&opts.clan!=="r"){
     var found=CLANS.find(function(c){return c.n===opts.clan});
-    if(found){clanData=found}
+    if(found){clanData=found;clanPicked=true}
     else{clanless=true}
   }else{
     clanData=chance(.42)?rollClan(village):null;
   }
-  if(clanData&&clanData.v&&clanData.v!==village){/* village take precedence, clan may not match: 30% family relocated */
-    if(!chance(.3))clanData=null;
+  if(clanData&&clanData.v&&clanData.v!==village){
+    /* a clan you pick yourself always sticks; only randomly rolled clans respect the village filter */
+    if(clanPicked){relocated=true}
+    else if(!chance(.3)){clanData=null}
   }
   var wealthRoll=Math.random();
   var familyWealth=wealthRoll<.4?"poor":wealthRoll<.8?"modest":wealthRoll<.95?"comfortable":"wealthy";
@@ -478,7 +480,7 @@ function generateLife(opts){
     villageState:{stability:ri(55,90),prosperity:ri(40,85),warActive:era.war>.1,kage:pick(["Torifu","Kagami","Ebun","Shikuro","Genji"])+" "+v.kage,influence:0,
       warYear:false},
     retired:false,retiredYear:null,
-    bio:makeBio({first:first,last:last,clanName:clanData?clanData.n:null,clanSpec:clanData?clanData.spec:"",villageName:v.name,eraName:era.name,familyWealth:familyWealth,stats:stats,familyHistory:familyHistory}),
+    bio:makeBio({first:first,last:last,clanName:clanData?clanData.n:null,clanSpec:clanData?clanData.spec:"",villageName:v.name,eraName:era.name,familyWealth:familyWealth,stats:stats,familyHistory:familyHistory,relocated:relocated}),
     legacyParent:null
   };
   c.relationships.forEach(function(n){n.village=village});
@@ -1785,6 +1787,7 @@ function wireTitle(){
       rollPreview();
     };
   });
+  $("#c-clan").addEventListener("change",function(){var v=$("#c-clan").value;if(v!=="r"&&v!=="none")$("#c-last").value=v;rollPreview()});
   ["c-first","c-last","c-gender","c-era","c-village","c-clan"].forEach(function(id){$("#"+id).onchange=rollPreview});
 }
 function saveMenuFromTitle(){
