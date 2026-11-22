@@ -1741,7 +1741,7 @@ function ccClear(){CC.timers.forEach(clearTimeout);CC.timers=[]}
 function ccShow(step){
   CC.step=step;ccClear();
   var order={intro:0,name:1,village:2,roll:3,clan:4,final:5};
-  ["#cc-intro","#cc-name","#cc-village","#cc-roll","#cc-clan","#cc-final"].forEach(function(id,n){
+  ["#cc-intro","#cc-pane-name","#cc-village","#cc-roll","#cc-clan","#cc-final"].forEach(function(id,n){
     var p=$(id);if(p)p.classList.toggle("on",order[step]===n);
   });
   var dots=$("#cc-prog");if(dots){
