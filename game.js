@@ -949,7 +949,7 @@ function startMission(rank){
     tpl.prep.map(function(p,i){return {t:p[0],d:p[1],i:i}}).concat([{t:"Decline the mission",decline:true}]),
     function(choice){
       if(!choice||choice.decline){fbig("You decline the "+rank+"-rank mission.");render();return}
-      runMission(choice,tpl);
+      runMission(Object.assign({},choice,{rank:rank,pay:pay,team:teamScore}),tpl);
     });
 }
 function runMission(choice,tpl){
@@ -975,6 +975,7 @@ function runMission(choice,tpl){
     });
 }
 function finishMission(tpl,rank,pay,outcome){
+  pay=pay||0;
   var ms=G.missionStats;
   var outTxt="",outCls="";
   ms.total++;ms.byRank[rank]=(ms.byRank[rank]||0)+1;
@@ -2274,7 +2275,7 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"Age Up Moves To The Top",b:"Version 4.0.3. The AGE UP button now sits at the very top of the home screen and stays pinned there while you scroll, so one year is always one tap away. No more scrolling down for it. Everything else is untouched."},{d:"Nov 22, 2026",t:"Bridge Fix Round Two",b:"Version 4.0.2. The wiring bug behind the last fix had more strands: a second batch of the game core (year events, ranks, bonds, academy, the fate system) was still out of reach of the story and fate layers, so AGE UP could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every connection is exposed now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched."},
+var UPDATES=[{d:"Nov 22, 2026",t:"Mission Board Fix",b:"Version 4.0.4. Fixed the mission board: the briefing lost track of the mission's rank and reward before the field, so outcomes miscalculated and pay, reputation and the record could not update. Missions now resolve at the right rank and reward, and every success and failure lands in the record."},{d:"Nov 22, 2026",t:"Age Up Moves To The Top",b:"Version 4.0.3. The AGE UP button now sits at the very top of the home screen and stays pinned there while you scroll, so one year is always one tap away. No more scrolling down for it. Everything else is untouched."},{d:"Nov 22, 2026",t:"Bridge Fix Round Two",b:"Version 4.0.2. The wiring bug behind the last fix had more strands: a second batch of the game core (year events, ranks, bonds, academy, the fate system) was still out of reach of the story and fate layers, so AGE UP could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every connection is exposed now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched."},
 {d:"Nov 22, 2026",t:"Age-Up Fix & The People Tab",b:"Version 4.0.1. Fixed the bug that made AGE UP do nothing when clicked: the new Hearts & Voices systems could not reach the game core, so the click died silently before a single year passed. It now ages you up every time, runs the year\u2019s events and closes with the Year Summary. The People tab and the Record tab are really on the bottom bar now (and the Character tab opens again), and enrolling in the Academy fills your classroom with people to talk to. Everything else is untouched."},
 {d:"Nov 22, 2026",t:"Hearts & Voices",b:"Version 4.0.0. Shinobi: Life Unbound is now a true life simulator. A new People tab puts everyone in this life on one screen: bond meters, what each person remembers about you, and a Spend time button that opens real conversations where your answers branch and every reply is shaped by who they are. Six voices (bold, steady, sharp, warm, distant, easygoing) speak and remember differently. Choices leave seeds: keep the pouch you found, spread a friend's secret, give your word as a child, and the consequences come back years later. Personality deepens: your dominant traits unlock new dialogue options and decide who you are becoming, from The Shield to The Storm. New life events (first words, the new kid, a dinner with edges, the lantern stranger) and bond and feud milestones now fire on their own. Existing saves, menus, character systems and progression are untouched."},
 {d:"Nov 22, 2026",t:"Roll Your Own Clan",b:"Version 3.2.0. The bloodline is yours to roll now. After the dice of birth forge your origin and trait, the clan step hands you three spins: each one rolls a real clan from your village\u2019s bloodline pool at full rarity odds, you keep the one you want or spin again, and the clan you keep becomes your surname. Used all three? You keep the last roll. Rather walk alone? A quiet option lets you stay clanless, a civilian with nothing but your own name. Village pools still respect their lands, rare and mythical clans stay rare, and existing saves are untouched."},
@@ -2433,7 +2434,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="4.0.3";
+var GAME_VERSION="4.0.4";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");
