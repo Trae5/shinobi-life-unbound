@@ -193,7 +193,7 @@ function ago(iso){var d=new Date(iso).getTime();if(!d)return'';var s=(Date.now()
 auth.onAuthStateChanged(function(u){if(u){UID=u.uid;boot()}else{auth.signInAnonymously().catch(function(){cloudFail()})}});
 function cloudFail(){CLOUD=false;setPill('bad','cloud offline');document.getElementById('cloudwarn').style.display='block'}
 function boot(){
- db.collection('community_bugs').orderBy('when','desc').limit(300).onSnapshot(function(s){BUGS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderBugs();renderHome();setPill('ok','online · v'+SITE_VERSION)},function(e){cloudFail()}),function(e){cloudFail()});
+ db.collection('community_bugs').orderBy('when','desc').limit(300).onSnapshot(function(s){BUGS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderBugs();renderHome();setPill('ok','online · v'+SITE_VERSION)},function(e){cloudFail()});
  db.collection('community_features').orderBy('when','desc').limit(300).onSnapshot(function(s){REQS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderReqs();renderHome()},function(e){cloudFail()});
  db.collection('community_chat').orderBy('when','desc').limit(120).onSnapshot(function(s){var el=document.getElementById('chatlog');if(!el)return;var msgs=s.docs.map(function(d){return d.data()}).reverse();el.innerHTML=msgs.map(function(m){return '<div class="msg'+(m.uid===UID?' me':'')+'"><div class="nm">'+esc(m.name)+'</div><div class="tx">'+esc(m.text)+'</div><div class="tm">'+ago(m.when)+'</div></div>'}).join('');el.scrollTop=el.scrollHeight},function(e){cloudFail()});
  fetch('version.json?cb='+Date.now()).then(function(r){return r.json()}).then(function(j){if(j&&j.v&&j.v!==SITE_VERSION)setPill('warn','update available · refresh')}).catch(function(){});
