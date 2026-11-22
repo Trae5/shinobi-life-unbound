@@ -442,6 +442,114 @@ h1,h2,h3{margin:0;line-height:1.2}
 .rar-flash{animation:rarFlash 1s ease 2}
 @keyframes rarFlash{0%{box-shadow:0 0 0 0 rgba(211,169,76,.55)}100%{box-shadow:0 0 0 22px rgba(211,169,76,0)}}
 </style>
+
+<style id="rpgcss">
+.rpg-screen{position:fixed;inset:0;z-index:9000;display:none;background:rgba(5,6,10,.92);overflow:auto;-webkit-overflow-scrolling:touch}
+.rpg-wrap{max-width:860px;margin:0 auto;padding:18px 14px 60px;color:#e8e2d4;font-family:inherit}
+.rpg-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.rpg-title{font-weight:700;font-size:18px;color:#e7c36a;letter-spacing:.5px}
+.rpg-meta{font-size:12px;color:#9aa5b1;margin-left:auto}
+.rpg-x{background:none;border:1px solid #444;color:#ccc;border-radius:8px;width:32px;height:32px}
+.rpg-subnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.rpg-sub{background:#15171f;border:1px solid #2c2f3a;color:#cfd3dd;border-radius:20px;padding:7px 14px;font-size:13px}
+.rpg-sub.on{background:#2a2410;border-color:#e7c36a;color:#e7c36a}
+.rpg-body{display:flex;flex-direction:column;gap:10px}
+.rpg-note{font-size:12.5px;color:#9aa5b1;margin:2px 0 8px;line-height:1.45}
+.rpg-card{background:#12141b;border:1px solid #262a35;border-radius:12px;padding:12px 14px}
+.rpg-card.locked{opacity:.55}
+.rc-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.rc-top b{font-size:14.5px}
+.rpg-chip{font-size:10.5px;border:1px solid #3a3f4d;color:#9aa5b1;border-radius:10px;padding:2px 8px;white-space:nowrap}
+.rpg-chip.on{border-color:#e7c36a;color:#e7c36a}
+.rpg-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;font-size:11.5px;color:#9aa5b1;flex-wrap:wrap}
+.rpg-btn{background:#2a2410;border:1px solid #e7c36a;color:#e7c36a;border-radius:8px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.rpg-btn.wide{width:100%;margin-top:6px}
+.rpg-btn.ghost{background:none;border-color:#3a3f4d;color:#9aa5b1}
+.rpg-btn:disabled{opacity:.4}
+.rpg-lock{font-size:11px;color:#6b7280}
+.rj{font-size:10px;font-weight:700;border-radius:4px;padding:1px 5px}
+.rj.rS{background:#eb5757;color:#fff}.rj.rA{background:#f2994a;color:#111}.rj.rB{background:#9b7ede;color:#111}.rj.rC{background:#4aa3df;color:#111}.rj.rD{background:#6fcf97;color:#111}.rj.rE{background:#9aa5b1;color:#111}
+.jut-stats{display:flex;gap:10px;font-size:11px;color:#9aa5b1;margin:4px 0;flex-wrap:wrap}
+.mbar{height:5px;background:#1d2029;border-radius:3px;overflow:hidden;margin:6px 0}
+.mbar i{display:block;height:100%;background:linear-gradient(90deg,#e7c36a,#f2994a)}
+.rpg-h3{font-size:13px;color:#e7c36a;margin:10px 0 2px;letter-spacing:.4px}
+.cbar{height:10px;background:#1d2029;border-radius:5px;overflow:hidden;margin:8px 0}
+.cbar i{display:block;height:100%;background:linear-gradient(90deg,#4aa3df,#9b7ede)}
+.cgrid{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:12.5px;color:#9aa5b1;margin:8px 0}
+.cgrid b{color:#e8e2d4;text-align:right}
+.rpg-diff{display:flex;gap:6px;margin-bottom:8px}
+.rpg-branch{display:flex;flex-direction:column;gap:8px}
+.rpg-node{background:#12141b;border:1px solid #262a35;border-radius:10px;padding:10px 12px}
+.rpg-node.owned{border-color:#4c7a4c}
+.rpg-node.ready{border-color:#e7c36a}
+.rpg-node.locked{opacity:.5}
+.rpg-modal{position:fixed;inset:0;z-index:9500;background:rgba(5,6,10,.85);display:flex;align-items:center;justify-content:center;padding:20px}
+.rpg-modal .rpg-card{max-width:420px;width:100%}
+/* minigame */
+#minigame{position:fixed;inset:0;z-index:9400;background:rgba(5,6,10,.9);display:none;align-items:center;justify-content:center;padding:18px}
+.mg-box{background:#12141b;border:1px solid #e7c36a33;border-radius:14px;padding:18px;max-width:440px;width:100%}
+.mg-title{font-size:15px;font-weight:700;color:#e7c36a;margin-bottom:2px}
+.mg-sub{font-size:12px;color:#9aa5b1;margin-bottom:12px}
+.mg-bar{position:relative;height:26px;background:#1d2029;border-radius:6px;margin-bottom:12px;overflow:hidden}
+.mg-zone{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#e7c36a55,#e7c36a99)}
+.mg-mark{position:absolute;top:0;bottom:0;width:3px;background:#fff;border-radius:2px}
+.mg-btn{width:100%;background:#2a2410;border:1px solid #e7c36a;color:#e7c36a;border-radius:8px;padding:12px;font-size:15px;font-weight:700;cursor:pointer}
+.mg-tries{font-size:12px;color:#9aa5b1;margin-top:10px;min-height:16px}
+.mg-pad{height:130px;background:#1d2029;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#9aa5b1;cursor:pointer;user-select:none;margin-bottom:8px}
+.mg-pad.go{background:#e7c36a;color:#111}
+.mg-field{position:relative;height:240px;background:#12141b;border:1px solid #262a35;border-radius:10px;margin-bottom:8px;overflow:hidden}
+.mg-target{position:absolute;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle,#e7c36a,#f2994a);cursor:pointer;box-shadow:0 0 12px #e7c36a66}
+.mg-seq{font-size:22px;letter-spacing:6px;text-align:center;min-height:34px;color:#e7c36a;margin-bottom:10px}
+.mg-keys{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.mg-key{background:#1d2029;border:1px solid #3a3f4d;color:#e8e2d4;border-radius:8px;padding:10px 14px;font-size:16px;cursor:pointer}
+.mg-q{font-size:14px;line-height:1.5;margin-bottom:8px}
+.mg-holdbar{height:26px;background:#1d2029;border-radius:6px;overflow:hidden;margin-bottom:10px;cursor:pointer}
+.mg-fill{height:100%;background:linear-gradient(90deg,#4aa3df,#6fcf97);width:20%}
+/* combat */
+.rc-overlay{position:fixed;inset:0;z-index:9300;background:radial-gradient(1200px 600px at 50% -10%,#1a1410,#05060a 70%);display:flex;flex-direction:column;padding:14px;color:#e8e2d4;overflow:auto}
+.rc-stage{display:flex;align-items:flex-start;justify-content:center;gap:14px;position:relative;padding:14px 4px}
+.rc-col{flex:1;max-width:300px}
+.rc-col.foe{text-align:right}
+.rc-name{font-weight:700;font-size:14px;margin-bottom:6px;color:#e7c36a}
+.rc-bar{height:14px;background:#1d2029;border-radius:7px;overflow:hidden;margin-bottom:4px;border:1px solid #262a35}
+.rc-bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#4c9a4c,#6fcf97);transition:width .3s}
+.rc-bar.ch i{background:linear-gradient(90deg,#3a7bbf,#4aa3df)}
+.rc-bar.st i{background:linear-gradient(90deg,#a37b2a,#e7c36a)}
+.rc-nums{font-size:11px;color:#9aa5b1}
+.rc-status{font-size:10px;margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
+.rc-col.foe .rc-status{justify-content:flex-end}
+.rc-chip{border:1px solid #3a3f4d;border-radius:8px;padding:1px 6px;color:#cfd3dd}
+.rc-chip.stun{border-color:#eb5757;color:#eb5757}.rc-chip.dot{border-color:#eb5757;color:#eb5757}
+.rc-chip.regen{border-color:#6fcf97;color:#6fcf97}.rc-chip.gates{border-color:#f2994a;color:#f2994a}
+.rc-intent{font-size:11px;color:#9aa5b1;margin-top:6px}
+.rc-vs{font-weight:800;color:#444;align-self:center}
+.rc-log{flex:1;min-height:120px;max-height:34vh;overflow-y:auto;background:#0c0e14cc;border:1px solid #262a35;border-radius:10px;padding:10px;font-size:12.5px;line-height:1.5;margin:10px 0}
+.rc-line{padding:1px 0;color:#cfd3dd}
+.rc-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rc-btn{background:#1d2029;border:1px solid #3a3f4d;color:#e8e2d4;border-radius:10px;padding:12px 6px;font-size:13px;font-weight:600;cursor:pointer}
+.rc-btn:active{transform:scale(.97)}
+.rc-jutsu{position:absolute;inset:0;z-index:5;background:rgba(5,6,10,.94);display:none;flex-direction:column;gap:8px;padding:16px;overflow:auto}
+.rc-jbtn{background:#12141b;border:1px solid #3a3f4d;border-left:4px solid #9aa5b1;color:#e8e2d4;border-radius:10px;padding:10px 12px;text-align:left;cursor:pointer;font-size:13px}
+.rc-jbtn.rS{border-left-color:#eb5757}.rc-jbtn.rA{border-left-color:#f2994a}.rc-jbtn.rB{border-left-color:#9b7ede}.rc-jbtn.rC{border-left-color:#4aa3df}
+.rc-jbtn.cd{opacity:.45}
+.rc-jnote{font-size:13px;color:#9aa5b1;padding:10px}
+.rc-overwrap{position:absolute;inset:0;z-index:8;background:rgba(5,6,10,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.rc-over h3{font-size:22px;color:#e7c36a;margin-bottom:8px}
+.rc-over.lose h3{color:#eb5757}
+.rc-over p{color:#cfd3dd;font-size:13.5px;margin:4px 0}
+.rc-over .done{margin-top:14px;padding:12px 30px}
+.rc-fx{position:absolute;inset:0;pointer-events:none;border-radius:12px}
+.fx-fire{background:radial-gradient(circle at 50% 60%,rgba(255,107,53,.45),transparent 60%);animation:fxfade .9s ease-out}
+.fx-water{background:radial-gradient(circle at 50% 60%,rgba(74,163,223,.4),transparent 60%);animation:fxfade .9s ease-out}
+.fx-wind{background:repeating-linear-gradient(115deg,rgba(143,214,148,.25) 0 8px,transparent 8px 22px);animation:fxfade .8s ease-out}
+.fx-earth{background:linear-gradient(0deg,rgba(176,137,104,.35),transparent 55%);animation:fxfade .9s ease-out}
+.fx-lightning{background:radial-gradient(circle at 50% 40%,rgba(245,213,71,.5),transparent 55%);animation:fxflash .5s steps(2) 2}
+.fx-genjutsu{background:radial-gradient(circle at 50% 50%,rgba(155,126,222,.4),transparent 65%);animation:fxfade 1.1s ease-out}
+.fx-taijutsu{background:radial-gradient(circle at 50% 70%,rgba(255,255,255,.35),transparent 45%);animation:fxfade .4s ease-out}
+@keyframes fxfade{0%{opacity:1}100%{opacity:0}}
+@keyframes fxflash{0%{opacity:1}50%{opacity:.2}100%{opacity:1}}
+@media(max-width:600px){.rc-actions{grid-template-columns:repeat(3,1fr)}.rc-stage{gap:8px}.rc-vs{display:none}}
+</style>
 </head>
 <body>
 
@@ -676,8 +784,8 @@ h1,h2,h3{margin:0;line-height:1.2}
  <button type="button" id="cine-skip">SKIP INTRO</button>
  <div class="vig"></div>
 </div>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=4.0.2"></script><script src="life.js?v=4.0.2"></script><script src="social.js?v=4.0.2"></script>
-<script src="fate.js?v=4.0.2" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=5.0.0"></script><script src="life.js?v=5.0.0"></script><script src="social.js?v=5.0.0"></script><script src="rpg_data.js?v=5.0.0"></script><script src="rpg_core.js?v=5.0.0"></script><script src="rpg_combat.js?v=5.0.0"></script><script src="rpg_screens.js?v=5.0.0"></script>
+<script src="fate.js?v=5.0.0" defer></script>
 
 <div id="upd" role="alertdialog" aria-modal="true" aria-label="Game update"><div class="upd-card"><div class="mk" style="color:var(--gold)">MAINTENANCE</div><h3 class="serif" style="color:var(--gold)">Update incoming</h3><div class="mtext">A new version just went live. The game is going down for the update.</div><div class="upd-count" id="upd-count">30</div><div class="mtext">refreshing automatically, your saves are safe</div></div></div>
 <script>(function(){var secret='please',pos=0,last=0;function reset(){pos=0;last=0}window.addEventListener('blur',reset);document.addEventListener('keydown',function(e){var t=e.target,title=document.getElementById('screen-title'),intro=document.getElementById('ss-intro');if(!title||!title.classList.contains('on')||(intro&&!intro.hidden)||document.querySelector('#modal.on,#upd.on')||e.defaultPrevented||e.repeat||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||e.shiftKey||(t instanceof Element&&(t.matches('input,textarea,select')||t.isContentEditable))){reset();return}var now=Date.now();if(now-last>3000)pos=0;last=now;var key=e.key;if(key===secret[pos])pos++;else pos=key===secret[0]?1:0;if(pos===secret.length){reset();window.location.href='owner.html'}})})();</script></body>
