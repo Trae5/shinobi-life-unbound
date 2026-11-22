@@ -59,10 +59,11 @@ function rpgTrain(act){
     var xpg=Math.round(act.xp*q*dim);
     var before=rpgXpFor(r.level+1);
     rpgAddXp(xpg);
-    if(act.type!=="combat")spendAgeMinutes&&spendAgeMinutes(20);
+    if(act.type!=="combat")if(typeof spendAgeMinutes==="function")spendAgeMinutes(20);
     rpgShowTrainResult(act,score,statName,G.stats[statName],gain,xpg);
   });
 }
+function spendAgeMinutes(m){/* time advances per year in this sim; drills already cost stamina+fatigue */}
 /* ---------- minigames ---------- */
 function rpgMinigame(act,done){
   var wrap=el("#minigame")||rpgMgCreate();

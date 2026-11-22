@@ -248,7 +248,7 @@ function rpgExamGrad(){
             rpgAddXp(120);fbig("GRADUATION PASSED — score "+score+"/8. You are a shinobi of the village now.")}
           else{G.examDone="failed";fbig("Graduation failed — score "+score+"/8. Train for a year and try again.")}
           if(typeof render==="function")render();
-        }});if(!jutsuOk)rcLog&&0;
+        }});
       },900);
     })},900);
   });
