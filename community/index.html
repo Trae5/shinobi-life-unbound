@@ -15,6 +15,14 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellips
 header{padding:34px 0 6px;text-align:center}
 h1{font-family:Cinzel,serif;font-weight:900;font-size:clamp(28px,6vw,44px);color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
 .sub{color:var(--dim);font-size:14px;margin-top:6px;letter-spacing:.06em}
+.pill{display:inline-flex;align-items:center;gap:7px;margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:5px 14px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);background:rgba(0,0,0,.3)}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.pill.ok{color:#9fe0b3;border-color:rgba(79,174,106,.5)}
+.pill.ok .dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+.pill.warn{color:#f0c470;border-color:rgba(224,165,60,.5)}
+.pill.warn .dot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.pill.bad{color:#ff9a8a;border-color:rgba(179,38,38,.55)}
+.pill.bad .dot{background:var(--red2);box-shadow:0 0 8px var(--red2)}
 nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:22px 0 26px;position:sticky;top:0;background:rgba(13,7,9,.92);backdrop-filter:blur(6px);padding:10px 0;z-index:50;border-bottom:1px solid var(--line)}
 nav button{font-family:Cinzel,serif;font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--dim);border:1px solid transparent;border-radius:20px;padding:9px 16px;cursor:pointer;transition:.15s}
 nav button:hover{color:var(--gold)}
@@ -82,6 +90,7 @@ footer a{color:var(--gold)}
 <div class="wrap">
 <header>
 <h1>Shinobi Community</h1>
+<div class="pill" id="pill"><span class="dot"></span><span id="pilltext">connecting</span></div>
 <div class="sub">bug reports · feature requests · live chat — Shinobi Legacy &amp; Shinobi: Life Unbound</div>
 </header>
 <nav>
@@ -176,15 +185,18 @@ Shinobi Community · fan hub for <a href="https://shinobi-legacy.sites.tab.bot/"
 var CFG={apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'};
 var app=firebase.initializeApp(CFG,'community'),auth=app.auth(),db=app.firestore();
 var UID=null,CLOUD=true,BUGS=[],REQS=[],bugFilter='all',bugStatus='all',reqFilter='all',reqSort='votes',lastChat=0;
+var SITE_VERSION='1.0.0';
+function setPill(cls,txt){var p=document.getElementById('pill');if(!p)return;p.className='pill '+cls;document.getElementById('pilltext').textContent=txt}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function name(){return localStorage.getItem('shinobi_com_name')||''}
 function ago(iso){var d=new Date(iso).getTime();if(!d)return'';var s=(Date.now()-d)/1000;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
 auth.onAuthStateChanged(function(u){if(u){UID=u.uid;boot()}else{auth.signInAnonymously().catch(function(){cloudFail()})}});
-function cloudFail(){CLOUD=false;document.getElementById('cloudwarn').style.display='block'}
+function cloudFail(){CLOUD=false;setPill('bad','cloud offline');document.getElementById('cloudwarn').style.display='block'}
 function boot(){
- db.collection('community_bugs').orderBy('when','desc').limit(300).onSnapshot(function(s){BUGS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderBugs();renderHome()},function(e){cloudFail()});
+ db.collection('community_bugs').orderBy('when','desc').limit(300).onSnapshot(function(s){BUGS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderBugs();renderHome();setPill('ok','online · v'+SITE_VERSION)},function(e){cloudFail()}),function(e){cloudFail()});
  db.collection('community_features').orderBy('when','desc').limit(300).onSnapshot(function(s){REQS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderReqs();renderHome()},function(e){cloudFail()});
  db.collection('community_chat').orderBy('when','desc').limit(120).onSnapshot(function(s){var el=document.getElementById('chatlog');if(!el)return;var msgs=s.docs.map(function(d){return d.data()}).reverse();el.innerHTML=msgs.map(function(m){return '<div class="msg'+(m.uid===UID?' me':'')+'"><div class="nm">'+esc(m.name)+'</div><div class="tx">'+esc(m.text)+'</div><div class="tm">'+ago(m.when)+'</div></div>'}).join('');el.scrollTop=el.scrollHeight},function(e){cloudFail()});
+ fetch('version.json?cb='+Date.now()).then(function(r){return r.json()}).then(function(j){if(j&&j.v&&j.v!==SITE_VERSION)setPill('warn','update available · refresh')}).catch(function(){});
  if(!name())setTimeout(openName,600);
 }
 /* tabs */
