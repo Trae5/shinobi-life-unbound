@@ -640,6 +640,7 @@ function ACTIVITY_LIST(){
 
 /* ============================ missions ============================ */
 function availableRanks(){
+  if(!["Genin","Chunin","Jonin","ANBU"].includes(G.rank)&&G.occupation!=="ANBU Operative"&&!G.rogue&&!G.flags.kage)return [];
   var out=["D"];
   if(G.rank==="Genin"){if(G.missionCount>=6&&stat("reputation")>=15)out.push("C")}
   else if(G.rank==="Chunin"){out.push("C");if(G.missionCount>=14)out.push("B")}
@@ -847,6 +848,7 @@ function openCareer(){
     (G.rogue?"You are a missing-nin. Jobs are darker and buyers less honest.":"Available mission ranks: "+availableRanks().join(", ")+"-rank.")+'</div><div class="mchoices" id="miss"></div>';
   modal(html);
   var box=$("mcard").querySelector("#miss");
+  if(!availableRanks().length)box.parentNode.querySelector(".mtext").innerHTML+=" <br>Missinon take is available once you are a graduated shinobi (Genin or above).";
   availableRanks().forEach(function(rk){
     var b=el("button","mchoice");
     b.innerHTML="<b>"+rk+"-Rank Mission</b><small>"+pick(MISSION_TYPES[rk])+"</small>";
