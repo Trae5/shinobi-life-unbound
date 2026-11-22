@@ -462,6 +462,7 @@ function ensureProfile(){
    db.collection('community_profiles').doc(UID).set(ME).then(applyName).catch(function(e){})}
  }).catch(function(e){})
 }
+function openName(){openModal('namemodal');setTimeout(function(){var i=document.getElementById('nm-in');if(i)i.focus()},150)}
 function applyName(){document.getElementById('hello-name').textContent=ME.name||'shinobi';renderMe();if(!ME.name&&!name())openName()}
 function saveProfile(patch){return db.collection('community_profiles').doc(UID).set(patch,{merge:true}).then(function(){Object.keys(patch).forEach(function(k){ME[k]=patch[k]})}).catch(function(e){toast('Could not save. Try again.')})}
 function gainRep(n){if(!ME||n<=0)return;var d=ME.daily||{};var done=d.day===todayKey()?d.n:0;if(done>=20)return;var add=Math.min(n,20-done);
