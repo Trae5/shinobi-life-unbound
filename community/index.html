@@ -17,7 +17,7 @@ header{padding:30px 0 4px;text-align:center}
 h1{font-family:Cinzel,serif;font-weight:900;font-size:clamp(26px,5.5vw,42px);color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
 .sub{color:var(--dim);font-size:13.5px;margin-top:5px;letter-spacing:.06em}
 nav{position:sticky;top:0;z-index:60;background:rgba(12,7,9,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:18px 0 22px;padding:9px 0}
-.navrow{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;justify-content:center}
+.navrow{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-start}.navrow>button{order:10}.navrow>button[data-v="home"]{order:0}.navrow>button[data-v="bugs"]{order:1}.navrow>button[data-v="requests"]{order:2}.navrow>button[data-v="chat"]{order:3}.navrow>button[data-v="me"]{order:4}.navrow::before{content:"";flex-basis:100%;height:0;order:5}@media(max-width:600px){.navrow>button{font-size:10px;letter-spacing:0;padding:6px 5px}}
 .navrow::-webkit-scrollbar{display:none}
 nav button{font-family:Cinzel,serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--dim);border:1px solid transparent;border-radius:18px;padding:8px 13px;cursor:pointer;transition:.15s;white-space:nowrap;position:relative}
 nav button:hover{color:var(--gold)}
