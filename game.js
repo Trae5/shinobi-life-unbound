@@ -2273,7 +2273,7 @@ function wireTitle(){
   function menuOpen(id){
     try{
       if(id==="btn-ach"){var lines=ACHIEVEMENTS.map(function(x){var got=G&&G.achievements&&includes(G.achievements,x.id);return x.h&&!got?"? ? ? (a hidden honor)":x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements",ACHIEVEMENTS.length+" honors a shinobi can earn in a single life, some hidden until discovered:\n\n"+lines)}
-      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 2.2.1\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Replay Intro",d:"Watch the cinematic opening again",fn:function(){cinePlay(function(){})}},{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
+      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 2.2.2\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Replay Intro",d:"Watch the cinematic opening again",fn:function(){cinePlay(function(){})}},{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
       else if(id==="btn-credits"){modalSafe("Credits","Credits","SHINOBI: LIFE UNBOUND\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")}
       else if(id==="btn-exit"){modalSafe("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])}
       else if(id==="btn-back"){$("#screen-creator").classList.remove("on");$("#screen-title").classList.add("on")}
@@ -2375,12 +2375,22 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.2.1";
+var GAME_VERSION="2.2.2";
+function updStatus(text,upd){
+  var s=document.getElementById("t-status");
+  if(!s)return;
+  s.classList.toggle("upd",!!upd);
+  var t=document.getElementById("t-status-text");
+  if(t)t.textContent=text;
+}
 function startUpdateWatch(){
   function check(){
     try{
       fetch("version.json?cb="+Date.now()).then(function(r){return r.ok?r.json():null}).then(function(d){
-        if(d&&d.v&&d.v!==GAME_VERSION)beginUpdateCountdown();
+        if(d&&d.v){
+          if(d.v!==GAME_VERSION){updStatus("Updating \u00b7 new version live",true);beginUpdateCountdown();}
+          else updStatus("Online \u00b7 Version "+GAME_VERSION,false);
+        }
       }).catch(function(){});
     }catch(e){}
   }
