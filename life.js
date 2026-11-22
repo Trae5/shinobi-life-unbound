@@ -1187,7 +1187,7 @@ function renderStory(){
     b.appendChild(el("div","ftxt",h.txt));r.appendChild(b);hp.appendChild(r);
   });
   w.appendChild(hp);
-  var holder=$("#vpane")||w;holder.innerHTML="";holder.appendChild(w);
+  var holder=$("#vpane-story")||w;holder.innerHTML="";holder.appendChild(w);
 }
 
 /* ============================== init & hooks ============================== */

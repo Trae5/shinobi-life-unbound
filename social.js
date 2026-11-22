@@ -504,7 +504,7 @@ var KIND_ICON={rival:"\u2694\ufe0f",spouse:"\ud83d\udc8d",teacher:"\ud83c\udf93"
   sibling:"\ud83d\udc6b",parent:"\ud83c\udfe0",guardian:"\ud83c\udfe0",sensei:"\ud83e\udd77",child:"\ud83e\udd8b",teammate:"\ud83e\udd4a"};
 function renderPeople(){
   var w=el("div");
-  if(!G||!G.relationships){var p0=el("div","panel");p0.appendChild(el("div","tag","the people in this life"));p0.appendChild(el("div","ftxt","No one knows you yet. That changes."));w.appendChild(p0);var h=$("vpane");if(h){h.innerHTML="";h.appendChild(w)}return}
+  if(!G||!G.relationships){var p0=el("div","panel");p0.appendChild(el("div","tag","the people in this life"));p0.appendChild(el("div","ftxt","No one knows you yet. That changes."));w.appendChild(p0);var h=$("vpane-people");if(h){h.innerHTML="";h.appendChild(w)}return}
   E();
   var idn=identity(G);
   var head=el("div","panel");
@@ -544,7 +544,7 @@ function renderPeople(){
   w.appendChild(grid);
   var hint=el("div","panel");hint.appendChild(el("div","ftxt","Conversations cost a little energy and change how people see you. What you say out here comes back later, one way or another."));
   w.appendChild(hint);
-  var h2=$("vpane");if(h2){h2.innerHTML="";h2.appendChild(w)}
+  var h2=$("vpane-people");if(h2){h2.innerHTML="";h2.appendChild(w)}
 }
 
 /* ============================== record identity panel ============================== */
