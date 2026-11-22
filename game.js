@@ -2214,5 +2214,25 @@ function showRetire(){
     [{t:"Retire with honors",fn:function(){G.retired=true;G.retiredYear=G.age;G.career="Retired Shinobi";award("retired");fbig("You retire with honors.","good");tl(G.age,"Retired with honors")}},{t:"Keep serving"}]);
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
+/* ============================ update watch ============================ */
+var GAME_VERSION="2.0.0";
+function startUpdateWatch(){
+  function check(){
+    try{
+      fetch("version.json?cb="+Date.now()).then(function(r){return r.ok?r.json():null}).then(function(d){
+        if(d&&d.v&&d.v!==GAME_VERSION)beginUpdateCountdown();
+      }).catch(function(){});
+    }catch(e){}
+  }
+  check();setInterval(check,45000);
+}
+function beginUpdateCountdown(){
+  var o=document.getElementById("upd");
+  if(!o||o.classList.contains("on"))return;
+  o.classList.add("on");
+  var n=30,c=document.getElementById("upd-count");
+  var t=setInterval(function(){n--;if(c)c.textContent=n;if(n<=0){clearInterval(t);try{location.reload()}catch(e){}}},1000);
+}
+startUpdateWatch();
 wireTitle();
 })();
