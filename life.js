@@ -274,7 +274,7 @@ function sceneChoices(s){
       if(ch.res)res=Array.isArray(ch.res)?ch.res:[ch.res];
       res.forEach(function(r){c.appendChild(el("p","sc-res",r))});
       var done=el("button","sc-choice sc-continue",ch.then||"Continue");
-      done.onclick=function(){SCENE_CARD=false;SCENEQ.shift();sceneDone()};
+      done.onclick=function(){SCENE_CARD=false;closeCard();SCENEQ.shift();sceneDone()};
       c.appendChild(done);
       drift();render();
     };
@@ -282,7 +282,7 @@ function sceneChoices(s){
   });
   if(!s.choices||!s.choices.length){
     var done=el("button","sc-choice sc-continue","Continue");
-    done.onclick=function(){SCENE_CARD=false;SCENEQ.shift();sceneDone()};
+    done.onclick=function(){SCENE_CARD=false;closeCard();SCENEQ.shift();sceneDone()};
     box.appendChild(done);
   }
   c.appendChild(box);

@@ -76,8 +76,8 @@ function startConv(n,script,auto){
     var t=script.turns[i];
     if(!t)return;
     var lines=[];
-    if(openLine)lines.push({name:first(n),say:openLine});
-    (Array.isArray(t.say)?t.say:[t.say]).forEach(function(x){lines.push({name:first(n),say:x})});
+    if(openLine)lines.push({name:fn(n),say:openLine});
+    (Array.isArray(t.say)?t.say:[t.say]).forEach(function(x){lines.push({name:fn(n),say:x})});
     var s={t:script.title||"A Conversation",cat:script.cat||"Conversation",
       loc:script.loc||placeFor(n),rar:script.rar||"common",lines:lines,choices:[]};
     var opts=(t.opts||[]).filter(function(o){return !o.need||o.need()});
@@ -88,7 +88,7 @@ function startConv(n,script,auto){
         var next=(o.goto!=null)?o.goto:(o.end?null:i+1);
         if(next!=null&&script.turns[next])queueTurn(next,o.reply);
         else if(o.reply)LIFE.queue({t:script.title||"A Conversation",cat:script.cat||"Conversation",
-          loc:script.loc||placeFor(n),lines:[{name:first(n),say:o.reply}]});
+          loc:script.loc||placeFor(n),lines:[{name:fn(n),say:o.reply}]});
       }});
     });
     LIFE.queue(s);
