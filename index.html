@@ -417,6 +417,30 @@ h1,h2,h3{margin:0;line-height:1.2}
 .fate-pick p{font-size:12.5px;color:var(--muted);line-height:1.6;margin:6px 0 0}
 .fate-adapt{font-size:11px!important;color:#8a8f98!important;font-style:italic}
 .fate-note{color:var(--muted);font-size:12.5px;font-style:italic;text-align:center}
+/* clan system v2 */
+.cc-pas{margin-top:10px;padding:10px 12px;border:1px solid rgba(211,169,76,.28);border-radius:10px;background:rgba(211,169,76,.06);color:#e8c66b;font-size:12px;line-height:1.55}
+.cc-pas b{color:#f1d38a}
+.clan-filterbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.clan-search{flex:1 1 180px;min-width:140px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;color:#e9e4d8;padding:9px 12px;font-size:13px;outline:none}
+.clan-search:focus{border-color:rgba(211,169,76,.45)}
+.clan-chip{border:1px solid var(--line);background:rgba(0,0,0,.3);color:#cfc9bb;border-radius:999px;padding:6px 12px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .12s ease}
+.clan-chip:hover{color:#fff}
+.clan-chip.on{border-color:var(--rc,#d3a94c);color:var(--rc,#d3a94c);background:color-mix(in srgb,var(--rc,#d3a94c) 12%,transparent)}
+.clan-gridwrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.clan-mini{border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.3));transition:transform .12s ease,border-color .12s ease}
+.clan-mini:hover{transform:translateY(-2px)}
+.clan-mini.owned{border-color:rgba(211,169,76,.6)!important;box-shadow:0 0 0 1px rgba(211,169,76,.25) inset}
+.clan-mini b{display:block;font-size:14px;margin-bottom:2px}
+.clan-mini .rar{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--rc,#8a8f98)}
+.clan-mini .pas{display:block;font-size:11px;color:#9a958a;margin-top:5px;line-height:1.4}
+.clan-detail{display:flex;gap:16px;align-items:flex-start}
+.clan-detail .cc-emb{flex:0 0 auto}
+.clan-detailbody{flex:1;min-width:0}
+.clan-block{margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.25)}
+.clan-blocktitle{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#e8c66b}
+.clan-effects{margin:8px 0 0 18px;padding:0;color:#d8d2c4;font-size:12px;line-height:1.7}
+.rar-flash{animation:rarFlash 1s ease 2}
+@keyframes rarFlash{0%{box-shadow:0 0 0 0 rgba(211,169,76,.55)}100%{box-shadow:0 0 0 22px rgba(211,169,76,0)}}
 </style>
 </head>
 <body>

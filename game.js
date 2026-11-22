@@ -40,103 +40,330 @@ var VILLAGES={
   oto:{name:"Otogakure",label:"the Hidden Sound",kan:"音",kage:"Otokage",academyAge:9}
 };
 
-/* ============================ data: clans & bloodlines ============================ */
-/* r: rarity tier — mythical, legendary, rare, uncommon, common. spec + flavor + KG link. */
+/* ============================ data: clans & bloodlines (v2 overhaul) ============================
+   r: common | uncommon | rare | epic | legendary | mythical | secret
+   pas: {n, d, flat:{stat:bonus} applied once via st() layer, rel:{...} relative modifiers read live}
+   ab: flavor list of clan abilities; techniques live in JUTSU with cat:"Clan".
+   secret:true clans never appear in the normal roll pool. */
 var CLANS=[
-  {n:"Uchiha",r:"legendary",spec:"Fire · Genjutsu",kg:"Sharingan",v:"konoha",
-   d:"The village's most feared name since the massacre-in-waiting. Their eyes see through lies and copy what they witness.",
-   hist:"Your family keeps its fan crest covered in public."},
-  {n:"Hyuga",r:"legendary",spec:"Gentle Fist · Perception",kg:"Byakugan",v:"konoha",
-   d:"The oldest pure bloodline in the Leaf, split between main house and branch, bound by the Caged Bird seal.",
-   hist:"You were born into the branch house's quiet discipline."},
-  {n:"Senju",r:"mythical",spec:"Wood Release · Vitality",kg:"Wood Release",v:"konoha",
-   d:"The clan that founded the Leaf. Its direct line was thought gone for a generation.",
-   hist:"Elders still bow when your family name is spoken."},
-  {n:"Uzumaki",r:"rare",spec:"Sealing Arts · Endurance",kg:null,v:"konoha",
-   d:"Red-haired survivors of a drowned village, famous for enormous life force and fūinjutsu.",
-   hist:"Your mother's red hair turns heads in the market."},
-  {n:"Sarutobi",r:"rare",spec:"All-rounder · Willpower",kg:null,v:"konoha",
-   d:"A clan of strong-willed shinobi with deep ties to the village leadership, called the fire of the Leaf.",
-   hist:"Your grandfather served the second Hokage directly."},
-  {n:"Nara",r:"uncommon",spec:"Shadow Arts · Strategy",kg:null,v:"konoha",
-   d:"Lazy geniuses who tend deer and shadow techniques, and solve every problem with the least effort possible.",
-   hist:"The family deer pen is older than the village walls."},
-  {n:"Akimichi",r:"uncommon",spec:"Body Expansion · Strength",kg:null,v:"konoha",
-   d:"Big appetites, bigger bodies, and secret calorie-control techniques passed down three generations.",
-   hist:"Dinner at your house feeds twelve and there are four of you."},
-  {n:"Yamanaka",r:"uncommon",spec:"Mind Arts · Sensory",kg:null,v:"konoha",
-   d:"Florists by day, mind-walkers by trade. Their shop has served the village for sixty years.",
-   hist:"The flower shop is the family front and the family pride."},
-  {n:"Aburame",r:"uncommon",spec:"Kikaichū · Tracking",kg:null,v:"konoha",
-   d:"Quiet hosts of living insects. Few words, many kikaichū, unbreakable contracts.",
-   hist:"At your naming ceremony, beetles were given a home in your skin."},
-  {n:"Inuzuka",r:"uncommon",spec:"Ninken · Tracking",kg:null,v:"konoha",
-   d:"Loud, loyal, and always smelling faintly of dog. Every child is paired with a ninja hound at six.",
-   hist:"Your puppy sleeps in your bed and guards your socks."},
-  {n:"Kurama",r:"rare",spec:"Genjutsu Mastery",kg:null,v:"konoha",
-   d:"A small clan whose genjutsu once shook nations. Their power burns minds, including their own.",
-   hist:"Your aunt paints scenes no one else can see, and they are always real."},
-  {n:"Hatake",r:"rare",spec:"Kenjutsu · Speed",kg:null,v:"konoha",
-   d:"A legacy of white-fanged shinobi. The name still carries weight and a white scabbard.",
-   hist:"A white chokutō hangs above the family shrine."},
-  {n:"Shimura",r:"common",spec:"Wind Release · Discipline",kg:null,v:"konoha",
-   d:"An old founding family of strict teachers and council loyalists.",
-   hist:"Family dinners begin with the village oath."},
-  {n:"Fuma",r:"common",spec:"Shurikenjutsu",kg:null,v:"konoha",
-   d:"A widespread clan of shuriken specialists scattered across the land of Fire.",
-   hist:"Your uncle claims the clan once served a daimyō. Nobody can prove it."},
-  {n:"Yuki",r:"rare",spec:"Ice Release",kg:"Ice Release",v:"kiri",
-   d:"Ice-release carriers, once hunted in the Mist. They keep their kekkei genkai quiet.",
-   hist:"Your family never talks about why they moved to the coast."},
-  {n:"Hozuki",r:"uncommon",spec:"Hydrification",kg:null,v:"kiri",
-   d:"Mist shinobi who can turn their bodies to water and carry swords in gourds.",
-   hist:"Family legend says a great-grandfather was executed with a oiled gourd on his back."},
-  {n:"Hoshigaki",r:"uncommon",spec:"Shark Arts · Strength",kg:null,v:"kiri",
-   d:"Saw-toothed sharks of the Mist coastline. Samehada's previous wielders came from here.",
-   hist:"Your father's teeth are filed to points. Yours will be too, in time."},
-  {n:"Kaguya",r:"rare",spec:"Shikotsumyaku",kg:"Dead Bone Pulse",v:"kiri",
-   d:"A violent, nearly extinct bloodline of bone dancers. The village tolerates what it cannot tame.",
-   hist:"You were told never to bleed in public."},
-  {n:"Terumi",r:"rare",spec:"Lava & Boil Release",kg:"Lava Release",v:"kiri",
-   d:"Lava and boil release run in this flashy Mist line, alongside theatrical confidence.",
-   hist:"Your family hosts the loudest festivals on the coast."},
-  {n:"Yotsuya",r:"common",spec:"Puppetry",kg:null,v:"suna",
-   d:"Sand-country scholars turned puppeteers, keeping three workshops in the artisan quarter.",
-   hist:"Your first toy was a one-armed marionette."},
-  {n:"Sasori",r:"rare",spec:"Puppet Genius · Poison",kg:null,v:"suna",
-   d:"A bloodline of genius puppeteers and quiet tinkerers. Their workshops smell of lacquer and oil.",
-   hist:"The workshop door has thirty locks and your family knows twenty-nine."},
-  {n:"Kedoin",r:"uncommon",spec:"Copy Technique",kg:null,v:"suna",
-   d:"Desert wanderers said to mimic any jutsu they see once. Proof is thin; pride is not.",
-   hist:"Your grandmother insists she once copied a Kage's technique. Once."},
-  {n:"Yotsuki",r:"uncommon",spec:"Lightning · Endurance",kg:null,v:"kumo",
-   d:"Cloud-country mountain folk who never sell out their allies, at any price.",
-   hist:"The family motto is stitched inside every jacket: never sell out."},
-  {n:"Darui",r:"rare",spec:"Storm Release",kg:"Storm Release",v:"kumo",
-   d:"Storm-release carriers with a talent for deadpan loyalty and black lightning.",
-   hist:"Your father can split raindrops with a finger beam. He does parties."},
-  {n:"Kamizuru",r:"uncommon",spec:"Bee Arts",kg:null,v:"iwa",
-   d:"Bee-keepers of the Stone, old rivals of a certain Leaf clan that kept beetles instead.",
-   hist:"The hives behind the house hum through every season."},
-  {n:"Ishikawa",r:"common",spec:"Earth Release",kg:null,v:"iwa",
-   d:"Stone-country quarriers with earth-release in their bones and dust in everything.",
-   hist:"Your family carved the tunnel under the west gate."},
-  {n:"Amagiri",r:"common",spec:"Wind · Scouting",kg:null,v:null,
-   d:"A minor rain-country family of scouts and couriers, scattered across three villages.",
-   hist:"Your relatives write letters from three different countries."},
-  {n:"Fujimori",r:"common",spec:"Barrier Arts",kg:null,v:null,
-   d:"Wisteria farmers with a flair for barrier basics and patient hands.",
-   hist:"The wisteria trellis out back is a training tool, not decoration."},
-  {n:"Kurosawa",r:"common",spec:"Administration",kg:null,v:null,
-   d:"Ink-makers and ledger keepers for the village administration. Respectable, unglamorous, essential.",
-   hist:"Your father can smell a forged seal from across a room."},
-  {n:"Tachibana",r:"common",spec:"Endurance",kg:null,v:null,
-   d:"Bathhouse owners with surprisingly sturdy constitutions and endless gossip.",
-   hist:"You grew up hauling water before sunrise."},
-  {n:"Shirakami",r:"common",spec:"Scholarship",kg:null,v:null,
-   d:"A bookish family of archivists and part-time exorcists of small hauntings.",
-   hist:"The family library holds one scroll nobody is allowed to open."}
+ {n:"Otsutsuki",r:"mythical",spec:"Celestial · Chakra",kg:null,v:null,secret:false,
+  d:"A name that predates the villages themselves. Blood this old is not supposed to walk the earth again, and yet here you are.",
+  hist:"Your grandmother speaks a language no scholar can place, and the shrine carvings match your family crest exactly.",
+  pas:{n:"Celestial Blood",d:"Greatly increased chakra capacity, improved chakra control, faster ability progression, access to unique celestial events.",
+   flat:{chakra:16,chakraControl:8,willpower:6},
+   rel:{train:{chakra:.3,chakraControl:.25},jutsu:.25,exam:4},
+   trig:"chakra"}},
+ {n:"Hagoromo",r:"mythical",spec:"Sage Arts · Spirit",kg:null,v:null,secret:false,
+  d:"The Sage's name survives in scripture and stone. Your family carries it in blood, and the weight of both.",
+  hist:"Pilgrims once stopped at your family's door to be blessed. Your parents stopped telling them to go away.",
+  pas:{n:"Sage Legacy",d:"Improved chakra control, faster technique mastery, bonus spiritual stats, unique sage progression events.",
+   flat:{chakraControl:9,intelligence:6,willpower:8},
+   rel:{jutsu:.3,train:{chakraControl:.25,intelligence:.15},resist:.08},
+   trig:"spirit"}},
+ {n:"Senju",r:"mythical",spec:"Wood Release · Vitality",kg:"Wood Release",v:"konoha",
+  d:"The clan that founded the Leaf. Its direct line was thought gone for a generation.",
+  hist:"Elders still bow when your family name is spoken.",
+  pas:{n:"Vital Force",d:"Increased health, chakra reserves and stamina, improved recovery, bonus vitality progression.",
+   flat:{health:14,chakra:12,endurance:8},
+   rel:{train:{health:.2,chakra:.2,endurance:.2},recovery:.3,resist:.1},
+   trig:"recovery"}},
+ {n:"Uchiha",r:"legendary",spec:"Fire · Genjutsu",kg:"Sharingan",v:"konoha",
+  d:"The village's most feared name since the massacre-in-waiting. Their eyes see through lies and copy what they witness.",
+  hist:"Your family keeps its fan crest covered in public.",
+  pas:{n:"Eyes of Insight",d:"Improved combat awareness, faster reaction and technique mastery, exclusive Sharingan progression and awakening events.",
+   flat:{perception:8,genjutsu:7,ninjutsu:5},
+   rel:{jutsu:.2,train:{perception:.2,genjutsu:.25},exam:3},
+   trig:"combat"}},
+ {n:"Hyuga",r:"legendary",spec:"Gentle Fist · Perception",kg:"Byakugan",v:"konoha",
+  d:"The oldest pure bloodline in the Leaf, split between main house and branch, bound by the Caged Bird seal.",
+  hist:"You were born into the branch house's quiet discipline.",
+  pas:{n:"Gentle Vision",d:"Increased perception, improved precision and chakra control, exclusive Byakugan progression.",
+   flat:{perception:9,chakraControl:7,taijutsu:5},
+   rel:{train:{perception:.25,taijutsu:.15},track:.2,exam:2},
+   trig:"precision"}},
+ {n:"Uzumaki",r:"legendary",spec:"Sealing Arts · Endurance",kg:null,v:null,
+  d:"Red-haired survivors of a drowned village, famous for enormous life force and fūinjutsu.",
+  hist:"Your mother's red hair turns heads in the market.",
+  pas:{n:"Adamantine Vitality",d:"Massive chakra reserves, increased stamina and vitality, improved recovery, improved sealing technique mastery.",
+   flat:{chakra:14,endurance:9,health:8,willpower:5},
+   rel:{train:{endurance:.2,chakra:.2},recovery:.35,resist:.12},
+   trig:"recovery"},
+  ab:["Chakra Pull","Adamantine Sealing Chains","Enhanced Vitality"]},
+ {n:"Kaguya",r:"legendary",spec:"Shikotsumyaku",kg:"Dead Bone Pulse",v:"kiri",
+  d:"A violent, nearly extinct bloodline of bone dancers. The village tolerates what it cannot tame.",
+  hist:"You were told never to bleed in public.",
+  pas:{n:"Bone Bloodline",d:"Increased physical durability and power, unique bone-based bloodline progression, exclusive awakening events.",
+   flat:{health:10,strength:8,endurance:6},
+   rel:{train:{strength:.25,endurance:.2},resist:.1},
+   trig:"bone"}},
+ {n:"Chinoike",r:"legendary",spec:"Ketsuryūgan · Sight",kg:"Ketsuryūgan",v:null,
+  d:"Exiled twice over, a bloodline whose eyes once booby-trapped a valley. The world prefers to remember them as a story.",
+  hist:"Your family moved in the night more than once. Nobody asks why anymore.",
+  pas:{n:"Bloodline Sight",d:"Improved perception and genjutsu resistance, unique bloodline progression, exclusive clan events.",
+   flat:{perception:8,genjutsu:6,intelligence:4},
+   rel:{train:{perception:.2,genjutsu:.2},resist:.12,exam:2},
+   trig:"sight"}},
+ {n:"Jugo",r:"legendary",spec:"Sage Transformation",kg:null,v:null,
+  d:"A clan whose bodies drink natural energy and sometimes cannot stop. The curse and the gift wear the same face.",
+  hist:"Your family lives far from the main roads, by choice and by warning.",
+  pas:{n:"Natural Assimilation",d:"Gains natural energy over time, special awakening progression, increased power during surge events, unique transformation-related events.",
+   flat:{strength:9,endurance:8,health:6},
+   rel:{train:{strength:.2,endurance:.2},recovery:.15,resist:.08},
+   trig:"surge"}},
+ {n:"Sarutobi",r:"epic",spec:"All-rounder · Willpower",kg:null,v:"konoha",
+  d:"A clan of strong-willed shinobi with deep ties to the village leadership, called the fire of the Leaf.",
+  hist:"Your grandfather served the second Hokage directly.",
+  pas:{n:"Will of Fire",d:"Bonus elemental mastery, faster technique learning, improved training progression.",
+   flat:{willpower:6,ninjutsu:5,intelligence:4},
+   rel:{train:{ninjutsu:.2},jutsu:.2,exam:3},
+   trig:"training"}},
+ {n:"Kurama",r:"epic",spec:"Genjutsu Mastery",kg:null,v:"konoha",
+  d:"A small clan whose genjutsu once shook nations. Their power burns minds, including their own.",
+  hist:"Your aunt paints scenes no one else can see, and they are always real.",
+  pas:{n:"Illusion Prodigy",d:"Stronger genjutsu progression, improved illusion resistance, bonus mental stats.",
+   flat:{genjutsu:8,intelligence:5,perception:3},
+   rel:{train:{genjutsu:.3},resist:.12,exam:2},
+   trig:"illusion"}},
+ {n:"Hatake",r:"epic",spec:"Kenjutsu · Speed",kg:null,v:"konoha",
+  d:"A legacy of white-fanged shinobi. The name still carries weight and a white scabbard.",
+  hist:"A white chokutō hangs above the family shrine.",
+  pas:{n:"White Fang Talent",d:"Increased speed, faster mastery, improved combat adaptability.",
+   flat:{speed:7,kenjutsu:6,agility:4},
+   rel:{train:{speed:.2,kenjutsu:.25},jutsu:.15},
+   trig:"blade"}},
+ {n:"Yuki",r:"epic",spec:"Ice Release",kg:"Ice Release",v:"kiri",
+  d:"Ice-release carriers, once hunted in the Mist. They keep their kekkei genkai quiet.",
+  hist:"Your family never talks about why they moved to the coast.",
+  pas:{n:"Ice Blood",d:"Improved ice affinity, increased elemental control, unique ice techniques.",
+   flat:{ninjutsu:6,chakraControl:5,endurance:3},
+   rel:{train:{ninjutsu:.25,chakraControl:.15},resist:.06},
+   trig:"ice"}},
+ {n:"Terumi",r:"epic",spec:"Lava & Boil Release",kg:"Lava Release",v:"kiri",
+  d:"Lava and boil release run in this flashy Mist line, alongside theatrical confidence.",
+  hist:"Your family hosts the loudest festivals on the coast.",
+  pas:{n:"Elemental Fusion",d:"Improved elemental damage, faster hybrid-element mastery, unique elemental progression.",
+   flat:{ninjutsu:7,chakra:5,confidence:4},
+   rel:{train:{ninjutsu:.25},jutsu:.15},
+   trig:"element"}},
+ {n:"Hoshigaki",r:"epic",spec:"Shark Arts · Strength",kg:null,v:"kiri",
+  d:"Saw-toothed sharks of the Mist coastline. Samehada's previous wielders came from here.",
+  hist:"Your father's teeth are filed to points. Yours will be too, in time.",
+  pas:{n:"Aquatic Adaptation",d:"Increased stamina, improved water affinity, better recovery.",
+   flat:{endurance:7,strength:5,ninjutsu:3},
+   rel:{train:{endurance:.2},recovery:.2},
+   trig:"water"}},
+ {n:"Darui",r:"epic",spec:"Storm Release",kg:"Storm Release",v:"kumo",
+  d:"Storm-release carriers with a talent for deadpan loyalty and black lightning.",
+  hist:"Your father can split raindrops with a finger beam. He does parties.",
+  pas:{n:"Storm Talent",d:"Lightning mastery, improved elemental efficiency, unique storm-style progression.",
+   flat:{ninjutsu:7,speed:4,chakra:4},
+   rel:{train:{ninjutsu:.25,speed:.1},jutsu:.1},
+   trig:"storm"}},
+ {n:"Iburi",r:"epic",spec:"Smoke Body",kg:null,v:null,
+  d:"A clan that lived in caves and learned to become the smoke their fires made. Soldiers still fear fog because of them.",
+  hist:"Your family never lights a fire without closing the flue first.",
+  pas:{n:"Smoke Body",d:"Improved evasion, smoke-based abilities, unique clan progression.",
+   flat:{agility:7,speed:4,perception:3},
+   rel:{train:{agility:.25},evade:.15},
+   trig:"smoke"}},
+ {n:"Tsuchigumo",r:"epic",spec:"Forbidden Arts · Barriers",kg:null,v:null,
+  d:"Keepers of a barrier technique the great villages would pay wars to own. The family pretends to be farmers.",
+  hist:"The cellar door stays locked, and the cellar stays full.",
+  pas:{n:"Forbidden Art",d:"Improved barrier mastery, bonus technique power, exclusive clan events.",
+   flat:{chakra:6,intelligence:5,chakraControl:4},
+   rel:{train:{chakraControl:.2},jutsu:.2,exam:2},
+   trig:"barrier"}},
+ {n:"Nara",r:"rare",spec:"Shadow Arts · Strategy",kg:null,v:"konoha",
+  d:"Lazy geniuses who tend deer and shadow techniques, and solve every problem with the least effort possible.",
+  hist:"The family deer pen is older than the village walls.",
+  pas:{n:"Strategic Mind",d:"Increased intelligence, better outcomes in strategy-based events, faster planning progression.",
+   flat:{intelligence:6,patience:4},
+   rel:{train:{intelligence:.2},exam:4,mission:2},
+   trig:"strategy"}},
+ {n:"Akimichi",r:"rare",spec:"Body Expansion · Strength",kg:null,v:"konoha",
+  d:"Big appetites, bigger bodies, and secret calorie-control techniques passed down three generations.",
+  hist:"Dinner at your house feeds twelve and there are four of you.",
+  pas:{n:"Powerful Build",d:"Increased health, strength and stamina.",
+   flat:{health:7,strength:6,endurance:5},
+   rel:{train:{strength:.2,endurance:.15}},
+   trig:"bulk"}},
+ {n:"Yamanaka",r:"rare",spec:"Mind Arts · Sensory",kg:null,v:"konoha",
+  d:"Florists by day, mind-walkers by trade. Their shop has served the village for sixty years.",
+  hist:"The flower shop is the family front and the family pride.",
+  pas:{n:"Mind Arts",d:"Increased mental stats, better social influence, genjutsu resistance.",
+   flat:{intelligence:5,confidence:5,chakraControl:3},
+   rel:{social:.15,resist:.1,exam:2},
+   trig:"mind"}},
+ {n:"Aburame",r:"rare",spec:"Kikaichū · Tracking",kg:null,v:"konoha",
+  d:"Quiet hosts of living insects. Few words, many kikaichū, unbreakable contracts.",
+  hist:"At your naming ceremony, beetles were given a home in your skin.",
+  pas:{n:"Colony Bond",d:"Improved tracking and detection, bonus success chances for tracking missions.",
+   flat:{perception:5,intelligence:3,endurance:3},
+   rel:{track:.3,mission:1,per:.1},
+   trig:"hive"}},
+ {n:"Inuzuka",r:"rare",spec:"Ninken · Tracking",kg:null,v:"konoha",
+  d:"Loud, loyal, and always smelling faintly of dog. Every child is paired with a ninja hound at six.",
+  hist:"Your puppy sleeps in your bed and guards your socks.",
+  pas:{n:"Beast Instinct",d:"Increased speed, improved tracking, increased awareness.",
+   flat:{speed:6,agility:4,perception:4},
+   rel:{track:.2,train:{speed:.15},per:.1},
+   trig:"beast"}},
+ {n:"Hozuki",r:"rare",spec:"Hydrification",kg:null,v:"kiri",
+  d:"Mist shinobi who can turn their bodies to water and carry swords in gourds.",
+  hist:"Family legend says a great-grandfather was executed with a oiled gourd on his back.",
+  pas:{n:"Liquid Body",d:"Improved evasion, resistance to physical status effects, unique clan ability progression.",
+   flat:{agility:5,chakraControl:4,endurance:4},
+   rel:{evade:.15,resist:.12,jutsu:.1},
+   trig:"water"}},
+ {n:"Yotsuki",r:"rare",spec:"Lightning · Endurance",kg:null,v:"kumo",
+  d:"Cloud-country mountain folk who never sell out their allies, at any price.",
+  hist:"The family motto is stitched inside every jacket: never sell out.",
+  pas:{n:"Thunder Body",d:"Lightning affinity, increased speed, bonus stamina.",
+   flat:{speed:5,endurance:5,strength:3},
+   rel:{train:{speed:.15,endurance:.15}},
+   trig:"storm"}},
+ {n:"Kamizuru",r:"rare",spec:"Bee Arts",kg:null,v:"iwa",
+  d:"Bee-keepers of the Stone, old rivals of a certain Leaf clan that kept beetles instead.",
+  hist:"The hives behind the house hum through every season.",
+  pas:{n:"Hive Mastery",d:"Improved scouting and tracking, bonus sensory abilities.",
+   flat:{perception:5,chakraControl:3,intelligence:3},
+   rel:{track:.25,per:.12},
+   trig:"hive"}},
+ {n:"Kedoin",r:"rare",spec:"Copy Technique",kg:null,v:"suna",
+  d:"Desert wanderers said to mimic any jutsu they see once. Proof is thin; pride is not.",
+  hist:"Your grandmother insists she once copied a Kage's technique. Once.",
+  pas:{n:"Mind Guard",d:"Increased mental resistance, improved concentration, reduced negative mental effects.",
+   flat:{willpower:5,discipline:4,intelligence:3},
+   rel:{resist:.15,exam:2},
+   trig:"mind"}},
+ {n:"Fuma",r:"rare",spec:"Shurikenjutsu · Wind",kg:null,v:"konoha",
+  d:"A widespread clan of shuriken specialists scattered across the land of Fire, with old wind in their wrists.",
+  hist:"Your uncle claims the clan once served a daimyō. Nobody can prove it.",
+  pas:{n:"Windborn",d:"Increased agility and speed, wind affinity bonus.",
+   flat:{agility:5,speed:5,kenjutsu:2},
+   rel:{train:{agility:.2,speed:.15}},
+   trig:"wind"}},
+ {n:"Sasori",r:"rare",spec:"Puppet Genius · Poison",kg:null,v:"suna",
+  d:"A bloodline of genius puppeteers and quiet tinkerers. Their workshops smell of lacquer and oil.",
+  hist:"The workshop door has thirty locks and your family knows twenty-nine.",
+  pas:{n:"Puppet Prodigy",d:"Faster technical mastery, increased crafting and engineering progression, bonus intelligence.",
+   flat:{intelligence:5,chakraControl:4,discipline:3},
+   rel:{jutsu:.2,train:{intelligence:.15,chakraControl:.15}},
+   trig:"craft"}},
+ {n:"Onikuma",r:"rare",spec:"Bear Strength",kg:null,v:null,
+  d:"Mountain stock from the bear roads: broad backs, heavy hands, and a stare that ends arguments.",
+  hist:"Your family wrestles at every festival and wins at most of them.",
+  pas:{n:"Heavy Presence",d:"Increased health and strength, improved intimidation and physical progression.",
+   flat:{health:6,strength:6,confidence:3},
+   rel:{train:{strength:.2,health:.15}},
+   trig:"bulk"}},
+ {n:"Hoki",r:"rare",spec:"Scholarship · Speed",kg:null,v:null,
+  d:"A sharp-minded clan of tacticians and quick studies that produces academy stars a generation at a time.",
+  hist:"Your family keeps every report card since the village was founded.",
+  pas:{n:"Sharp Mind",d:"Increased intelligence, faster academy progression, improved skill learning.",
+   flat:{intelligence:6,discipline:4},
+   rel:{exam:4,jutsu:.15,train:{intelligence:.15}},
+   trig:"mind"}},
+ {n:"Kohaku",r:"rare",spec:"Clear Spirit",kg:null,v:null,
+  d:"A steady-blooded clan with old shrine duties. Their chakra runs smooth as lake water.",
+  hist:"Your family still sweeps the shrine steps before dawn.",
+  pas:{n:"Clear Spirit",d:"Improved chakra control, better resistance to negative events, improved concentration.",
+   flat:{chakraControl:6,willpower:4,patience:3},
+   rel:{resist:.15,exam:2,train:{chakraControl:.15}},
+   trig:"spirit"}},
+ {n:"Izuno",r:"rare",spec:"Scroll Arts · Fortune",kg:null,v:"konoha",
+  d:"Keepers of the dragon-blaze scroll and a talent for finding rare techniques in odd places.",
+  hist:"The family vault holds a scroll that hums when the moon is wrong.",
+  pas:{n:"Mystic Talent",d:"Improved rare-technique discovery, bonus chakra efficiency, increased special ability progression.",
+   flat:{chakraControl:5,intelligence:4,luck:2},
+   rel:{jutsu:.2,exam:2},
+   trig:"mystic"}},
+ {n:"Fujimori",r:"uncommon",spec:"Barrier Arts",kg:null,v:null,
+  d:"Wisteria farmers with a flair for barrier basics and patient hands.",
+  hist:"The wisteria trellis out back is a training tool, not decoration.",
+  pas:{n:"Natural Talent",d:"Slightly faster learning across the board.",
+   flat:{intelligence:3,discipline:2},
+   rel:{jutsu:.1,train:{all:.08}},
+   trig:"training"}},
+ {n:"Yotsuya",r:"uncommon",spec:"Puppetry",kg:null,v:"suna",
+  d:"Sand-country scholars turned puppeteers, keeping three workshops in the artisan quarter.",
+  hist:"Your first toy was a one-armed marionette.",
+  pas:{n:"Adaptable",d:"A small permanent boost to two stats fate favors in you.",
+   flat:{luck:2},
+   rel:{train:{all:.1},resist:.05},
+   trig:"fortune"}},
+ {n:"Ishikawa",r:"uncommon",spec:"Earth Release",kg:null,v:"iwa",
+  d:"Stone-country quarriers with earth-release in their bones and dust in everything.",
+  hist:"Your family carved the tunnel under the west gate.",
+  pas:{n:"Hard Worker",d:"Bonus training experience from every session.",
+   flat:{endurance:4,discipline:3},
+   rel:{train:{all:.12}},
+   trig:"training"}},
+ {n:"Amagiri",r:"uncommon",spec:"Wind · Scouting",kg:null,v:null,
+  d:"A minor rain-country family of scouts and couriers, scattered across three villages.",
+  hist:"Your relatives write letters from three different countries.",
+  pas:{n:"Quick Recovery",d:"Improved recovery after exhausting events.",
+   flat:{agility:3,endurance:2},
+   rel:{recovery:.25,resist:.05},
+   trig:"recovery"}},
+ {n:"Kurosawa",r:"uncommon",spec:"Administration",kg:null,v:null,
+  d:"Ink-makers and ledger keepers for the village administration. Respectable, unglamorous, essential.",
+  hist:"Your father can smell a forged seal from across a room.",
+  pas:{n:"Disciplined",d:"Reduced training failure chances, improved skill progression.",
+   flat:{discipline:4,intelligence:2},
+   rel:{resist:.08,train:{discipline:.15,intelligence:.1},jutsu:.1},
+   trig:"training"}},
+ {n:"Tachibana",r:"uncommon",spec:"Endurance · Society",kg:null,v:null,
+  d:"Bathhouse owners with surprisingly sturdy constitutions and endless gossip.",
+  hist:"You grew up hauling water before sunrise.",
+  pas:{n:"Social Grace",d:"Increased reputation gains, improved relationship progression.",
+   flat:{confidence:3,compassion:3,endurance:2},
+   rel:{rep:.2,social:.15},
+   trig:"social"}},
+ {n:"Shirakami",r:"uncommon",spec:"Scholarship",kg:null,v:null,
+  d:"A bookish family of archivists and part-time exorcists of small hauntings.",
+  hist:"The family library holds one scroll nobody is allowed to open.",
+  pas:{n:"Focused Spirit",d:"Improved concentration, faster technique learning.",
+   flat:{willpower:3,intelligence:3,chakraControl:2},
+   rel:{jutsu:.15,exam:2},
+   trig:"spirit"}},
+ {n:"Lee",r:"uncommon",spec:"Taijutsu",kg:null,v:"konoha",
+  d:"No bloodline limit, no shortcuts: a clan that treats hard work itself as the family technique.",
+  hist:"Your family trains before the sun and considers that sleeping in.",
+  pas:{n:"Taijutsu Discipline",d:"Bonus physical training, faster physical stat progression, improved taijutsu mastery.",
+   flat:{taijutsu:5,strength:3,speed:3},
+   rel:{train:{taijutsu:.3,strength:.2,speed:.2}},
+   trig:"training"}},
+ {n:"Ryu",r:"uncommon",spec:"Dragon Spirit",kg:null,v:null,
+  d:"A scattered clan that claims descent from a river dragon. The records are thin. The stubbornness is not.",
+  hist:"Your family never walks away from anything, which has been good and terrible.",
+  pas:{n:"Dragon Spirit",d:"Increased determination, bonus mastery to one nature, unique rare clan events.",
+   flat:{willpower:4,ambition:3},
+   rel:{jutsu:.12,train:{all:.08},resist:.06},
+   trig:"spirit"}},
+ {n:"Shimura",r:"common",spec:"Wind Release · Discipline",kg:null,v:"konoha",
+  d:"An old founding family of strict teachers and council loyalists.",
+  hist:"Family dinners begin with the village oath.",
+  pas:{n:"Iron Discipline",d:"Increased discipline, reduced training failure chances. Small, real, and always there.",
+   flat:{discipline:4,endurance:2},
+   rel:{resist:.08,train:{discipline:.12}},
+   trig:"training"}},
+ {n:"Vex",r:"secret",spec:"The Void",kg:null,v:null,secret:true,
+  d:"Not a clan so much as a debt the world owes something older than it. Those who carry the name do not dream ordinary dreams.",
+  hist:"The record of your family begins with a page torn out of every archive that ever held it.",
+  pas:{n:"Voidborn",d:"Exclusive progression path, unique scaling bonuses, special events, exclusive abilities and awakenings.",
+   flat:{chakra:10,willpower:8,perception:6},
+   rel:{jutsu:.3,train:{all:.15},resist:.15},
+   trig:"void"}},
+ {n:"Rin",r:"secret",spec:"Primordial Blood",kg:null,v:null,secret:true,
+  d:"The oldest blood in the register, older than the Sage's scriptures. It wakes slowly, and it never stops growing.",
+  hist:"Your family tree has a gap in it shaped like a hundred years.",
+  pas:{n:"Primordial Blood",d:"Exclusive awakening progression, extremely high potential, unique events, exclusive abilities, special evolution system.",
+   flat:{chakra:12,chakraControl:8,potential:2,endurance:6},
+   rel:{jutsu:.3,train:{all:.15},recovery:.25,resist:.12},
+   trig:"primordial"}}
 ];
+
 var CIV_BGS=[
   "Your family runs a small teahouse near the market.",
   "Your parents are farmers on the village's outer terraces.",
@@ -167,7 +394,8 @@ var KKG={
   "Storm Release":{clans:["Darui"],minAge:10,minPot:7,boost:{ninjutsu:8,speed:4},desc:"Laser-like beams of charged light."},
   "Explosion Release":{clans:[],minAge:12,minPot:7,boost:{ninjutsu:6,strength:4},desc:"Chakra that detonates on contact."},
   "Magnet Release":{clans:[],minAge:12,minPot:7,boost:{ninjutsu:6,perception:4},desc:"Iron sand and floating weapons."},
-  "Boil Release":{clans:[],minAge:12,minPot:7,boost:{ninjutsu:6,endurance:4},desc:"Corrosive acid mist."}
+  "Boil Release":{clans:[],minAge:12,minPot:7,boost:{ninjutsu:6,endurance:4},desc:"Corrosive acid mist."},
+  "Ketsuryūgan":{clans:["Chinoike"],minAge:8,minPot:6,boost:{perception:8,genjutsu:7},desc:"Crimson eyes that hypnotize the living and detonate chakra in earth and air."}
 };
 
 /* ============================ data: eras ============================ */
@@ -233,6 +461,18 @@ var JUTSU=[
   {id:"bugweb",n:"Kikaichū Web",cat:"Clan",clan:"Aburame",req:{chakraControl:50,perception:40},masteryMax:3},
   {id:"fangoverfang",n:"Fang Over Fang",cat:"Clan",clan:"Inuzuka",req:{strength:50,speed:50},masteryMax:3},
   {id:"mindwalk",n:"Mind Body Switch",cat:"Clan",clan:"Yamanaka",req:{intelligence:55,chakraControl:50},masteryMax:3},
+ {id:"chakrapull",n:"Chakra Pull",cat:"Clan",clan:"Uzumaki",req:{chakra:55,chakraControl:45},masteryMax:3},
+ {id:"adamantine",n:"Adamantine Sealing Chains",cat:"Clan",clan:"Uzumaki",req:{chakra:65,willpower:60},masteryMax:3},
+ {id:"fireball",n:"Fire Style: Great Fireball",cat:"Clan",clan:"Uchiha",req:{ninjutsu:50,chakra:45},masteryMax:3},
+ {id:"sixtyfour",n:"Eight Trigrams Sixty-Four Palms",cat:"Clan",clan:"Hyuga",req:{taijutsu:60,perception:60},masteryMax:3},
+ {id:"bonedance",n:"Bone Blade Dance",cat:"Clan",clan:"Kaguya",req:{taijutsu:55,endurance:50},masteryMax:3},
+ {id:"hydrify",n:"Hydrification",cat:"Clan",clan:"Hozuki",req:{chakraControl:55,endurance:50},masteryMax:3},
+ {id:"icemirror",n:"Demonic Ice Mirrors",cat:"Clan",clan:"Yuki",req:{ninjutsu:55,chakraControl:50},masteryMax:3},
+ {id:"shadowstrangle",n:"Shadow Strangle",cat:"Clan",clan:"Nara",req:{intelligence:60,chakraControl:50},masteryMax:3},
+ {id:"smokeveil",n:"Smoke Veil",cat:"Clan",clan:"Iburi",req:{chakraControl:50,agility:45},masteryMax:3},
+ {id:"wrathbarrier",n:"Wrath Seal Barrier",cat:"Clan",clan:"Tsuchigumo",req:{chakraControl:55,intelligence:55},masteryMax:3},
+ {id:"voidstep",n:"Void Step",cat:"Clan",clan:"Vex",req:{chakra:60,perception:55},masteryMax:3},
+ {id:"primordialsurge",n:"Primordial Surge",cat:"Clan",clan:"Rin",req:{chakra:60,endurance:55},masteryMax:3},
   {id:"kenjutsu_flow",n:"Flowing Blade Form",cat:"Kenjutsu",tier:2,req:{kenjutsu:45,speed:40},masteryMax:3},
   {id:"mysticalpalm",n:"Mystical Palm Technique",cat:"Medical",tier:2,req:{medical:50,chakraControl:55},masteryMax:3},
   {id:"scalpel",n:"Chakra Scalpel",cat:"Medical",tier:3,req:{medical:65,chakraControl:65},masteryMax:3}
@@ -360,11 +600,92 @@ var G=null; /* current life */
 function rollName(g){
   return (g==="f"?pick(NAMES_F):pick(NAMES_M));
 }
-function rollClan(village){
-  var pool=CLANS.filter(function(c){return !c.v||c.v===village});
-  var w={mythical:0.7,legendary:2.2,rare:5,uncommon:9,common:14};
-  return weighted(pool.map(function(c){return [c,w[c.r]]}));
+/* ============================ clan system v2: odds, luck, passives ============================ */
+var CLAN_RARITIES=["common","uncommon","rare","epic","legendary","mythical","secret"];
+var CLAN_ODDS={common:48,uncommon:27,rare:15,epic:7,legendary:2.5,mythical:.5};
+var SECRET_CLAN_ODDS=1/2000000; /* per secret clan, per divination */
+var CLAN_CFG_KEY="slu_clan_cfg";
+function clanCfg(){
+  try{var c=JSON.parse(localStorage.getItem(CLAN_CFG_KEY)||"{}");return (c&&typeof c==="object")?c:{}}catch(e){return {}}
 }
+function clanLuckValue(){
+  /* 0..1 — in-life luck stat when a life exists, otherwise the birth luck roll */
+  var l=(G&&G.stats&&G.stats.luck!=null)?G.stats.luck:(CC&&CC.luckRoll!=null?CC.luckRoll:5);
+  return Math.max(0,Math.min(1,(l-1)/9));
+}
+function clanRollWeights(){
+  /* baseline CLAN_ODDS; luck moves a slice of the common weight up the ladder;
+     owner per-rarity multipliers apply on top; caller normalizes over what exists */
+  var cfg=clanCfg();
+  var w={},r;
+  for(r in CLAN_ODDS)w[r]=CLAN_ODDS[r];
+  var luckMult=(cfg.luckMult==null?1:cfg.luckMult);
+  var shift=Math.min(18,10*clanLuckValue()*luckMult);
+  if(shift>0&&w.common>0){w.common-=shift;w.uncommon+=shift*.34;w.rare+=shift*.30;w.epic+=shift*.20;w.legendary+=shift*.11;w.mythical+=shift*.05}
+  if(cfg.oddsMult)for(r in cfg.oddsMult){if(w[r]!=null&&typeof cfg.oddsMult[r]==="number")w[r]=Math.max(0,w[r]*cfg.oddsMult[r])}
+  return w;
+}
+function rollClan(village,quiet){
+  var pool=CLANS.filter(function(c){return !c.secret&&(!c.v||c.v===village)});
+  if(!pool.length)return null;
+  var w=clanRollWeights();
+  var tiers=CLAN_RARITIES.filter(function(r){return r!=="secret"&&pool.some(function(c){return c.r===r})&&w[r]>0});
+  var rar=weighted(tiers.map(function(r){return [r,w[r]]}));
+  var c=pick(pool.filter(function(x){return x.r===rar}));
+  if(!quiet)logClanRoll(c,"roll",CC.clanHistory);
+  return c;
+}
+function secretRollClan(){
+  var pool=CLANS.filter(function(c){return c.secret});
+  if(!pool.length)return null;
+  var cfg=clanCfg();
+  var mult=(cfg.secretOddsMult==null||typeof cfg.secretOddsMult!=="number")?1:cfg.secretOddsMult;
+  var c=pick(pool);
+  var hit=Math.random()<SECRET_CLAN_ODDS*mult;
+  logClanRoll(c,hit?"secret-hit":"secret-miss",G&&G.clanHistory?G.clanHistory:null);
+  return hit?c:null;
+}
+function logClanRoll(c,kind,h){
+  if(!c)return;
+  if(!h){h=(G&&G.clanHistory)?G.clanHistory:(CC.clanHistory=CC.clanHistory||[])}
+  h.unshift({n:c.n,r:c.r,kind:kind||"roll",when:Date.now()});
+  if(h.length>30)h.length=30;
+}
+/* ---- passives: flat bonuses live in the st() layer, derived from the clan — never stored twice, never stack ---- */
+function clanOf(){
+  if(G&&G.clan)return G.clan;
+  var nm=(G&&G.clanName)||null;
+  if(!nm)return null;
+  return CLANS.find(function(x){return x.n===nm})||null;
+}
+function clanPas(){var c=clanOf();return c?(c.pas||null):null}
+function clanFlat(k){
+  var p=clanPas();
+  if(!p||!p.flat)return 0;
+  var v=p.flat[k];
+  if(v==null)return 0;
+  if(k==="potential")return v>0?Math.min(v,2):v; /* potential is a 1..11 scale */
+  return v;
+}
+function clanRelNum(key){
+  var p=clanPas();
+  if(!p||!p.rel)return 0;
+  var v=p.rel[key];
+  return typeof v==="number"?v:0;
+}
+function clanTrainMult(k){
+  var p=clanPas();
+  if(!p||!p.rel||!p.rel.train)return 1;
+  var t=p.rel.train;
+  var v=(t[k]!=null)?t[k]:((t.all!=null)?t.all:0);
+  return 1+v;
+}
+function fatigueHeal(n){G.fatigue=Math.max(0,G.fatigue-Math.round(n*(1+clanRelNum("recovery"))))}
+function clanRelLine(key){
+  var n=clanRelNum(key);
+  return n?"+"+Math.round(n*100)+"%":"";
+}
+
 function rollStats(){
   var s={};
   s.health=ri(70,95);s.chakra=ri(20,50);s.chakraControl=ri(10,30);
@@ -432,7 +753,7 @@ function generateLife(opts){
     if(found){clanData=found;clanPicked=true}
     else{clanless=true}
   }else{
-    clanData=chance(.42)?rollClan(village):null;
+    clanData=chance(.42)?rollClan(village,true):null;
   }
   if(clanData&&clanData.v&&clanData.v!==village){
     /* a clan you pick yourself always sticks; only randomly rolled clans respect the village filter */
@@ -520,10 +841,10 @@ function generateLife(opts){
 }
 
 /* ============================ state helpers ============================ */
-function st(k){return G.stats[k]}
+function st(k){var v=G.stats[k];if(v==null)return v;var f=clanFlat(k);return f?clamp(v+f,0,100):v}
 function addStat(k,v){if(G.stats[k]!=null){G.stats[k]=clamp(G.stats[k]+v,0,100);if(k==="health"&&G.stats[k]<=0){dieOf("wounds")}}}
 function addRyo(n){G.ryo=Math.max(0,(G.ryo||0)+n)}
-function rep(n){G.reputation=clamp(G.reputation+n,0,100)}
+function rep(n){if(n>0)n=Math.round(n*(1+clanRelNum("rep")));G.reputation=clamp(G.reputation+n,0,100)}
 function feed(txt,cls){G.feed.unshift({age:G.age,txt:txt,cls:cls||""})}
 function fbig(txt,cls){feed(txt,cls||"big")}
 function tl(age,txt){G.timeline.push({age:age,txt:txt})}
@@ -534,7 +855,7 @@ function adult(){return G.age>=18}
 
 /* ============================ relationships ============================ */
 function relOf(n){return n?n.rel:0}
-function relUp(n,v){if(!n)return;n.rel=clamp(n.rel+v,-100,100)}
+function relUp(n,v){if(!n)return;if(v>0)v=Math.round(v*(1+clanRelNum("social")));n.rel=clamp(n.rel+v,-100,100)}
 function npcAge(){G.relationships.forEach(function(n){if(n.alive&&n.kind!=="sibling"&&n.kind!=="child")n.age++})}
 function npcPass(n){
   if(!n.alive)return;
@@ -671,7 +992,7 @@ EVS.child=[
      {t:"Run",fn:function(){if(chance(.5)){fbig("You get three streets away before laughing. Best pear you never paid for.","good")}else{fbig("A shopkeeper catches your sleeve. Your parents hear about it by dinner.","bad");addStat("happiness",-2)}}}])}}
 ];
 EVS.academy=[
- {t:"class exam",w:5,run:function(){var score=Math.round(st("intelligence")*.6+st("discipline")*.3+st("taijutsu")*.1+luck());
+ {t:"class exam",w:5,run:function(){var score=Math.round(st("intelligence")*.6+st("discipline")*.3+st("taijutsu")*.1+luck()+clanRelNum("exam"));
    var a=G.academy;
    if(score>=60){a.grades=clamp((a.grades||0)+3,0,100);fbig("You place "+pick(["second","third","near the top"])+" in the written exam. Instructor "+(a.sensei||"Daichi")+" reads your name out.","good")}
    else if(score>=40){a.grades=clamp((a.grades||0)+1,0,100);fbig("You pass the exam solidly. Unspectacular, expected, fine.")}
@@ -803,6 +1124,26 @@ EVS.early=[
  {t:"childhood fever",w:1,run:function(){addStat("health",-5);fbig("A fever keeps the whole house awake for three nights. Your "+pick(["father","mother","guardian"])+" does not sleep either.","bad");relUp(byKind("mother")[0]||byKind("guardian")[0],5)}}
 ];
 EVS.awaken=[
+ {t:"clan fireside",w:.8,run:function(){var c=clanOf();if(!c||!c.pas)return;
+   fbig("A family elder sets the record straight: the "+c.n+" way is the "+c.pas.n.toLowerCase()+". \u201cIt is not a gift,\u201d they say. \u201cIt is a duty you were born owing.\u201d")}},
+ {t:"uzumaki chains",w:.5,run:function(){if(G.clanName!=="Uzumaki"||G.age<10||(G.flags&&G.flags.chains))return;
+   G.flags=G.flags||{};G.flags.chains=true;addStat("chakra",3);
+   fbig("BLOODLINE EVENT — your chakra coils flare gold and chains of light coil up your forearms before your grandmother\'s eyes. \"There it is,\" she says, quietly proud. The Adamantine Sealing Chains have acknowledged you.","rare");tl(G.age,"The Adamantine Sealing Chains first manifested")}},
+ {t:"jugo surge",w:.5,run:function(){if(G.clanName!=="Jugo"||G.age<12||(G.flags&&G.flags.surge))return;
+   G.flags=G.flags||{};G.flags.surge=true;addStat("strength",3);addStat("health",2);
+   fbig("BLOODLINE EVENT — natural energy floods you mid-training and your arm warps, just for a breath, into something older. You breathe through it. The clan\'s oldest lesson: the surge is a tide, not a master.","rare");tl(G.age,"Survived your first natural-energy surge")}},
+ {t:"otsutsuki dream",w:.4,run:function(){if(G.clanName!=="Otsutsuki"||G.age<8)return;
+   addStat("chakraControl",2);addStat("willpower",1);
+   fbig("You dream in a script nobody has written for a thousand years, and wake with the stroke order still behind your eyes. Whatever your blood remembers, it is starting to remember you.","rare");tl(G.age,"Dreamed a celestial script older than the villages")}},
+ {t:"chinoike blood moon",w:.4,run:function(){if(G.clanName!=="Chinoike"||G.age<10)return;
+   addStat("genjutsu",2);addStat("perception",1);
+   fbig("A red moon rises over the water and your eyes answer it, crimson and humming. Your mother closes every curtain in the house and says nothing for three days.","rare");tl(G.age,"Your eyes answered a blood moon")}},
+ {t:"void whisper",w:.35,run:function(){if(G.clanName!=="Vex"||G.age<9)return;
+   addStat("perception",2);addStat("willpower",1);
+   fbig("BLOODLINE EVENT — something speaks from the space between two breaths. It knows your name because it gave it. You answer in kind, and the air warms half a degree.","rare");tl(G.age,"Answered the whisper of the void")}},
+ {t:"primordial waking",w:.35,run:function(){if(G.clanName!=="Rin"||G.age<11)return;
+   addStat("chakra",2);addStat("endurance",2);
+   fbig("BLOODLINE EVENT — the oldest blood in the register turns over in its sleep. Your shadow stands when you sit. Your grandmother\'s records gain a page no one wrote.","rare");tl(G.age,"The primordial blood stirred")}},
  {t:"chakra awareness",w:3,run:function(){addStat("chakraControl",2);
    fbig(pick(["You feel something warm behind your navel when you concentrate. Nobody taught you to look for it.","A leaf sticks to your palm without glue. You stare at it for an hour.","You push a pebble with your mind. It moves half a finger-width. Nobody believes you.","You can feel when someone stands behind you before you hear them."]),"rare")}},
  {t:"first talent",w:2,run:function(){var s=pick(["strength","speed","agility","perception"]);addStat(s,3);
@@ -907,8 +1248,9 @@ function trainJutsu(j){
 function trainGain(k,base){
   var c=(G.trained[k]||0);G.trained[k]=c+1;
   var g=Math.max(1,Math.round(base/(1+c*.25)));
+  g=Math.max(1,Math.round(g*clanTrainMult(k)));
   addStat(k,g);
-  if(G.fatigue>=80&&chance(.15)){addStat("health",-3);fbig("You train through exhaustion and pay for it: something pulls in your shoulder.","bad")}
+  if(G.fatigue>=80&&chance(.15*(1-Math.min(.75,clanRelNum("resist"))))){addStat("health",-3);fbig("You train through exhaustion and pay for it: something pulls in your shoulder.","bad")}
   return g;
 }
 function jutsuListForTab(){
@@ -959,6 +1301,7 @@ function runMission(choice,tpl){
   if(G.spec==="combat"||G.spec==="intel")self+=3;else if(G.spec==="tracking")self+=2;else if(G.spec==="support")self+=1;
   if(G.fatigue>=70)self-=5;
   if(window.FATE_missionSelf)self+=FATE_missionSelf(rank);
+  self+=clanRelNum("mission");
   var roll=ri(1,100);
   var target=({D:25,C:45,B:60,A:72,S:82}[rank])-prepBonus-Math.floor(teamScore*.8);
   var ok=roll+self>=target;
@@ -1194,7 +1537,7 @@ function ageUp(){
   else if(chance(.3))G.villageState.warActive=false;
   /* natural drift */
   addStat("happiness",chance(.5)?1:-1);
-  if(G.fatigue>0)G.fatigue=Math.max(0,G.fatigue-20);
+  if(G.fatigue>0)fatigueHeal(20);
   if(st("health")<70)addStat("health",2);
   if(G.age<=5){addStat("strength",1);addStat("intelligence",1)}
   else if(inAcademy()){G.academy.years++;addStat("taijutsu",2);addStat("chakraControl",2);addStat("intelligence",1);
@@ -1306,7 +1649,7 @@ function serializeG(){
     clanLeader:c.clanLeader,examDone:c.examDone,jutsu:c.jutsu,inventory:c.inventory,deathCause:c.deathCause,
     relationships:c.relationships,teammateIds:c.teammates.map(function(n){return n.id}),
     senseiId:c.sensei?c.sensei.id:null,familyIds:{spouse:c.family.spouse?c.family.spouse.id:null,kids:c.family.kids.map(function(n){return n.id})},
-    students:c.students.map(function(n){return n.id}),rival:G.rival,bio:c.bio,household:c.household,trained:c.trained||{},flags:c.flags||{},spec:c.spec||null};
+    students:c.students.map(function(n){return n.id}),rival:G.rival,bio:c.bio,household:c.household,trained:c.trained||{},flags:c.flags||{},spec:c.spec||null,clanHistory:c.clanHistory||[],secretSeen:c.secretSeen||[]};
   return out;
 }
 function deserializeG(o){
@@ -1319,7 +1662,13 @@ function deserializeG(o){
   if(!c.household)c.household=o.household||"normal";
   c.trained=o.trained||{};c.flags=o.flags||{};
   c.clanName=o.clanName||null;
-  if(c.clanName){var cl=CLANS.find(function(x){return x.n===c.clanName});if(cl)c.clan=cl}
+  if(c.clanName){var cl=CLANS.find(function(x){return x.n===c.clanName});
+    if(cl)c.clan=cl;
+    else c.clan={n:c.clanName,r:"common",spec:"Unknown bloodline",kg:null,v:null,
+      d:"An old clan whose records were lost in an archive fire.",hist:"",ab:[],
+      pas:{n:"Old Blood",d:"The records were lost; the blood remembers.",flat:{},rel:{}}}}
+  c.clanHistory=Array.isArray(o.clanHistory)?o.clanHistory:[];
+  c.secretSeen=Array.isArray(o.secretSeen)?o.secretSeen:[];
   c.clanless=!c.clanName;
   if(c.academy&&!c.academy.subj)c.academy.subj={chakra:50,taijutsu:50,shuriken:50,tactics:50,history:50,stealth:50,teamwork:50};
   c.spec=o.spec||null;
@@ -1688,7 +2037,7 @@ function activitiesPane(){
     ab("📖","Study strategy","intelligence",function(){var g=trainGain("intelligence",2);G.fatigue=clamp(G.fatigue+3,0,100);fbig("You read old campaign maps and strategy scrolls. (+"+g+" intelligence)","good")});
     ab("🗡️","Weapon drills","kenjutsu · fatigues",function(){var g=trainGain("kenjutsu",2);G.fatigue=clamp(G.fatigue+6,0,100);fbig("A thousand cuts at the wooden post. The post loses. (+"+g+" kenjutsu)","good")});
     ab("🏃","Conditioning","speed · endurance · fatigues",function(){var g=trainGain("speed",1);var g2=trainGain("endurance",1);G.fatigue=clamp(G.fatigue+9,0,100);fbig("Ridge runs at dawn. Your legs file a complaint. (+"+g+" speed, +"+g2+" endurance)","good")});
-    ab("🧘","Meditate","willpower · recovery",function(){addStat("willpower",1);G.fatigue=Math.max(0,G.fatigue-10);fbig("You sit with your own head for an hour. It is harder than running.","good")});
+    ab("🧘","Meditate","willpower · recovery",function(){addStat("willpower",1);fatigueHeal(10);fbig("You sit with your own head for an hour. It is harder than running.","good")});
     ab("✋","Jutsu training","techniques",function(){showJutsuModal()});
     ab("💤","Rest","recover",function(){rest()});
   }
@@ -1708,7 +2057,7 @@ function familyTime(){
   AGEUP_SPENT++;render();
 }
 function rest(){
-  addStat("health",8);G.fatigue=Math.max(0,G.fatigue-30);addStat("happiness",1);
+  addStat("health",8);fatigueHeal(30);addStat("happiness",1);
   fbig("You rest properly for once.","good");AGEUP_SPENT++;render();
 }
 /* ---------- view renderers ---------- */
@@ -1835,20 +2184,216 @@ function renderMissions(){
     p2.appendChild(kv2);v.appendChild(p2);
   }
 }
-function renderClan(){
-  var v=$("#view-clan");v.innerHTML="";
-  if(!G.clanName){
-    var p=panel("clan","No Clan");
-    p.appendChild(el("div","mtext","You are clanless. Your name is yours alone, and your deeds will have to speak louder than a crest."));
-    v.appendChild(p);return;
+/* ============================ clan UI v2: collection, details, registry ============================ */
+var CLAN_UI={q:"",rar:null,detail:null};
+function rarityColor(r){return RARITY_COLOR[r]||"#8a8f98"}
+function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):""}
+function statLabel(k){return capFirst(String(k).replace(/([A-Z])/g," $1").trim())}
+function clanBuffLines(p){
+  var out=[];
+  if(p&&p.flat)for(var k in p.flat){var v=p.flat[k];if(v)out.push((v>0?"+":"")+v+" "+statLabel(k))}
+  if(p&&p.rel){
+    var t=p.rel.train||{},k2;
+    for(k2 in t){var m=Math.round(t[k2]*100);if(m)out.push("+"+m+"% "+statLabel(k2).toLowerCase()+" training")}
+    if(p.rel.jutsu)out.push("+"+Math.round(p.rel.jutsu*100)+"% technique mastery speed");
+    if(p.rel.recovery)out.push("+"+Math.round(p.rel.recovery*100)+"% recovery from exhaustion");
+    if(p.rel.resist)out.push("+"+Math.round(p.rel.resist*100)+"% resistance to harm and setbacks");
+    if(p.rel.rep)out.push("+"+Math.round(p.rel.rep*100)+"% reputation gains");
+    if(p.rel.social)out.push("+"+Math.round(p.rel.social*100)+"% bond growth");
+    if(p.rel.exam)out.push("+"+p.rel.exam+" exam performance");
+    if(p.rel.mission)out.push("+"+p.rel.mission+" mission performance");
+    if(p.rel.track)out.push("+"+Math.round(p.rel.track*100)+"% tracking effectiveness");
+    if(p.rel.evade)out.push("+"+Math.round(p.rel.evade*100)+"% evasion");
   }
-  var c=G.clan;
-  var p=panel(c.r+" clan","The "+c.n+" Clan");
-  p.appendChild(el("div","mtext",(c.d||"")+"\n\nSpecialty: "+c.spec+(c.kg?"\nBloodline: "+c.kg+(G.kkgKnown?" — AWAKENED":" — dormant, if it is in you at all"):"")+"\n\n"+G.familyHistory));
-  var mastered=Object.keys(G.jutsu).filter(function(id){var j=JUTSU.find(function(x){return x.id===id});return j&&j.clan===c.n}).length;
-  p.appendChild(el("div","mtext","Clan techniques mastered: "+mastered+"."));
+  if(!out.length)out.push("Steady blood, steady work: no modifiers beyond your own effort.");
+  return out;
+}
+function clanTechniquesFor(n){return JUTSU.filter(function(j){return j.clan===n})}
+function clanMiniCard(c,owned){
+  var col=rarityColor(c.r);
+  var d=el("div","clan-mini"+(owned?" owned":""));
+  d.style.borderColor=col+"55";
+  var b=el("b",null,c.secret?(includes(G.secretSeen||[],c.n)?c.n:"???"):c.n);
+  b.style.color=col;d.appendChild(b);
+  d.appendChild(el("span","rar",c.secret?"secret":c.r));
+  if(c.pas&&!c.secret)d.appendChild(el("span","pas",c.pas.n));
+  else if(c.secret&&includes(G.secretSeen||[],c.n))d.appendChild(el("span","pas",c.pas.n));
+  d.onclick=function(){CLAN_UI.detail=c;CLAN_UI.q="";CLAN_UI.rar=null;render()};
+  return d;
+}
+function changeClan(c){
+  var old=G.clanName;
+  G.clanName=c.n;G.clan=c;G.clanless=false;
+  if(!G.secretSeen)G.secretSeen=[];
+  if(!includes(G.secretSeen,c.n))G.secretSeen.push(c.n);
+  logClanRoll(c,"secret-join",G.clanHistory);
+  fbig("BLOODLINE REWRITTEN — the "+c.n+" name is yours now. "+c.pas.n+" settles into you like a second spine.","rare");
+  tl(G.age,"Joined the "+c.n+" clan"+(old?" (was "+old+")":"")+".");
+  rep(5);render();
+}
+function renderClanDetail(v,c){
+  var col=rarityColor(c.r);
+  var back=el("button","btn small ghost","\u2190 Back to the registry");
+  back.onclick=function(){CLAN_UI.detail=null;render()};
+  v.appendChild(back);
+  var owned=!!(G.clanName===c.n);
+  var seen=c.secret?includes(G.secretSeen||[],c.n):true;
+  var p=panel((c.secret?"secret":c.r)+" clan"+(owned?" · your clan":""),"Clan "+c.n);
+  if(!seen){v.appendChild(p);p.appendChild(el("div","mtext","This entry is sealed. Some names are only given, never found."));return}
+  var top=el("div","clan-detail");
+  var emb=el("div","cc-emb");emb.style.setProperty("--rc",col);emb.textContent=CLAN_KANJI[c.n]||c.n.charAt(0).toUpperCase();
+  top.appendChild(emb);
+  var right=el("div","clan-detailbody");
+  right.appendChild(el("span","cc-rar","clan "+c.n.toUpperCase()));right.lastChild.style.setProperty("--rc",col);
+  right.appendChild(el("div","cc-spec",c.spec+(c.kg?" · Kekkei genkai: "+c.kg:"")));
+  right.appendChild(el("p","mtext",c.d));
+  top.appendChild(right);p.appendChild(top);
+  if(c.hist)p.appendChild(el("div","mtext",c.hist));
+  if(c.pas){
+    var pas=el("div","clan-block");
+    pas.appendChild(el("b","clan-blocktitle","Passive — "+c.pas.n));
+    pas.appendChild(el("div","mtext",c.pas.d));
+    var ul=el("ul","clan-effects");
+    clanBuffLines(c.pas).forEach(function(l){ul.appendChild(el("li",null,l))});
+    pas.appendChild(ul);
+    p.appendChild(pas);
+  }
+  if(c.ab&&c.ab.length){
+    var ab=el("div","clan-block");
+    ab.appendChild(el("b","clan-blocktitle","Clan abilities"));
+    var ul2=el("ul","clan-effects");
+    c.ab.forEach(function(l){ul2.appendChild(el("li",null,l))});
+    ab.appendChild(ul2);p.appendChild(ab);
+  }
+  var techs=clanTechniquesFor(c.n);
+  if(techs.length){
+    var tb=el("div","clan-block");
+    tb.appendChild(el("b","clan-blocktitle","Clan techniques"));
+    techs.forEach(function(j){
+      var rec=G.jutsu[j.id];
+      var row=el("div","list-row");
+      var who=el("div","who");
+      who.appendChild(el("b",null,j.n+(rec?" · mastered rank "+rec.m+"/"+j.masteryMax:"")));
+      who.appendChild(el("span",null,"Requires "+Object.keys(j.req||{}).map(function(k){return j.req[k]+" "+statLabel(k).toLowerCase()}).join(", ")));
+      row.appendChild(who);
+      row.appendChild(el("span","rar",rec?"unlocked":"locked"));
+      tb.appendChild(row);
+    });
+    p.appendChild(tb);
+  }
+  p.appendChild(el("div","mtext",owned?"This blood is yours.":"Not yours yet. Clans are rolled at birth, granted by the village's archives, or found where they should not be."));
   v.appendChild(p);
 }
+function renderClan(){
+  var v=$("#view-clan");v.innerHTML="";
+  if(CLAN_UI.detail){renderClanDetail(v,CLAN_UI.detail);return}
+  var c=clanOf();
+  if(!c){
+    var p0=panel("clan","No Clan");
+    p0.appendChild(el("div","mtext","You are clanless. Your name is yours alone, and your deeds will have to speak louder than a crest. Every clan in the registry is listed below; only birth, blood, or the forbidden registry can give you one."));
+    v.appendChild(p0);
+  }else{
+    var col=rarityColor(c.r);
+    var p=panel((c.secret?"secret":c.r)+" clan"+(G.kkgKnown?" · bloodline awakened":""),"The "+c.n+" Clan");
+    var top=el("div","clan-detail");
+    var emb=el("div","cc-emb");emb.style.setProperty("--rc",col);emb.textContent=CLAN_KANJI[c.n]||c.n.charAt(0).toUpperCase();
+    top.appendChild(emb);
+    var right=el("div","clan-detailbody");
+    var rb=el("span","cc-rar",c.secret?"SECRET":c.r.toUpperCase());rb.style.setProperty("--rc",col);right.appendChild(rb);
+    right.appendChild(el("div","cc-spec",c.spec+(c.kg?" · "+c.kg+(G.kkgKnown?" — AWAKENED":" — dormant"):"")));
+    right.appendChild(el("p","mtext",c.d));
+    top.appendChild(right);p.appendChild(top);
+    if(c.pas){
+      var pas=el("div","clan-block");
+      pas.appendChild(el("b","clan-blocktitle","Passive — "+c.pas.n+" (always active)"));
+      pas.appendChild(el("div","mtext",c.pas.d));
+      var ul=el("ul","clan-effects");
+      clanBuffLines(c.pas).forEach(function(l){ul.appendChild(el("li",null,l))});
+      pas.appendChild(ul);p.appendChild(pas);
+    }
+    if(c.ab&&c.ab.length){
+      var ab=el("div","clan-block");
+      ab.appendChild(el("b","clan-blocktitle","Clan abilities"));
+      var ul2=el("ul","clan-effects");
+      c.ab.forEach(function(l){ul2.appendChild(el("li",null,l))});
+      ab.appendChild(ul2);p.appendChild(ab);
+    }
+    var mastered=Object.keys(G.jutsu).filter(function(id){var j=JUTSU.find(function(x){return x.id===id});return j&&j.clan===c.n}).length;
+    var total=clanTechniquesFor(c.n).length;
+    p.appendChild(el("div","mtext","Clan techniques mastered: "+mastered+(total?" of "+total:"")+"."+((!G.kkgKnown&&c.kg)?" Your bloodline may still wake, in its own time.":"")));
+    v.appendChild(p);
+  }
+  /* collection */
+  var pc=panel("registry","Clan collection — "+CLANS.filter(function(x){return !x.secret}).length+" clans");
+  var bar=el("div","clan-filterbar");
+  var q=el("input","clan-search");q.placeholder="Search clans…";q.value=CLAN_UI.q;
+  q.oninput=function(){CLAN_UI.q=q.value.toLowerCase();redrawCollection(pc)};
+  bar.appendChild(q);
+  RARITY_ORDER.forEach(function(r){
+    var chip=el("button","clan-chip"+(CLAN_UI.rar===r?" on":""),r);
+    chip.style.setProperty("--rc",rarityColor(r));
+    chip.onclick=function(){CLAN_UI.rar=(CLAN_UI.rar===r?null:r);render()};
+    bar.appendChild(chip);
+  });
+  pc.appendChild(bar);
+  var gridWrap=el("div","clan-gridwrap");
+  pc.appendChild(gridWrap);
+  pc.__redraw=function(){ /* fill grid per current filters */
+    gridWrap.innerHTML="";
+    var list=CLANS.filter(function(x){
+      if(x.secret)return includes(G.secretSeen||[],x.n);
+      if(CLAN_UI.rar&&x.r!==CLAN_UI.rar)return false;
+      if(CLAN_UI.q&&x.n.toLowerCase().indexOf(CLAN_UI.q)<0)return false;
+      return true;
+    });
+    if(!list.length)gridWrap.appendChild(el("div","mtext","No clans match."));
+    list.forEach(function(x){gridWrap.appendChild(clanMiniCard(x,G.clanName===x.n))});
+  };
+  pc.__redraw();
+  v.appendChild(pc);
+  /* roll history */
+  var hist=G.clanHistory||[];
+  if(hist.length){
+    var ph=panel("rolls","Roll history");
+    hist.slice(0,12).forEach(function(h){
+      var row=el("div","list-row");
+      var who=el("div","who");
+      who.appendChild(el("b",null,h.n));
+      who.appendChild(el("span",null,new Date(h.when).toLocaleDateString()));
+      row.appendChild(who);
+      var tag=el("span","rar",h.kind);tag.style.color=rarityColor(h.r);
+      row.appendChild(tag);ph.appendChild(row);
+    });
+    v.appendChild(ph);
+  }
+  /* forbidden registry */
+  var pf=panel("forbidden","Forbidden Registry");
+  pf.appendChild(el("div","mtext","Two names are struck from every roll in the land. They cannot be rolled at birth. The registry keeps a rite for them, and the odds are exactly what the stories say: one in two million."));
+  var seen=(G.secretSeen||[]);
+  if(seen.length){
+    var sg=el("div","clan-gridwrap");
+    CLANS.filter(function(x){return x.secret&&includes(seen,x.n)}).forEach(function(x){sg.appendChild(clanMiniCard(x,G.clanName===x.n))});
+    pf.appendChild(sg);
+  }
+  var bsec=el("button","btn small","Perform the forbidden divination");
+  bsec.onclick=function(){
+    var hit=secretRollClan();
+    if(hit){
+      if(!G.secretSeen)G.secretSeen=[];
+      if(!includes(G.secretSeen,hit.n))G.secretSeen.push(hit.n);
+      modal("The Void Answers","SECRET CLAN — "+hit.n,hit.d+"\n\nPassive: "+hit.pas.n+" — "+hit.pas.d+"\n\nTake this name as your own? Your current clan" + (G.clanName?" ("+G.clanName+")":"") + " would be set aside.",
+        [{t:"Claim "+hit.n,fn:function(){changeClan(hit)}},
+         {t:"Walk away",fn:function(){fbig("You step back from the edge. The feeling follows you for days.","");render()}}]);
+    }else{
+      fbig(pick(["The smoke gives you nothing tonight.","You cast the bones and read only your own face.","Something watched. Nothing answered."]),"");
+    }
+    render();
+  };
+  pf.appendChild(bsec);
+  v.appendChild(pf);
+}
+var RARITY_ORDER=["common","uncommon","rare","epic","legendary","mythical","secret"];
+
 function renderInventory(){
   var v=$("#view-inventory");v.innerHTML="";
   var p=panel("pouch","Inventory — "+money(G.ryo));
@@ -1863,7 +2408,7 @@ function renderInventory(){
     var b=el("button","btn small","Use");
     b.onclick=function(){
       G.inventory.splice(G.inventory.indexOf(id),1);
-      if(id==="pill"){G.fatigue=Math.max(0,G.fatigue-40);fbig("You bite down on the soldier pill. Fatigue washes away.","good")}
+      if(id==="pill"){fatigueHeal(40);fbig("You bite down on the soldier pill. Fatigue washes away.","good")}
       else if(id==="medkit"){addStat("health",25);fbig("You dress your wounds properly.","good")}
       else if(id==="scroll"){var recs=Object.keys(G.jutsu);if(recs.length){G.jutsu[recs[0]].progress+=10;fbig("You study the scroll; progress on your technique improves.","good")}else{addStat("intelligence",2);fbig("You read it twice and feel sharper.","good")}}
       else if(id==="kunai"){addStat("taijutsu",1);fbig("You put the fine kunai through its paces.","good")}
@@ -1956,8 +2501,8 @@ function fillCreator(){
 var CC={step:"intro",name:"",village:null,eraId:null,eraPicked:false,gender:null,clanRoll:null,origin:null,trait:null,last:"",timers:[]};
 var ORIGINS=["born to a farming family on the village outskirts","born to a merchant family that deals in silk and steel","born to two active-duty shinobi; you saw more of the mission hall than a crib","orphaned at birth and raised in the village orphanage","the youngest child of a lesser shinobi household","born above a teahouse your family runs near the mission hall","born during a border scare, with the village gates shut for a week","born into a family of potters who quietly still forge shinobi tools"];
 var TRAITS=["stubborn to a fault","quiet, but you miss nothing","reckless, in the way that gets people promoted or killed","a natural liar with an honest face","gentle in a house of blades","hungry to prove something","lazy, right up until it matters","too honest for a career in espionage","lucky at cards, unlucky in everything else","obsessed with stories of old heroes"];
-var RARITY_COLOR={mythical:"#a06cd5",legendary:"#d3a94c",rare:"#d4555f",uncommon:"#3fb3a8",common:"#8a8f98"};
-var CLAN_KANJI={Uchiha:"\u6247",Hyuga:"\u65e5",Senju:"\u5343",Uzumaki:"\u6e29",Sarutobi:"\u733f",Nara:"\u5948",Akimichi:"\u79cb",Yamanaka:"\u5c71",Aburame:"\u6cb9",Inuzuka:"\u72ac",Kurama:"\u978d",Hatake:"\u7551",Shimura:"\u5fd7",Fuma:"\u98a8",Yuki:"\u96ea",Hozuki:"\u9b3c"};
+var RARITY_COLOR={common:"#8a8f98",uncommon:"#3fae6a",rare:"#4d8fd1",epic:"#9b59d0",legendary:"#d3a94c",mythical:"#c22b45",secret:"#b04ad6"};
+var CLAN_KANJI={Uchiha:"\u6247",Hyuga:"\u65e5",Senju:"\u5343",Uzumaki:"\u6e29",Sarutobi:"\u733f",Nara:"\u5948",Akimichi:"\u79cb",Yamanaka:"\u5c71",Aburame:"\u6cb9",Inuzuka:"\u72ac",Kurama:"\u978d",Hatake:"\u7551",Shimura:"\u5fd7",Fuma:"\u98a8",Yuki:"\u96ea",Hozuki:"\u9b3c",Kaguya:"\u304b",Terumi:"\u7167",Darui:"\u96f7",Kamizuru:"\u8702",Kedoin:"\u5f71",Yotsuki:"\u96f2",Yotsuya:"\u4eba",Ishikawa:"\u77f3",Amagiri:"\u96e8",Fujimori:"\u85e4",Kurosawa:"\u9ed2",Tachibana:"\u6a58",Shirakami:"\u767d",Otsutsuki:"\u5927",Hagoromo:"\u7fbd",Chinoike:"\u8840",Jugo:"\u5492",Iburi:"\u7159",Tsuchigumo:"\u571f",Onikuma:"\u9b3c",Hoki:"\u5b9d",Kohaku:"\u7425",Izuno:"\u6cc9",Lee:"\u674e",Ryu:"\u9f8d",Vex:"\u865a",Rin:"\u6797"};
 var CC_BAD=["fuck","shit","bitch","asshole","dick","cunt","nigg","fag","slut","whore","rape","porn","sex","cock","pussy","nazi","hitler"];
 function ccTimer(fn,ms){CC.timers.push(setTimeout(fn,ms))}
 function ccClear(){CC.timers.forEach(clearTimeout);CC.timers=[]}
@@ -2028,7 +2573,7 @@ function ccForge(){
   next();
 }
 function ccClanReveal(){
-  CC.clanSpins=3;CC.clanCur=null;
+  CC.clanSpins=3;CC.clanCur=null;if(!CC.clanHistory)CC.clanHistory=[];CC.luckRoll=ri(1,10);
   var spin=$("#cc-spin"),card=$("#cc-clancard");
   card.hidden=true;card.innerHTML="";
   spin.style.display="";spin.classList.remove("slow");spin.textContent="\u00b7 \u00b7 \u00b7";
@@ -2086,11 +2631,14 @@ function ccShowClanCard(c){
     '<h4>Clan '+c.n+'</h4>'+
     '<div class="cc-spec">'+c.spec+(c.kg?" \u00b7 Kekkei genkai: "+c.kg:"")+'</div>'+
     '<p class="cc-desc">'+c.d+'</p>'+
+    (c.pas?'<div class="cc-pas"><b>Passive — '+c.pas.n+'</b><br>'+c.pas.d+'</div>':'')+
     '<div class="cc-clanacts">'+
       '<button class="btn cc-next" id="cc-keep"><b>Keep this clan</b><small>it becomes your surname</small></button>'+
       (CC.clanSpins>0?'<button class="btn ghost" id="cc-again"><b>Spin again</b><small>'+CC.clanSpins+' spin'+(CC.clanSpins===1?"":"s")+' left</small></button>':'')+
     '</div>';
   card.innerHTML=html;card.hidden=false;
+  card.classList.remove("rar-flash");
+  if(c.r==="legendary"||c.r==="mythical"||c.r==="secret")void card.offsetWidth,card.classList.add("rar-flash");
   $("#cc-keep").onclick=function(){ccKeepClan(c)};
   var a=$("#cc-again");if(a)a.onclick=ccSpinAgain;
 }
@@ -2181,6 +2729,7 @@ function rollPreview(){
 function beginLife(){
   if(!PENDING)rollPreview();
   G=PENDING;PENDING=null;
+  G.clanHistory=CC.clanHistory||[];G.secretSeen=G.secretSeen||[];CC.clanHistory=[];CC.luckRoll=null;
   if(!G.cid)G.cid="c"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   G.born=Date.now();
   $("#screen-creator").classList.remove("on");
@@ -2286,7 +2835,7 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"Age Up Never Leaves The Top",b:"Version 4.0.6. The AGE UP button is now a true pinned header: it lives at the very top of the game screen on every tab, sits just below the status bar instead of covering it, and never scrolls away no matter how far down you go. One year is always one tap away. Everything else is untouched."},{d:"Nov 22, 2026",t:"Talks Fix & Scene Continue",b:"Version 4.0.5. Fixed the two bugs QA caught in live play: every conversation from the People tab (Spend time, Face them and the rest) opens again, an internal name helper had gone missing and silenced them all; and the Continue button after an event summary now dismisses properly, so the year summary and the next year always load instead of waiting forever. Also tuned the title intro to hand you to the main menu on its own after about 6 seconds."},{d:"Nov 22, 2026",t:"Mission Board Fix",b:"Version 4.0.4. Fixed the mission board: the briefing lost track of the mission's rank and reward before the field, so outcomes miscalculated and pay, reputation and the record could not update. Missions now resolve at the right rank and reward, and every success and failure lands in the record. Also fixed loading a save: lives were reloading with a fresh random clan roll, so the clan tab could say you were clanless when you were not. Your real clan is now kept across saves."},{d:"Nov 22, 2026",t:"Age Up Moves To The Top",b:"Version 4.0.3. The AGE UP button now sits at the very top of the home screen and stays pinned there while you scroll, so one year is always one tap away. No more scrolling down for it. Everything else is untouched."},{d:"Nov 22, 2026",t:"Bridge Fix Round Two",b:"Version 4.0.2. The wiring bug behind the last fix had more strands: a second batch of the game core (year events, ranks, bonds, academy, the fate system) was still out of reach of the story and fate layers, so AGE UP could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every connection is exposed now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched."},
+var UPDATES=[{d:"Nov 22, 2026",t:"The Complete Clan Overhaul",b:"Version 4.1.0. The clan system is rebuilt from the ground up. Seven rarity tiers: common, uncommon, rare, epic, legendary, mythical, and two secret clans that cannot appear in normal rolls at all. A full roster of 45 clans, adding the Otsutsuki, Hagoromo, Chinoike, Jugo, Iburi, Tsuchigumo, Onikuma, Hoki, Kohaku, Izuno, Lee and Ryu bloodlines, with Uzumaki now correctly Legendary. Every clan carries a real, named passive that touches actual math: stats, training speed, technique mastery, exams, missions, recovery, reputation, bond growth, tracking, evasion and resistances. Bonuses are derived live from your clan, so they can never stack or duplicate across refreshes, saves or age-ups. Weighted clan rolls now run at 48 / 27 / 15 / 7 / 2.5 / 0.5 percent, shifted by luck and owner controls, with clan roll history kept on your record. Twelve new clan techniques to unlock, from the Adamantine Sealing Chains to the Sixty-Four Palms. The clan tab is a new collection: search, rarity filters, full clan cards with passives and abilities, and a Forbidden Registry where the secret clans can be found at one in two million. Existing saves migrate safely: your clan stays yours, only its rarity label updates to the new scale."},{d:"Nov 22, 2026",t:"Age Up Never Leaves The Top",b:"Version 4.0.6. The AGE UP button is now a true pinned header: it lives at the very top of the game screen on every tab, sits just below the status bar instead of covering it, and never scrolls away no matter how far down you go. One year is always one tap away. Everything else is untouched."},{d:"Nov 22, 2026",t:"Talks Fix & Scene Continue",b:"Version 4.0.5. Fixed the two bugs QA caught in live play: every conversation from the People tab (Spend time, Face them and the rest) opens again, an internal name helper had gone missing and silenced them all; and the Continue button after an event summary now dismisses properly, so the year summary and the next year always load instead of waiting forever. Also tuned the title intro to hand you to the main menu on its own after about 6 seconds."},{d:"Nov 22, 2026",t:"Mission Board Fix",b:"Version 4.0.4. Fixed the mission board: the briefing lost track of the mission's rank and reward before the field, so outcomes miscalculated and pay, reputation and the record could not update. Missions now resolve at the right rank and reward, and every success and failure lands in the record. Also fixed loading a save: lives were reloading with a fresh random clan roll, so the clan tab could say you were clanless when you were not. Your real clan is now kept across saves."},{d:"Nov 22, 2026",t:"Age Up Moves To The Top",b:"Version 4.0.3. The AGE UP button now sits at the very top of the home screen and stays pinned there while you scroll, so one year is always one tap away. No more scrolling down for it. Everything else is untouched."},{d:"Nov 22, 2026",t:"Bridge Fix Round Two",b:"Version 4.0.2. The wiring bug behind the last fix had more strands: a second batch of the game core (year events, ranks, bonds, academy, the fate system) was still out of reach of the story and fate layers, so AGE UP could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every connection is exposed now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched."},
 {d:"Nov 22, 2026",t:"Age-Up Fix & The People Tab",b:"Version 4.0.1. Fixed the bug that made AGE UP do nothing when clicked: the new Hearts & Voices systems could not reach the game core, so the click died silently before a single year passed. It now ages you up every time, runs the year\u2019s events and closes with the Year Summary. The People tab and the Record tab are really on the bottom bar now (and the Character tab opens again), and enrolling in the Academy fills your classroom with people to talk to. Everything else is untouched."},
 {d:"Nov 22, 2026",t:"Hearts & Voices",b:"Version 4.0.0. Shinobi: Life Unbound is now a true life simulator. A new People tab puts everyone in this life on one screen: bond meters, what each person remembers about you, and a Spend time button that opens real conversations where your answers branch and every reply is shaped by who they are. Six voices (bold, steady, sharp, warm, distant, easygoing) speak and remember differently. Choices leave seeds: keep the pouch you found, spread a friend's secret, give your word as a child, and the consequences come back years later. Personality deepens: your dominant traits unlock new dialogue options and decide who you are becoming, from The Shield to The Storm. New life events (first words, the new kid, a dinner with edges, the lantern stranger) and bond and feud milestones now fire on their own. Existing saves, menus, character systems and progression are untouched."},
 {d:"Nov 22, 2026",t:"Roll Your Own Clan",b:"Version 3.2.0. The bloodline is yours to roll now. After the dice of birth forge your origin and trait, the clan step hands you three spins: each one rolls a real clan from your village\u2019s bloodline pool at full rarity odds, you keep the one you want or spin again, and the clan you keep becomes your surname. Used all three? You keep the last roll. Rather walk alone? A quiet option lets you stay clanless, a civilian with nothing but your own name. Village pools still respect their lands, rare and mythical clans stay rare, and existing saves are untouched."},
@@ -2447,7 +2996,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="4.0.6";
+var GAME_VERSION="4.1.0";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");
