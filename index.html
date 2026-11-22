@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Shinobi Sprint — a three.js demo</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0e0e12;font-family:system-ui,-apple-system,sans-serif}
+  canvas{display:block}
+  #hud{position:fixed;top:12px;left:50%;transform:translateX(-50%);color:#fff;background:rgba(15,15,20,.6);
+       padding:8px 16px;border-radius:999px;font-weight:700;font-size:16px;letter-spacing:.5px;white-space:nowrap;z-index:5}
+  #hud span{color:#7fe3ff}
+  #overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;
+           background:rgba(8,8,12,.72)}
+  #card{background:#14141c;color:#fff;border:1px solid #2c2c3a;border-radius:18px;padding:28px 32px;text-align:center;max-width:320px}
+  #card h1{margin:0 0 6px;font-size:26px;color:#ff5a5a}
+  #card p{margin:6px 0;color:#c9c9d6;font-size:14px;line-height:1.5}
+  #card button{margin-top:14px;background:#ff5a5a;border:0;color:#fff;font-weight:800;font-size:16px;
+               padding:12px 28px;border-radius:999px;cursor:pointer}
+  #card button:active{transform:scale(.97)}
+  #joy{position:fixed;left:18px;bottom:22px;width:110px;height:110px;border-radius:50%;
+       background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);z-index:6;touch-action:none}
+  #knob{position:absolute;left:33px;top:33px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.45)}
+  #jump{position:fixed;right:20px;bottom:30px;width:84px;height:84px;border-radius:50%;border:0;z-index:6;
+        background:rgba(255,90,90,.85);color:#fff;font-weight:800;font-size:14px;touch-action:manipulation}
+  @media (min-width:900px){ #joy,#jump{display:none} }
+</style>
+</head>
+<body>
+<div id="hud">⚡ <span id="score">0</span> / 20 &nbsp;·&nbsp; ⏱ <span id="time">120</span>s</div>
+<div id="overlay"><div id="card">
+  <h1>Shinobi Sprint</h1>
+  <p>A tiny three.js demo. Grab every chakra orb before time runs out.</p>
+  <p>PC: WASD / arrows to move · Shift to sprint · Space to jump · R to reset</p>
+  <button id="startBtn">START</button>
+</div></div>
+<div id="joy"><div id="knob"></div></div>
+<button id="jump">JUMP</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.149.0/three.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
