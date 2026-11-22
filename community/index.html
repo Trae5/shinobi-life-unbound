@@ -172,6 +172,9 @@ h3.sect{font-family:Cinzel,serif;color:var(--gold);font-size:13.5px;letter-spaci
 footer{text-align:center;color:var(--faint);font-size:12px;margin-top:44px;line-height:2}
 footer a{color:var(--gold)}
 .pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pill2{display:inline-block;margin-top:9px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line);border-radius:12px;padding:4px 12px;transition:.3s}
+.pill2.on{color:#8fe0a8;border-color:rgba(79,174,106,.45)}
+.pill2.off{color:#ff9a8a;border-color:rgba(179,38,38,.5)}
 kbd{background:var(--panel3);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;font-size:11px;color:var(--gold)}
 </style>
 </head>
@@ -179,6 +182,7 @@ kbd{background:var(--panel3);border:1px solid var(--line2);border-radius:5px;pad
 <div class="wrap">
 <header>
 <h1>Shinobi Community</h1>
+<div class="pill2" id="hubstatus">connecting…</div>
 <div class="sub">the hub for Shinobi Legacy &amp; Shinobi: Life Unbound — bugs · features · discussions · announcements</div>
 </header>
 <nav><div class="navrow" id="navrow">
@@ -391,6 +395,9 @@ Shinobi Community · fan hub for <a href="https://shinobi-legacy.sites.tab.bot/"
 <div class="mrow"><button class="btn ghost" onclick="closeModal('reportmodal')">Cancel</button><button class="btn danger" id="rp-send">Send Report</button></div>
 </div></div>
 <div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 var CFG={apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'};
 var OWNER='Gb2MYzFu5sV2Rr8d1cGWMI90K4e2';
@@ -420,7 +427,7 @@ function profAvatar(uid,fallback){var p=profOf(uid);return(p&&p.avatar)||'🥷'}
 function whoChip(doc){var uid=doc.uid;var nm=doc.author||'anonymous';if(!uid)return '<span class="who-name">'+esc(nm)+'</span>';
  return '<span class="who-name" data-prof="'+esc(uid)+'">'+AVATAR_ICON(uid,nm)+' '+esc(nm)+'</span>'}
 function AVATAR_ICON(uid,nm){var p=profOf(uid);var a=(p&&p.avatar)||'🥷';return '<span style="font-size:13px">'+a+'</span>'}
-function cloudFail(){if(!CLOUD){return}CLOUD=false;document.getElementById('cloudwarn').style.display='block'}
+function cloudFail(){if(!CLOUD){return}CLOUD=false;document.getElementById('cloudwarn').style.display='block';var p=document.getElementById('hubstatus');if(p){p.textContent='offline · retrying';p.className='pill2 off'}}
 function guard(key,ms){var now=Date.now();var last={chat:lastChat,post:lastPost,comment:lastComment}[key]||0;if(now-last<ms){toast('Easy there, give it a moment.');return false}if(key==='chat')lastChat=now;else if(key==='post')lastPost=now;else lastComment=now;return true}
 function muted(){if(ME&&ME.mutedUntil&&new Date(ME.mutedUntil).getTime()>Date.now()){toast('You are muted until '+new Date(ME.mutedUntil).toLocaleString()+'.');return true}return false}
 function todayKey(){return new Date().toISOString().slice(0,10)}
@@ -818,7 +825,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.0.0';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;
 </script>
 </body>
