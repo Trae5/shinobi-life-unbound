@@ -403,7 +403,7 @@ Shinobi Community · fan hub for <a href="https://shinobi-legacy.sites.tab.bot/"
 var CFG={apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'};
 var OWNER='Gb2MYzFu5sV2Rr8d1cGWMI90K4e2';
 var app=firebase.initializeApp(CFG,'community'),auth=app.auth(),db=app.firestore();
-var UID=null,CLOUD=true,ME=null,READY=false;
+var UID=null,CLOUD=true,ME=null,READY=false,PROFERR=false;
 var BUGS=[],REQS=[],DISC=[],COMS=[],ANNS=[],ACT=[],NOTIFS=[],REPORTS=[],PROFILES=[];
 var bugFilter='all',bugStatus='all',bugSev='all',reqFilter='all',reqStatus='all',reqSort='votes',disFilter='all',disSort='new',annFilter='all',actFilter='all',searchType='all',searchGame='all',homeGame='all',adminTab='compose';
 var lastChat=0,lastPost=0,lastComment=0;
@@ -445,11 +445,11 @@ function boot(){
   ['community_comments',function(s){COMS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderDiscussions();renderTrending()}],
   ['community_announcements',function(s){ANNS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderAnns();renderHome();checkAnnNotifs()}],
   ['community_activity',function(s){ACT=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderActivity();renderHome();renderTrending()}],
-  ['community_profiles',function(s){PROFILES=s.docs.map(function(d){var v=d.data();v.uid=d.id;return v});renderMembers();renderHome();renderMe()}],
+  ['community_profiles',function(s){PROFILES=s.docs.map(function(d){var v=d.data();v.uid=d.id;return v});if(!ME){for(var _i=0;_i<PROFILES.length;_i++){if(PROFILES[_i].uid===UID){ME=PROFILES[_i];applyName();break}}}PROFERR=false;renderMembers();renderHome();renderMe()}],
   ['community_reports',function(s){REPORTS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});if(isOwner())renderAdmin()}]
  ];
  var COREC={community_bugs:1,community_features:1,community_chat:1};
- subs.forEach(function(p){db.collection(p[0]).orderBy('when','desc').limit(300).onSnapshot(function(s){p[1](s)},function(e){if(p[0]==='community_reports'||p[0]==='community_modlog')return;if(!COREC[p[0]])return;cloudFail()})});
+ subs.forEach(function(p){var q=db.collection(p[0]);if(p[0]!=='community_profiles')q=q.orderBy('when','desc');q=q.limit(300);q.onSnapshot(function(s){p[1](s)},function(e){if(p[0]==='community_profiles'){PROFERR=true;renderMe();console.warn('profiles stream failed',e);return}if(p[0]==='community_reports'||p[0]==='community_modlog')return;if(!COREC[p[0]])return;cloudFail()})});
  db.collection('community_notifications').where('to','==',UID).onSnapshot(function(s){NOTIFS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});updateBell()},function(e){});
  db.collection('community_chat').orderBy('when','desc').limit(120).onSnapshot(function(s){var el=document.getElementById('chatlog');if(!el)return;var msgs=s.docs.map(function(d){return d.data()}).reverse();el.innerHTML=msgs.map(function(m){return '<div class="msg'+(m.uid===UID?' me':'')+'"><div class="nm">'+esc(m.name)+'</div><div class="tx">'+esc(m.text)+'</div><div class="tm">'+ago(m.when)+'</div></div>'}).join('');el.scrollTop=el.scrollHeight},function(e){cloudFail()});
  if(!name())setTimeout(openName,600);
@@ -461,8 +461,8 @@ function ensureProfile(){
   if(d.exists){ME=d.data();ME.id=d.id;applyName()}
   else{var v=AVATARS[Math.floor(Math.random()*AVATARS.length)];
    ME={name:'',avatar:v,bio:'',joined:new Date().toISOString(),rep:0,badges:[],counts:{},lastSeenAnn:0};
-   db.collection('community_profiles').doc(UID).set(ME).then(applyName).catch(function(e){})}
- }).catch(function(e){})
+   db.collection('community_profiles').doc(UID).set(ME).then(applyName).catch(function(e){PROFERR=true;renderMe();console.warn('profile save failed',e)})}
+ }).catch(function(e){PROFERR=true;renderMe();console.warn('profile load failed',e)})
 }
 function openName(){openModal('namemodal');setTimeout(function(){var i=document.getElementById('nm-in');if(i)i.focus()},150)}
 function applyName(){document.getElementById('hello-name').textContent=ME.name||'shinobi';renderMe();if(!ME.name&&!name())openName()}
@@ -617,8 +617,8 @@ function profileHTML(p,own){var badges=computeBadges(p);var c=p.counts||{};
  return '<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div class="avatar lg">'+avInner(p.avatar)+'</div><div style="flex:1;min-width:200px"><div style="font-size:19px;font-weight:700">'+esc(p.name||'unnamed shinobi')+'</div><div style="color:var(--faint);font-size:12.5px;margin-top:3px">joined '+ago(p.joined).replace(' ago','')+' ago · '+(p.rep||0)+' reputation · '+totalPosts(p)+' posts</div>'+(p.bio?'<div style="color:var(--dim);font-size:13.5px;margin-top:7px;line-height:1.6">'+esc(p.bio)+'</div>':'')+'</div>'+(own?'<button class="btn mini" onclick="openEditProfile()">Edit</button>':'')+'</div>'
  +'<div class="pillrow" style="margin-top:14px">'+badges.filter(function(b){return b.got}).map(function(b){return '<span class="badge bdg" title="'+esc(b.tip)+'">'+b.icon+' '+esc(b.label)+'</span>'}).join(' ')+'</div>'
  +'<div class="statrow" style="margin-top:14px"><div class="stat"><b>'+(c.bugs||0)+'</b><span>Bugs</span></div><div class="stat"><b>'+(c.features||0)+'</b><span>Requests</span></div><div class="stat"><b>'+(c.discussions||0)+'</b><span>Discussions</span></div><div class="stat"><b>'+(c.comments||0)+'</b><span>Comments</span></div></div>'
- +'<h3 class="sect">Recently earned achievements</h3><div>'+badges.filter(function(b){return b.got}).slice(-3).map(function(b){return '<div class="feeditem"><div class="fi-ic">'+b.icon+'</div><div class="fi-tx"><b>'+esc(b.label)+'</b> — '+esc(b.tip)+'</div></div>'}).join('')||'<div class="empty">Earn badges by reporting bugs, suggesting features and helping out.</div></div>'}
-function renderMe(){if(!ME)return;document.getElementById('mepanel').innerHTML='<div class="panel">'+profileHTML(ME,true)+'</div>'}
+ +'<h3 class="sect">Recently earned achievements</h3><div>'+(function(){var g=badges.filter(function(b){return b.got});return g.length?g.slice(-3).map(function(b){return '<div class="feeditem"><div class="fi-ic">'+b.icon+'</div><div class="fi-tx"><b>'+esc(b.label)+'</b> \u2014 '+esc(b.tip)+'</div></div>'}).join(''):'<div class="empty">Earn badges by reporting bugs, suggesting features and helping out.</div>'})()+'</div>'}
+function renderMe(){var mp=document.getElementById('mepanel');if(!mp)return;if(!ME){if(PROFERR)mp.innerHTML='<div class="empty">Your profile could not load just now. Refresh in a bit.</div>';return}mp.innerHTML='<div class="panel">'+profileHTML(ME,true)+'</div>'}
 function openProfile(uid){if(!uid)return;if(uid===UID){go('me');return}var p=profOf(uid);if(!p){toast('No profile on file for that member yet.');return}
  document.getElementById('detailbox').innerHTML=profileHTML(p,false);openModal('detailmodal')}
 var PICKED=AVATARS[0];
@@ -819,7 +819,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.0.1';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.0.2';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;
 </script>
 </body>
