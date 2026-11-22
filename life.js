@@ -29,14 +29,14 @@ function pack(g){
   g=ensure(g);
   return {lifeV:VER,traits:g.traits,pending:g.pending,history:g.history,milestones:g.milestones,
     talents:g.talents,memLedger:g.memLedger.slice(0,60),recentEvents:g.recentEvents.slice(-40),
-    academyClassIds:g.academyClassIds};
+    academyClassIds:g.academyClassIds,seeds:g.seeds||{},socRecent:g.socRecent||[]};
 }
 function unpack(g,o){
   ensure(g);
   if(o&&o.lifeV){
     g.traits=o.traits||g.traits;g.pending=o.pending||[];g.history=o.history||[];
     g.milestones=o.milestones||{};g.talents=o.talents||[];g.memLedger=o.memLedger||[];
-    g.recentEvents=o.recentEvents||[];g.academyClassIds=o.academyClassIds||[];g.lifeV=o.lifeV;
+    g.recentEvents=o.recentEvents||[];g.academyClassIds=o.academyClassIds||[];g.seeds=o.seeds||{};g.socRecent=o.socRecent||[];g.lifeV=o.lifeV;
   }
   return g;
 }
@@ -522,6 +522,7 @@ function processPending(){
   duePending().forEach(function(p){
     var h=PENDING_HANDLERS[p.k];
     if(h){try{h(p)}catch(e){}}
+    else if(window.SOCIAL&&window.SOCIAL.pending){try{window.SOCIAL.pending(p)}catch(e){}}
   });
 }
 
@@ -555,6 +556,8 @@ function tick(){
   checkMilestones();
   /* relationship drift thresholds */
   checkRelMilestones();
+  /* social layer: conversations, stages, consequences */
+  if(window.SOCIAL&&window.SOCIAL.tick){try{window.SOCIAL.tick(g)}catch(e){}}
 }
 function markRecent(id){
   var g=ensure(G);g.recentEvents.push(id);
@@ -1215,7 +1218,7 @@ function init(){
     }
   }catch(e){}
 }
-return {tick:tick,ensure:ensure,pack:pack,unpack:unpack,init:init,queue:queue,yearSummary:yearSummary,finishYear:finishYear,playScenes:function(){if(SCENEQ.length&&!SCENE_ON){SCENE_ON=true;playScene()}},trait:trait,voiceFor:voiceFor,greet:greet,remember:remember,seedClassroom:seedClassroom,renderStory:renderStory,get pendingHandlers(){return PENDING_HANDLERS}};
+return {tick:tick,ensure:ensure,pack:pack,unpack:unpack,init:init,queue:queue,yearSummary:yearSummary,finishYear:finishYear,playScenes:function(){if(SCENEQ.length&&!SCENE_ON){SCENE_ON=true;playScene()}},trait:trait,voiceFor:voiceFor,greet:greet,remember:remember,seedClassroom:seedClassroom,renderStory:renderStory,TPL:TPL,FX:FX,ensureNPC:ensureNPC,npcRecall:npcRecall,relLabel:relLabel,get pendingHandlers(){return PENDING_HANDLERS}};
 window.LIFE={TPL:TPL,FX:FX};
 })();
 LIFE.init();
