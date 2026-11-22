@@ -138,32 +138,102 @@
     }
   }
 
+  // Articulated shinobi made from lightweight Three.js primitives.
   function buildPlayer() {
     playerGroup = new THREE.Group();
-    var body = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1.3, 0.6),
-      new THREE.MeshLambertMaterial({ color: 0x232640 })
-    );
-    body.position.y = 1.15;
-    var head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.45, 18, 14),
-      new THREE.MeshLambertMaterial({ color: 0xf0c8a0 })
-    );
-    head.position.y = 2.15;
-    var band = new THREE.Mesh(
-      new THREE.BoxGeometry(0.95, 0.16, 0.95),
-      new THREE.MeshLambertMaterial({ color: 0xd0342c })
-    );
-    band.position.y = 2.4;
-    var scarf = new THREE.Mesh(
-      new THREE.BoxGeometry(0.3, 0.8, 0.12),
-      new THREE.MeshLambertMaterial({ color: 0xd0342c })
-    );
-    scarf.position.set(0, 1.5, 0.42);
-    scarf.rotation.x = 0.35;
-    [body, head, band, scarf].forEach(function (m) { m.castShadow = true; playerGroup.add(m); });
+    var rig = new THREE.Group();
+    playerGroup.add(rig);
+    var cloth = new THREE.MeshLambertMaterial({ color: 0x263452 });
+    var accent = new THREE.MeshLambertMaterial({ color: 0xb72f43 });
+    var skin = new THREE.MeshLambertMaterial({ color: 0xe9b78e });
+    var hair = new THREE.MeshLambertMaterial({ color: 0x20202b });
+    var metal = new THREE.MeshLambertMaterial({ color: 0xc7d2d9 });
+    var dark = new THREE.MeshLambertMaterial({ color: 0x151d2b });
+    function part(parent, geometry, material, x, y, z) {
+      var mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      parent.add(mesh);
+      return mesh;
+    }
+    function box(parent, w, h, d, material, x, y, z) {
+      return part(parent, new THREE.BoxGeometry(w, h, d), material, x, y, z);
+    }
+    function limb(parent, x, y, upperLength, lowerLength, upperWidth, lowerWidth) {
+      var upper = new THREE.Group();
+      upper.position.set(x, y, 0);
+      parent.add(upper);
+      part(upper, new THREE.CylinderGeometry(upperWidth, upperWidth * 0.8, upperLength, 8), cloth, 0, -upperLength / 2, 0);
+      var lower = new THREE.Group();
+      lower.position.y = -upperLength;
+      upper.add(lower);
+      part(lower, new THREE.CylinderGeometry(lowerWidth, lowerWidth * 0.85, lowerLength, 8), cloth, 0, -lowerLength / 2, 0);
+      return { upper: upper, lower: lower };
+    }
+    // Pelvis, chest, neck and expressive, slightly oversized head.
+    part(rig, new THREE.SphereGeometry(0.36, 12, 8), cloth, 0, 1.08, 0).scale.set(1.2, 0.65, 0.7);
+    var chest = part(rig, new THREE.CylinderGeometry(0.46, 0.32, 0.83, 8), cloth, 0, 1.55, 0);
+    chest.scale.z = 0.68;
+    box(rig, 0.68, 0.12, 0.51, accent, 0, 1.18, 0);
+    part(rig, new THREE.CylinderGeometry(0.14, 0.16, 0.22, 8), skin, 0, 2.06, 0);
+    part(rig, new THREE.SphereGeometry(0.43, 16, 12), skin, 0, 2.44, 0).scale.set(1, 1.08, 0.9);
+    var cap = part(rig, new THREE.SphereGeometry(0.45, 12, 8), hair, 0, 2.75, 0);
+    cap.scale.set(1.04, 0.43, 0.95);
+    part(rig, new THREE.ConeGeometry(0.18, 0.35, 5), hair, -0.25, 2.87, 0.05).rotation.z = 0.35;
+    part(rig, new THREE.ConeGeometry(0.18, 0.39, 5), hair, 0.14, 2.89, 0.08).rotation.z = -0.2;
+    part(rig, new THREE.CylinderGeometry(0.445, 0.445, 0.14, 16), accent, 0, 2.63, 0).scale.z = 0.91;
+    box(rig, 0.38, 0.12, 0.035, metal, 0, 2.63, -0.41);
+    box(rig, 0.14, 0.06, 0.02, dark, 0, 2.63, -0.434);
+    part(rig, new THREE.SphereGeometry(0.045, 8, 6), dark, -0.15, 2.44, -0.376);
+    part(rig, new THREE.SphereGeometry(0.045, 8, 6), dark, 0.15, 2.44, -0.376);
+    // Shoulder and hip pivots let arms and legs move independently.
+    var leftArm = limb(rig, -0.49, 1.93, 0.45, 0.43, 0.14, 0.11);
+    var rightArm = limb(rig, 0.49, 1.93, 0.45, 0.43, 0.14, 0.11);
+    part(leftArm.lower, new THREE.SphereGeometry(0.12, 8, 6), skin, 0, -0.46, 0);
+    part(rightArm.lower, new THREE.SphereGeometry(0.12, 8, 6), skin, 0, -0.46, 0);
+    var leftLeg = limb(rig, -0.22, 1.08, 0.49, 0.45, 0.17, 0.13);
+    var rightLeg = limb(rig, 0.22, 1.08, 0.49, 0.45, 0.17, 0.13);
+    box(leftLeg.lower, 0.26, 0.18, 0.42, dark, 0, -0.49, -0.08);
+    box(rightLeg.lower, 0.26, 0.18, 0.42, dark, 0, -0.49, -0.08);
+    buildPlayer.rig = { model: rig, leftArm: leftArm, rightArm: rightArm, leftLeg: leftLeg, rightLeg: rightLeg, phase: 0 };
     playerGroup.position.set(0, 0, 6);
     scene.add(playerGroup);
+    // The selector changes shared materials without rebuilding meshes.
+    var chooser = D.createElement('label');
+    chooser.textContent = 'Outfit: ';
+    Object.assign(chooser.style, { position: 'fixed', top: '64px', right: '12px', zIndex: '5', color: 'white', background: 'rgba(15,20,35,.85)', padding: '6px', borderRadius: '6px', font: '14px sans-serif' });
+    var select = D.createElement('select');
+    select.setAttribute('aria-label', 'Shinobi outfit colors');
+    [['Navy / Red', 'navy'], ['Forest / Teal', 'forest']].forEach(function (choice) {
+      var option = D.createElement('option'); option.textContent = choice[0]; option.value = choice[1]; select.appendChild(option);
+    });
+    select.addEventListener('change', function () {
+      var forest = select.value === 'forest';
+      cloth.color.setHex(forest ? 0x284c42 : 0x263452);
+      accent.color.setHex(forest ? 0x36b4a5 : 0xb72f43);
+    });
+    chooser.appendChild(select);
+    D.body.appendChild(chooser);
+  }
+
+  function updatePlayer(dt) {
+    var rig = buildPlayer.rig;
+    var ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + joy.x;
+    var iz = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y;
+    var moving = started && !ended && Math.hypot(ix, iz) > 0.1;
+    var running = moving && !!(keys.ShiftLeft || keys.ShiftRight);
+    if (moving) rig.phase += dt * (running ? 15 : 9);
+    var swing = moving && grounded ? Math.sin(rig.phase) * (running ? 0.8 : 0.55) : 0;
+    var ease = Math.min(1, dt * 12);
+    rig.leftLeg.upper.rotation.x += (swing - rig.leftLeg.upper.rotation.x) * ease;
+    rig.rightLeg.upper.rotation.x += (-swing - rig.rightLeg.upper.rotation.x) * ease;
+    rig.leftArm.upper.rotation.x += (-swing * 0.75 - rig.leftArm.upper.rotation.x) * ease;
+    rig.rightArm.upper.rotation.x += (swing * 0.75 - rig.rightArm.upper.rotation.x) * ease;
+    rig.leftLeg.lower.rotation.x += (Math.max(0, -swing) * 0.45 - rig.leftLeg.lower.rotation.x) * ease;
+    rig.rightLeg.lower.rotation.x += (Math.max(0, swing) * 0.45 - rig.rightLeg.lower.rotation.x) * ease;
+    rig.leftArm.lower.rotation.x += (-0.16 - rig.leftArm.lower.rotation.x) * ease;
+    rig.rightArm.lower.rotation.x += (-0.16 - rig.rightArm.lower.rotation.x) * ease;
+    rig.model.position.y = moving && grounded ? Math.abs(Math.sin(rig.phase)) * 0.035 : Math.sin(clock.elapsedTime * 2) * 0.025;
   }
 
   function spawnOrbs() {
@@ -324,6 +394,7 @@
 
     camera.position.set(p.x, p.y + camOffset.y, p.z + camOffset.z);
     camera.lookAt(p.x, p.y + 1.6, p.z);
+    updatePlayer(dt);
     renderer.render(scene, camera);
   }
 
