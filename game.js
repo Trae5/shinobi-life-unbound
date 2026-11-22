@@ -12,7 +12,7 @@ function pick(a){return a[rnd(a.length)]}
 function chance(p){return Math.random()<p}
 function ri(a,b){return a+rnd(b-a+1)}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-function money(n){return Math.round(n).toLocaleString("en-US")+" ryō"}
+function money(n){return Math.round(n||0).toLocaleString("en-US")+" ryō"}
 function esc(s){return String(s==null?"":s)}
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=t;a[j]=t}return a}
 function weighted(list){
