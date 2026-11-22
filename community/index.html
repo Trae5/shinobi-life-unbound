@@ -372,7 +372,7 @@ Shinobi Community · fan hub for <a href="https://shinobi-legacy.sites.tab.bot/"
 <h3>Edit Profile</h3>
 <label>Display name</label><input id="ep-name" maxlength="24">
 <label>Avatar</label><div id="ep-avatars" style="display:flex;gap:6px;flex-wrap:wrap"></div><div id="ep-upchip" style="display:none;align-items:center;gap:8px;margin-top:6px"></div><button class="btn ghost" id="ep-upload" style="margin-top:6px">Upload your own photo</button><input type="file" id="ep-file" accept="image/*" style="display:none">
-<label>Bio</label><textarea id="ep-bio" maxlength="200" placeholder="A line or two about you"></textarea>
+<label for="ep-title">Greeting title</label><select id="ep-title"><option value="">Default (shinobi)</option><option>Shinobi</option><option>Pirate</option><option>Shinigami</option><option>Saiyan</option><option>Samurai</option><option>Demon Slayer</option><option>Titan</option><option>Sorcerer</option><option>Alchemist</option><option>Espada</option><option>Stand User</option><option>Hero</option><option>Villain</option><option>Ninja</option><option>Soul Reaper</option></select><label>Bio</label><textarea id="ep-bio" maxlength="200" placeholder="A line or two about you"></textarea>
 <div class="mrow"><button class="btn ghost" onclick="closeModal('editprofile')">Cancel</button><button class="btn" id="ep-save">Save</button></div>
 </div></div>
 
@@ -487,10 +487,10 @@ function ensureProfile(){
   else{var v=AVATARS[Math.floor(Math.random()*AVATARS.length)];
    ME={name:'',avatar:v,bio:'',joined:new Date().toISOString(),rep:0,badges:[],counts:{},lastSeenAnn:0};
    db.collection('community_profiles').doc(UID).set(ME).then(applyName).catch(function(e){PROFERR=true;renderMe();console.warn('profile save failed',e)})}
- }).catch(function(e){PROFERR=true;renderMe();console.warn('profile load failed',e)})
+ }).catch(function(e){PROFERR=true;document.getElementById('hello-name').textContent='shinobi';renderMe();console.warn('profile load failed',e)})
 }
 function openName(){openModal('namemodal');setTimeout(function(){var i=document.getElementById('nm-in');if(i)i.focus()},150)}
-function applyName(){document.getElementById('hello-name').textContent=ME.name||'shinobi';renderMe();if(!ME.name&&!name())openName()}
+function applyName(){document.getElementById('hello-name').textContent=(!PROFERR&&typeof ME.title==='string'&&ME.title.trim())||'shinobi';renderMe();if(!ME.name&&!name())openName()}
 function saveProfile(patch){return db.collection('community_profiles').doc(UID).set(patch,{merge:true}).then(function(){Object.keys(patch).forEach(function(k){ME[k]=patch[k]})}).catch(function(e){toast('Could not save. Try again.')})}
 function gainRep(n){if(!ME||n<=0)return;var d=ME.daily||{};var done=d.day===todayKey()?d.n:0;if(done>=20)return;var add=Math.min(n,20-done);
  return db.collection('community_profiles').doc(UID).update({rep:firebase.firestore.FieldValue.increment(add),['daily.day']:todayKey(),['daily.n']:done+add}).then(function(){ME.rep=(ME.rep||0)+add}).catch(function(){})}
@@ -653,11 +653,11 @@ function epGrid(){var g=document.getElementById('ep-avatars');
  +AVATARS.map(function(a){return '<button class="rx'+(a===PICKED?' mine':'')+'" data-av="'+a+'" style="font-size:17px">'+a+'</button>'}).join('');
  document.querySelectorAll('#ep-avatars [data-av]').forEach(function(b){b.onclick=function(){PICKED=b.dataset.av;document.querySelectorAll('#ep-avatars [data-av]').forEach(function(x){x.classList.toggle('mine',x===b)})}});
  var up=document.getElementById('ep-upchip');if(up){var isU=PICKED&&PICKED.slice(0,5)==='data:';up.style.display=isU?'flex':'none';if(isU)up.innerHTML='<span style="color:var(--dim);font-size:12px">Your upload:</span><img src="'+PICKED+'" style="width:34px;height:34px;border-radius:6px;object-fit:cover">'}}
-function openEditProfile(){PICKED=ME.avatar||AVATARS[0];document.getElementById('ep-name').value=ME.name||'';document.getElementById('ep-bio').value=ME.bio||'';epGrid();
+function openEditProfile(){PICKED=ME.avatar||AVATARS[0];document.getElementById('ep-name').value=ME.name||'';document.getElementById('ep-bio').value=ME.bio||'';document.getElementById('ep-title').value=ME.title||'';epGrid();
  openModal('editprofile')}
 document.getElementById('ep-save').onclick=function(){var n=document.getElementById('ep-name').value.trim();
  if(n&&n!==name())localStorage.setItem('shinobi_com_name',n);
- saveProfile({name:n,avatar:PICKED,bio:document.getElementById('ep-bio').value.trim()}).then(function(){closeModal('editprofile');renderMe();toast('Profile saved.')})};
+ var t=document.getElementById('ep-title').value;var titleSave=t===(ME.title||'')?Promise.resolve():db.collection('community_profiles').doc(UID).update({title:t}).then(function(){ME.title=t;PROFERR=false;document.getElementById('hello-name').textContent=t||'shinobi'});titleSave.then(function(){return saveProfile({name:n,avatar:PICKED,bio:document.getElementById('ep-bio').value.trim()})}).then(function(){closeModal('editprofile');renderMe();toast('Profile saved.')}).catch(function(e){toast('Could not save title. Try again.');console.warn('title save failed',e)})};
 document.getElementById('ep-upload').onclick=function(){document.getElementById('ep-file').value='';document.getElementById('ep-file').click()};
 document.getElementById('ep-file').onchange=function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=128;c.height=128;var x=c.getContext('2d'),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,128,128);PICKED=c.toDataURL('image/jpeg',0.85);epGrid()};im.src=rd.result};rd.readAsDataURL(f)};
 document.getElementById('nm-save').onclick=function(){var v=document.getElementById('nm-in').value.trim();if(!v)return;localStorage.setItem('shinobi_com_name',v);closeModal('namemodal');
@@ -764,7 +764,7 @@ function markAllRead(){NOTIFS.filter(function(n){return !n.read}).forEach(functi
 function clearNotifs(){if(!NOTIFS.length||!confirm('Clear all notifications?'))return;NOTIFS.forEach(function(n){db.collection('community_notifications').doc(n.id).delete().catch(function(){})});setTimeout(function(){closeModal('notifmodal')},500)}
 /* ---------- home dashboard ---------- */
 function renderHome(){
- var el=document.getElementById('hello-name');if(el&&ME)el.textContent=ME.name||'shinobi';
+ var el=document.getElementById('hello-name');if(el&&ME)el.textContent=(!PROFERR&&typeof ME.title==='string'&&ME.title.trim())||'shinobi';
  var c={};BUGS.forEach(function(b){var s=bugStatusOf(b);c[s]=(c[s]||0)+1});
  var impl=REQS.filter(function(r){return reqStatusOf(r)==='implemented'}).length;
  var voters=0;REQS.forEach(function(r){voters+=(r.votes||0)});
