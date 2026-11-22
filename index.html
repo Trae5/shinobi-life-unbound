@@ -26,6 +26,14 @@ h1,h2,h3{margin:0;line-height:1.2}
 
 /* ---------- title v3 (cinematic) ---------- */
 #screen-title.on{display:block}
+.btn{display:block;width:100%;background:var(--crimson-deep);color:#fff;font-weight:800;letter-spacing:.08em;
+  padding:14px 18px;border-radius:10px;transition:filter .2s,transform .1s;border:1px solid rgba(255,255,255,.08)}
+.btn:hover{filter:brightness(1.15)}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn.ghost:hover{border-color:var(--gold);color:#fff}
+.btn.small{padding:9px 14px;font-size:13px;width:auto;display:inline-block}
+.btn[disabled]{opacity:.4;pointer-events:none}
 .t-bg{position:fixed;inset:0;background:url("assets/title-bg.jpg?v=3") center/cover no-repeat;z-index:0}
 .t-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.55) 0%,rgba(8,8,12,.25) 45%,rgba(8,8,12,.8) 100%)}
 .t-scene{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:88px 20px 64px;text-align:center}
@@ -392,54 +400,7 @@ h1,h2,h3{margin:0;line-height:1.2}
 <div id="modal"><div class="mcard" id="mcard"></div></div>
 <div class="toast" id="toast"></div>
 
-<script src="game.js?v=ll4"></script>
+<script src="game.js?v=ll5"></script>
 
-<script>
-(function(){
-  var SLOTS="shinobi_sprint_slots_v2";
-  function latestRyo(){
-    try{
-      var all=JSON.parse(localStorage.getItem(SLOTS)||"[]"),best=null;
-      for(var i=0;i<all.length;i++){if(all[i]&&all[i].g&&(!best||all[i].when>best.when))best=all[i]}
-      return best&&best.g?Math.round(best.g.ryo||0):0;
-    }catch(e){return 0}
-  }
-  function setRyo(){
-    var v=latestRyo().toLocaleString("en-US");
-    var a=document.getElementById("t-ryo-val"),b=document.getElementById("c-ryo-val");
-    if(a)a.textContent=v;if(b)b.textContent=v;
-  }
-  setRyo();
-  document.getElementById("t-ryo").onclick=saveMenuFromTitle;
-  document.getElementById("c-ryo").onclick=saveMenuFromTitle;
-  document.getElementById("btn-back").onclick=function(){
-    document.getElementById("screen-creator").classList.remove("on");
-    document.getElementById("screen-title").classList.add("on");
-  };
-  document.getElementById("btn-ach").onclick=function(){
-    var lines=ACHIEVEMENTS.map(function(x){return x.n+" ("+x.d+")"}).join("\n");
-    modal("Achievements","Achievements","Twenty-two honors a shinobi can earn in a single life:\n\n"+lines);
-  };
-  document.getElementById("btn-settings").onclick=function(){
-    modal("Settings","Settings","Version 1.0.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",
-      [{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){
-        if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){
-          try{localStorage.removeItem(SLOTS);localStorage.removeItem("shinobi_sprint_legacy_v2");localStorage.removeItem("shinobi_sprint_ach_v2")}catch(e){}
-          toast("All data cleared");setRyo();
-        }
-      }},{t:"Close"}]);
-  };
-  document.getElementById("btn-credits").onclick=function(){
-    modal("Credits","Credits","SHINOBI SPRINT - Life of a Shinobi\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.");
-  };
-  document.getElementById("btn-exit").onclick=function(){
-    modal("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",
-      [{t:"Leave",fn:function(){
-        try{window.close()}catch(e){}
-        setTimeout(function(){toast("Close this tab whenever you're ready")},200);
-      }},{t:"Stay"}]);
-  };
-})();
-</script>
 </body>
 </html>
