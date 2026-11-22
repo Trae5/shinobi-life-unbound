@@ -262,6 +262,11 @@ h1,h2,h3{margin:0;line-height:1.2}
 .mcard h3{font-size:19px;font-weight:900;margin-bottom:10px}
 .mcard .mtext{color:#cfc9bd;font-size:14px;white-space:pre-wrap}
 .mchoices{display:grid;gap:8px;margin-top:16px}
+.mchoice,.mclose{width:100%;text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 14px;cursor:pointer;font:inherit}
+.mchoice:hover,.mclose:hover{border-color:var(--gold)}
+.mchoice b{display:block;font-size:14px}
+.mchoice small{color:#a89f8d;font-size:12px}
+.mclose{text-align:center}
 /* death & legacy */
 #screen-death{display:none;place-items:center;padding:30px 16px}
 #screen-death.on{display:grid}
@@ -400,7 +405,7 @@ h1,h2,h3{margin:0;line-height:1.2}
 <div id="modal"><div class="mcard" id="mcard"></div></div>
 <div class="toast" id="toast"></div>
 
-<script src="game.js?v=ll8"></script>
+<script src="game.js?v=ll9"></script>
 
 </body>
 </html>

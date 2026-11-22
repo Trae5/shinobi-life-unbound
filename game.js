@@ -573,7 +573,7 @@ function runEvent(e){
 }
 
 /* ---------- event helpers ---------- */
-function modal(title,kind,text,choices,onClose){
+function paperModal(title,kind,text,choices,onClose){
   var m=$("#modal"),c=$("#mcard");c.innerHTML="";
   c.appendChild(el("div","mk",kind||"Event"));
   c.appendChild(el("h3","serif",title));
@@ -596,7 +596,6 @@ function modal(title,kind,text,choices,onClose){
   if(!choices||!choices.length){var b=el("button","btn mclose","Continue");b.onclick=function(){m.classList.remove("on");if(onClose)onClose()};box.appendChild(b)}
   c.appendChild(box);
   m.classList.add("on");
-  try{D.title="MODAL ok class="+m.className}catch(_){}
 }
 function pickEvent(){
   var pools=poolFor();
@@ -1789,7 +1788,6 @@ function wireTitle(){
   var cr=$("#c-ryo");if(cr)cr.onclick=saveMenuFromTitle;
   var bb=$("#btn-back");if(bb)bb.onclick=function(){menuOpen("btn-back")};
   function menuOpen(id){
-    try{D.title="MENU "+id}catch(_){}
     try{
       if(id==="btn-ach"){var lines=ACHIEVEMENTS.map(function(x){return x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements","Twenty-two honors a shinobi can earn in a single life:\n\n"+lines)}
       else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 1.0.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
@@ -1804,7 +1802,6 @@ function wireTitle(){
   var bx=$("#btn-exit");if(bx)bx.onclick=function(){menuOpen("btn-exit")};
   D.addEventListener("click",function(e){
     var t=e.target;
-    try{D.title="CLK "+((t&&t.id)?t.id:(t&&t.tagName?t.tagName.toLowerCase():"?"))}catch(_){}
     if(t&&t.closest){var b=t.closest("#btn-ach,#btn-settings,#btn-credits,#btn-exit,#btn-back");if(b)menuOpen(b.id)}
   },true);
   Array.prototype.forEach.call(D.querySelectorAll(".dice"),function(b){
@@ -1893,7 +1890,6 @@ function showRetire(){
   modal("Retirement","Career","Full pension, honors, a house on the hill. The vest comes off on your terms.",
     [{t:"Retire with honors",fn:function(){G.retired=true;G.retiredYear=G.age;G.career="Retired Shinobi";award("retired");fbig("You retire with honors.","good");tl(G.age,"Retired with honors")}},{t:"Keep serving"}]);
 }
-function modalSafe(){try{modal.apply(null,arguments);try{var mm=$("#modal");D.title="MSAFE ok "+(mm?mm.className:"null")}catch(e2){D.title="MSAFE readfail "+e2.message}}catch(e){try{D.title="ERR modal: "+(e&&e.message?e.message:String(e))}catch(_){}}}
-window.onerror=function(m,s,l){try{D.title="ERR "+String(m).slice(0,100)+" line "+l}catch(e){}}
+function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 wireTitle();
 })();
