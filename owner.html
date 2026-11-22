@@ -12,17 +12,38 @@
 <script type="module">
 (async()=>{
   const boot=window.ownerBoot, $=id=>document.getElementById(id), status=m=>$('status').textContent=m;
+  const owner='Gb2MYzFu5sV2Rr8d1cGWMI90K4e2', config={apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'};
+  let auth,db,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence,collection,getDocs,doc,getDoc,setDoc,updateDoc,deleteField;
+  function loadScript(name){return new Promise((resolve,reject)=>{const s=document.createElement('script');let timer;const finish=error=>{clearTimeout(timer);s.onload=s.onerror=null;if(error){s.remove();reject(error)}else resolve()};s.src='https://www.gstatic.com/firebasejs/10.14.1/firebase-'+name+'-compat.js';s.onload=()=>finish();s.onerror=()=>finish(new Error('Could not load '+name+' compat SDK'));timer=setTimeout(()=>finish(new Error('Timed out loading '+name+' compat SDK')),10000);document.head.append(s)})}
   try{
-    const [firebaseApp,firebaseAuth,firebaseStore]=await Promise.all([
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
-    ]);
-    boot.stage='initializing Firebase authentication';
-    const {initializeApp}=firebaseApp;
-    const {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence}=firebaseAuth;
-    const {getFirestore,collection,getDocs,doc,getDoc,setDoc,updateDoc,deleteField}=firebaseStore;
-    const owner='Gb2MYzFu5sV2Rr8d1cGWMI90K4e2', app=initializeApp({apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'}), auth=getAuth(app),db=getFirestore(app);
+    try{
+      const [firebaseApp,firebaseAuth,firebaseStore]=await Promise.all([
+        import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
+        import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
+      ]);
+      boot.stage='initializing Firebase authentication';
+      const app=firebaseApp.initializeApp(config);
+      auth=firebaseAuth.getAuth(app);db=firebaseStore.getFirestore(app);
+      ({signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence}=firebaseAuth);
+      ({collection,getDocs,doc,getDoc,setDoc,updateDoc,deleteField}=firebaseStore);
+    }catch(modularError){
+      console.warn('Modular Firebase initialization failed; trying compat SDK:',modularError);
+      status('Firebase authentication failed to start; trying compatible SDK…');
+      try{
+        for(const name of ['app','auth','firestore']){boot.stage='loading Firebase '+name+' compat SDK';await loadScript(name)}
+        const f=window.firebase;
+        if(!f||f.SDK_VERSION!=='10.14.1'||typeof f.auth!=='function'||typeof f.firestore!=='function')throw new Error('Compatible Firebase SDK components or version missing');
+        boot.stage='initializing compatible Firebase authentication';
+        const app=f.initializeApp(config);auth=app.auth();db=app.firestore();
+        signInWithEmailAndPassword=(a,email,password)=>a.signInWithEmailAndPassword(email,password);
+        signOut=a=>a.signOut();onAuthStateChanged=(a,next,error)=>a.onAuthStateChanged(next,error);
+        setPersistence=(a,p)=>a.setPersistence(p);browserLocalPersistence=f.auth.Auth.Persistence.LOCAL;
+        collection=(d,path)=>d.collection(path);getDocs=ref=>ref.get();doc=(d,...path)=>d.doc(path.join('/'));
+        getDoc=async ref=>{const snapshot=await ref.get();return {exists:()=>snapshot.exists,data:()=>snapshot.data()}};
+        setDoc=(ref,data)=>ref.set(data);updateDoc=(ref,data)=>ref.update(data);deleteField=()=>f.firestore.FieldValue.delete();
+      }catch(compatError){throw new Error('Modular SDK: '+(modularError.code||modularError.message)+'; compatible SDK: '+(compatError.code||compatError.message))}
+    }
     let ownerReady=false, nonOwnerNotice='';
     $('form').onsubmit=async e=>{e.preventDefault();nonOwnerNotice='';try{status('Signing in…');await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,$('email').value,$('password').value);$('password').value='';}catch(e){status('Sign-in failed: '+(e.code||e.message))}};
     boot.stage='waiting for the initial authentication state';
