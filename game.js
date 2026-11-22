@@ -1912,7 +1912,7 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[
+var UPDATES=[{d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
  {d:"Nov 22, 2026",t:"Life & Legacy",b:"Eras, bloodline awakening, narrative missions, jutsu training, descendant system, a rebuilt dashboard-style game screen, clan surname fix, and a full main-menu rework."},
  {d:"Nov 22, 2026",t:"Clan Surnames",b:"A clan you pick always sticks now and your last name auto-fills with it. Random clan births take the clan surname, and relocated families get a line in your bio."},
  {d:"Nov 22, 2026",t:"First-Pass Life Sim",b:"Shinobi Sprint rebuilt as a full life simulator: birth, family, school, career, missions, aging, death, and a Legacy Hall for finished lives."}
