@@ -1732,7 +1732,9 @@ function fillCreator(){
 }
 
 /* ============================ cinematic multi-step creator ============================ */
-var CC={step:"intro",name:"",village:null,gender:null,eraId:null,clanRoll:null,last:"",timers:[]};
+var CC={step:"intro",name:"",village:null,eraId:null,eraPicked:false,gender:null,clanRoll:null,origin:null,trait:null,last:"",timers:[]};
+var ORIGINS=["born to a farming family on the village outskirts","born to a merchant family that deals in silk and steel","born to two active-duty shinobi; you saw more of the mission hall than a crib","orphaned at birth and raised in the village orphanage","the youngest child of a lesser shinobi household","born above a teahouse your family runs near the mission hall","born during a border scare, with the village gates shut for a week","born into a family of potters who quietly still forge shinobi tools"];
+var TRAITS=["stubborn to a fault","quiet, but you miss nothing","reckless, in the way that gets people promoted or killed","a natural liar with an honest face","gentle in a house of blades","hungry to prove something","lazy, right up until it matters","too honest for a career in espionage","lucky at cards, unlucky in everything else","obsessed with stories of old heroes"];
 var RARITY_COLOR={mythical:"#a06cd5",legendary:"#d3a94c",rare:"#d4555f",uncommon:"#3fb3a8",common:"#8a8f98"};
 var CLAN_KANJI={Uchiha:"\u6247",Hyuga:"\u65e5",Senju:"\u5343",Uzumaki:"\u6e29",Sarutobi:"\u733f",Nara:"\u5948",Akimichi:"\u79cb",Yamanaka:"\u5c71",Aburame:"\u6cb9",Inuzuka:"\u72ac",Kurama:"\u978d",Hatake:"\u7551",Shimura:"\u5fd7",Fuma:"\u98a8",Yuki:"\u96ea",Hozuki:"\u9b3c"};
 var CC_BAD=["fuck","shit","bitch","asshole","dick","cunt","nigg","fag","slut","whore","rape","porn","sex","cock","pussy","nazi","hitler"];
@@ -1740,8 +1742,8 @@ function ccTimer(fn,ms){CC.timers.push(setTimeout(fn,ms))}
 function ccClear(){CC.timers.forEach(clearTimeout);CC.timers=[]}
 function ccShow(step){
   CC.step=step;ccClear();
-  var order={intro:0,name:1,village:2,roll:3,clan:4,final:5};
-  ["#cc-intro","#cc-pane-name","#cc-village","#cc-roll","#cc-clan","#cc-final"].forEach(function(id,n){
+  var order={intro:0,name:1,village:2,era:3,roll:4,clan:5,final:6};
+  ["#cc-intro","#cc-pane-name","#cc-village","#cc-era","#cc-roll","#cc-clan","#cc-final"].forEach(function(id,n){
     var p=$(id);if(p)p.classList.toggle("on",order[step]===n);
   });
   var dots=$("#cc-prog");if(dots){
@@ -1756,7 +1758,7 @@ function ccReset(){
   ["#c-first","#c-last"].forEach(function(id){$(id).value=""});
   ["#c-gender","#c-era","#c-village","#c-clan"].forEach(function(id){$(id).value=id==="#c-clan"?"r":"r"});
   $("#cc-name").value="";$("#cc-name-err").textContent="";$("#cc-nameprev").innerHTML="";
-  $("#cc-vill-err").textContent="";$("#cc-vills").innerHTML="";$("#cc-spin").textContent="";$("#cc-spin").classList.remove("slow");$("#cc-spin").style.display="";
+  $("#cc-vill-err").textContent="";$("#cc-vills").innerHTML="";$("#cc-era-err").textContent="";$("#cc-eras").innerHTML="";$("#cc-spin").textContent="";$("#cc-spin").classList.remove("slow");$("#cc-spin").style.display="";
   $("#cc-clancard").hidden=true;$("#cc-clancard").innerHTML="";
   ccShow("intro");
 }
@@ -1784,7 +1786,9 @@ function ccBuildVills(){
 }
 function ccForge(){
   CC.gender=chance(.5)?"m":"f";
-  CC.eraId=pick(ERAS).id;
+  CC.eraId=(CC.eraId&&CC.eraId!=="r")?CC.eraId:pick(ERAS).id;
+  CC.origin=pick(ORIGINS);
+  CC.trait=pick(TRAITS);
   CC.clanRoll=chance(.42)?rollClan(CC.village):null;
   CC.last=CC.clanRoll?CC.clanRoll.n:pick(SURNAMES);
   $("#c-gender").value=CC.gender;
@@ -1794,10 +1798,10 @@ function ccForge(){
   $("#c-first").value=CC.name;
   $("#c-last").value=CC.last;
   var era=ERAS.find(function(e){return e.id===CC.eraId});
-  var lines=["Rolling the dice of birth…","Body and spirit: sealed.","The era finds you: "+era.name+".","A household waits in "+VILLAGES[CC.village].label+"…"];
+  var lines=["Rolling the dice of birth…","Body and spirit: sealed.",(CC.eraPicked?"The era takes shape: "+era.name+".":"The era finds you: "+era.name+"."),"A household waits in "+VILLAGES[CC.village].label+"…","Fate whispers: you were "+CC.origin+".","They already say you are "+CC.trait+"."];
   var i=0;
   function next(){
-    if(i<lines.length){$("#cc-forgeline").textContent=lines[i];i++;ccTimer(next,520)}
+    if(i<lines.length){$("#cc-forgeline").textContent=lines[i];i++;ccTimer(next,460)}
     else ccTimer(function(){ccShow("clan");ccClanReveal()},420);
   }
   next();
@@ -1850,7 +1854,7 @@ function ccToFinal(){
   var era=ERAS.find(function(e){return e.id===CC.eraId});
   var s='<b>'+CC.name+' '+CC.last+'</b><br>'+
     VILLAGES[CC.village].name+' · '+VILLAGES[CC.village].label+'<br>'+
-    era.name+' · '+(CC.gender==="m"?"Male":"Female")+'<br>'+
+    era.name+' · '+(CC.gender==="m"?"Male":"Female")+'<br>'+'Origin: '+CC.origin+'<br>Trait: '+CC.trait+'<br>'+
     (CC.clanRoll?('Clan '+CC.clanRoll.n+' · '+CC.clanRoll.r):'No clan · civilian')+
     (PENDING&&PENDING.kkg?'<br>Bloodline: '+PENDING.kkg+' (dormant)':'');
   $("#cc-finalsum").innerHTML=s;
@@ -1867,9 +1871,30 @@ function ccNameNext(){
   ccShow("village");
   if(!$("#cc-vills").children.length)ccBuildVills();
 }
+function ccBuildEras(){
+  var wrap=$("#cc-eras");wrap.innerHTML="";
+  var cards=[{id:"r",name:"Random Era",small:"let fate decide",d:"The dice choose the age you are born into."}];
+  ERAS.forEach(function(e){
+    cards.push({id:e.id,name:e.name,small:e.war>.12?"age of war":(e.war>.05?"unsettled age":"relative peace"),d:e.d});
+  });
+  cards.forEach(function(c){
+    var d=document.createElement("div");d.className="cc-vill";d.dataset.v=c.id;
+    d.innerHTML='<span class="vk">'+(c.id==="r"?"\uD83C\uDFB2":"\u23F3")+'</span><b>'+c.name+'</b><small>'+c.small+'</small><p>'+c.d+'</p>';
+    d.onclick=function(){
+      wrap.querySelectorAll(".cc-vill").forEach(function(x){x.classList.remove("sel")});
+      d.classList.add("sel");CC.eraId=c.id;CC.eraPicked=(c.id!=="r");$("#cc-era-err").textContent="";
+    };
+    wrap.appendChild(d);
+  });
+}
+function ccEraNext(){
+  if(!CC.eraId){$("#cc-era-err").textContent="Pick the era you are born into, or let fate decide.";return}
+  ccShow("roll");ccForge();
+}
 function ccVillNext(){
   if(!CC.village){$("#cc-vill-err").textContent="Pick the village you are born into.";return}
-  ccShow("roll");ccForge();
+  ccShow("era");
+  if(!$("#cc-eras").children.length)ccBuildEras();
 }
 
 var PENDING=null;
@@ -1879,6 +1904,7 @@ function rollPreview(){
   if(opts.last===""||opts.last==="none")delete opts.last;
   if(opts.clan==="none"){opts.clan="__none__"}
   PENDING=generateLife(opts);
+  if(CC.origin&&CC.trait){var oCap=CC.origin.charAt(0).toUpperCase()+CC.origin.slice(1);PENDING.bio+=" "+oCap+", and people already say you are "+CC.trait+".";}
   $("#bioPreview").textContent=PENDING.bio+"\n\nFamily: "+PENDING.family.parents.map(function(p){return p.name}).join(" & ")+(PENDING.family.siblings.length?" · "+PENDING.family.siblings.length+" sibling(s)":"")+"\nWealth: "+PENDING.familyWealth+(PENDING.clanName?"\nClan: "+PENDING.clanName+" ("+PENDING.clan.r+")":"\nClan: none")+"\nChakra nature: hidden until discovered\nBloodline: "+(PENDING.kkg?"possible ("+PENDING.kkg+")":"none");
 }
 function beginLife(){
@@ -1912,7 +1938,7 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
+var UPDATES=[{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
  {d:"Nov 22, 2026",t:"New Name",b:"Shinobi Sprint is now SHINOBI: LIFE UNBOUND. Same life sim, bigger name. Title screen, intro, credits, and page title all carry the new banner."},
  {d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
  {d:"Nov 22, 2026",t:"Cross Links",b:"A direct link to Shinobi Legacy now sits in the title footer, so you can jump from the sprint sim to the main game in one tap."},
@@ -1936,6 +1962,7 @@ function wireTitle(){
   $("#cc-go").onclick=function(){ccShow("name");$("#cc-name").focus()};
   $("#cc-name-next").onclick=ccNameNext;
   $("#cc-vill-next").onclick=ccVillNext;
+  $("#cc-era-next").onclick=ccEraNext;
   $("#cc-confirm").onclick=function(){ccClear();beginLife()};
   $("#cc-name").addEventListener("input",function(){
     var v=this.value.trim();
@@ -1963,7 +1990,7 @@ function wireTitle(){
   function menuOpen(id){
     try{
       if(id==="btn-ach"){var lines=ACHIEVEMENTS.map(function(x){return x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements","Twenty-two honors a shinobi can earn in a single life:\n\n"+lines)}
-      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 1.1.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
+      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 1.2.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
       else if(id==="btn-credits"){modalSafe("Credits","Credits","SHINOBI: LIFE UNBOUND\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")}
       else if(id==="btn-exit"){modalSafe("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])}
       else if(id==="btn-back"){$("#screen-creator").classList.remove("on");$("#screen-title").classList.add("on")}
