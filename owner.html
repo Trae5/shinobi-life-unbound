@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shinobi Owner Panel</title><style>body{background:#10090c;color:#f2dfbc;font:16px system-ui;max-width:900px;margin:auto;padding:24px}h1,h2{color:#dfb963}section{background:#211218;border:1px solid #a47d3b;border-radius:12px;padding:20px;margin:16px 0}input,button{font:inherit;padding:10px;border-radius:6px}input{background:#10090c;color:#fff;border:1px solid #a47d3b}button{cursor:pointer;background:#711c2d;color:#fff;border:1px solid #d4af65;margin:4px}a{color:#dfb963}.save{border-top:1px solid #654d37;padding:12px 0;overflow-wrap:anywhere}#status{color:#ffd381}</style></head><body><h1>SHINOBI: LIFE UNBOUND</h1><p>Owner panel · <a href="./">Return to game</a></p><p id="status">Loading Firebase…</p><section id="login" hidden><h2>Owner sign in</h2><form id="form"><label>Email <input id="email" type="email" autocomplete="username" required></label> <label>Password <input id="password" type="password" autocomplete="current-password" required></label> <button>Sign in</button></form></section><div id="panel" hidden><section><button id="signout">Sign out</button><h2>Maintenance</h2><p id="maintenance">Loading…</p><button id="enable">Turn maintenance on</button><button id="disable">Turn maintenance off</button></section><section><h2>Player saves</h2><button id="refresh">Refresh</button><div id="saves"></div></section></div>
 <script>
-// This watchdog runs even if the module or its SDK dependencies cannot load.
+// The watchdog reports a stalled SDK load or initial auth state.
 (function(){
   var boot=window.ownerBoot={stage:'loading the Firebase SDK',done:false};
   var timer=setTimeout(function(){if(!boot.done)document.getElementById('status').textContent='Firebase is taking too long while '+boot.stage+'. Check your connection and access to www.gstatic.com, then reload.'},15000);
@@ -9,41 +9,24 @@
   boot.fail=function(message){boot.complete();document.getElementById('status').textContent=message};
 })();
 </script>
-<script type="module">
+<script>
 (async()=>{
   const boot=window.ownerBoot, $=id=>document.getElementById(id), status=m=>$('status').textContent=m;
   const owner='Gb2MYzFu5sV2Rr8d1cGWMI90K4e2', config={apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'};
-  let auth,db,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence,collection,getDocs,doc,getDoc,setDoc,updateDoc,deleteField;
   function loadScript(name){return new Promise((resolve,reject)=>{const s=document.createElement('script');let timer;const finish=error=>{clearTimeout(timer);s.onload=s.onerror=null;if(error){s.remove();reject(error)}else resolve()};s.src='https://www.gstatic.com/firebasejs/10.14.1/firebase-'+name+'-compat.js';s.onload=()=>finish();s.onerror=()=>finish(new Error('Could not load '+name+' compat SDK'));timer=setTimeout(()=>finish(new Error('Timed out loading '+name+' compat SDK')),10000);document.head.append(s)})}
   try{
-    try{
-      const [firebaseApp,firebaseAuth,firebaseStore]=await Promise.all([
-        import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
-        import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
-        import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
-      ]);
-      boot.stage='initializing Firebase authentication';
-      const app=firebaseApp.initializeApp(config);
-      auth=firebaseAuth.getAuth(app);db=firebaseStore.getFirestore(app);
-      ({signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence}=firebaseAuth);
-      ({collection,getDocs,doc,getDoc,setDoc,updateDoc,deleteField}=firebaseStore);
-    }catch(modularError){
-      console.warn('Modular Firebase initialization failed; trying compat SDK:',modularError);
-      status('Firebase authentication failed to start; trying compatible SDK…');
-      try{
-        for(const name of ['app','auth','firestore']){boot.stage='loading Firebase '+name+' compat SDK';await loadScript(name)}
-        const f=window.firebase;
-        if(!f||f.SDK_VERSION!=='10.14.1'||typeof f.auth!=='function'||typeof f.firestore!=='function')throw new Error('Compatible Firebase SDK components or version missing');
-        boot.stage='initializing compatible Firebase authentication';
-        const app=f.initializeApp(config);auth=app.auth();db=app.firestore();
-        signInWithEmailAndPassword=(a,email,password)=>a.signInWithEmailAndPassword(email,password);
-        signOut=a=>a.signOut();onAuthStateChanged=(a,next,error)=>a.onAuthStateChanged(next,error);
-        setPersistence=(a,p)=>a.setPersistence(p);browserLocalPersistence=f.auth.Auth.Persistence.LOCAL;
-        collection=(d,path)=>d.collection(path);getDocs=ref=>ref.get();doc=(d,...path)=>d.doc(path.join('/'));
-        getDoc=async ref=>{const snapshot=await ref.get();return {exists:()=>snapshot.exists,data:()=>snapshot.data()}};
-        setDoc=(ref,data)=>ref.set(data);updateDoc=(ref,data)=>ref.update(data);deleteField=()=>f.firestore.FieldValue.delete();
-      }catch(compatError){throw new Error('Modular SDK: '+(modularError.code||modularError.message)+'; compatible SDK: '+(compatError.code||compatError.message))}
-    }
+    // One SDK family and version: each component registers before the next loads.
+    for(const name of ['app','auth','firestore']){boot.stage='loading Firebase '+name+' compat SDK';await loadScript(name)}
+    const f=window.firebase;
+    if(!f||f.SDK_VERSION!=='10.14.1'||typeof f.auth!=='function'||typeof f.firestore!=='function')throw new Error('Compatible Firebase SDK components or version missing');
+    boot.stage='initializing compatible Firebase authentication';
+    const app=f.initializeApp(config), auth=app.auth(), db=app.firestore();
+    const signInWithEmailAndPassword=(a,email,password)=>a.signInWithEmailAndPassword(email,password);
+    const signOut=a=>a.signOut(), onAuthStateChanged=(a,next,error)=>a.onAuthStateChanged(next,error);
+    const setPersistence=(a,p)=>a.setPersistence(p), browserLocalPersistence=f.auth.Auth.Persistence.LOCAL;
+    const collection=(d,path)=>d.collection(path), getDocs=ref=>ref.get(), doc=(d,...path)=>d.doc(path.join('/'));
+    const getDoc=async ref=>{const snapshot=await ref.get();return {exists:()=>snapshot.exists,data:()=>snapshot.data()}};
+    const setDoc=(ref,data)=>ref.set(data), updateDoc=(ref,data)=>ref.update(data), deleteField=()=>f.firestore.FieldValue.delete();
     let ownerReady=false, nonOwnerNotice='';
     $('form').onsubmit=async e=>{e.preventDefault();nonOwnerNotice='';try{status('Signing in…');await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,$('email').value,$('password').value);$('password').value='';}catch(e){status('Sign-in failed: '+(e.code||e.message))}};
     boot.stage='waiting for the initial authentication state';
