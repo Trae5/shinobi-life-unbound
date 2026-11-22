@@ -1,4 +1,4 @@
-/* Shinobi Sprint — Life of a Shinobi (v2, Life & Legacy)
+/* Shinobi: Life Unbound (v2, Life & Legacy)
    A Naruto-universe life simulator. Vanilla JS, no dependencies. */
 (function(){
 "use strict";
@@ -1912,7 +1912,8 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
+var UPDATES=[{d:"Nov 22, 2026",t:"New Name",b:"Shinobi Sprint is now SHINOBI: LIFE UNBOUND. Same life sim, bigger name. Title screen, intro, credits, and page title all carry the new banner."},
+ {d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
  {d:"Nov 22, 2026",t:"Cross Links",b:"A direct link to Shinobi Legacy now sits in the title footer, so you can jump from the sprint sim to the main game in one tap."},
  {d:"Nov 22, 2026",t:"Life & Legacy",b:"Eras, bloodline awakening, narrative missions, jutsu training, descendant system, a rebuilt dashboard-style game screen, clan surname fix, and a full main-menu rework."},
  {d:"Nov 22, 2026",t:"Clan Surnames",b:"A clan you pick always sticks now and your last name auto-fills with it. Random clan births take the clan surname, and relocated families get a line in your bio."},
@@ -1950,7 +1951,7 @@ function wireTitle(){
     var us=uc.querySelector("span");if(us)us.textContent=u.t+" \u2014 "+u.d;
     uc.title="Tap to open the update log";
     uc.style.cursor="pointer";
-    uc.onclick=function(){var log="";for(var i=0;i<UPDATES.length;i++){log+=(i?"\n\n":"")+UPDATES[i].d+" \u2014 "+UPDATES[i].t+"\n"+UPDATES[i].b}modalSafe("Update Log","Updates","What's new in Shinobi Sprint:\n\n"+log)};
+    uc.onclick=function(){var log="";for(var i=0;i<UPDATES.length;i++){log+=(i?"\n\n":"")+UPDATES[i].d+" \u2014 "+UPDATES[i].t+"\n"+UPDATES[i].b}modalSafe("Update Log","Updates","What's new in Shinobi: Life Unbound:\n\n"+log)};
   }
   function titleRyo(){var all=slots(),best=null;for(var i=0;i<all.length;i++){if(all[i]&&all[i].g&&(!best||all[i].when>best.when))best=all[i]}return best&&best.g?Math.round(best.g.ryo||0):0}
   function setTitleRyo(){var v=titleRyo().toLocaleString("en-US");var a=$("#t-ryo-val"),b=$("#c-ryo-val");if(a)a.textContent=v;if(b)b.textContent=v}
@@ -1962,7 +1963,7 @@ function wireTitle(){
     try{
       if(id==="btn-ach"){var lines=ACHIEVEMENTS.map(function(x){return x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements","Twenty-two honors a shinobi can earn in a single life:\n\n"+lines)}
       else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 1.0.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
-      else if(id==="btn-credits"){modalSafe("Credits","Credits","SHINOBI SPRINT - Life of a Shinobi\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")}
+      else if(id==="btn-credits"){modalSafe("Credits","Credits","SHINOBI: LIFE UNBOUND\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")}
       else if(id==="btn-exit"){modalSafe("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])}
       else if(id==="btn-back"){$("#screen-creator").classList.remove("on");$("#screen-title").classList.add("on")}
     }catch(e){try{D.title="ERR menu "+id+": "+(e&&e.message?e.message:String(e))}catch(_){}}
