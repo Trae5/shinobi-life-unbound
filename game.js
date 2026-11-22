@@ -605,6 +605,13 @@ function runEvent(e){
 /* ---------- event helpers ---------- */
 function paperModal(title,kind,text,choices,onClose){
   var m=$("#modal"),c=$("#mcard");c.innerHTML="";
+  if(!choices||!choices.length){
+    var xb=el("button","mcloseX","\u00d7");
+    xb.setAttribute("aria-label","Close");
+    xb.onclick=function(ev){ev.stopPropagation();m.classList.remove("on");if(onClose)onClose()};
+    c.appendChild(xb);
+    m.onclick=function(ev){if(ev.target===m){m.classList.remove("on");if(onClose)onClose()}};
+  }else{m.onclick=null}
   c.appendChild(el("div","mk",kind||"Event"));
   c.appendChild(el("h3","serif",title));
   var t=el("div","mtext",text);c.appendChild(t);
@@ -1226,13 +1233,16 @@ function ageUp(){
   if(chance(deathRisk))dieOf(G.age>70?"old age":pick(["illness","a mission gone wrong","an illness the medics could not break"]));
   /* events */
   if(G.alive){
-    var er=Math.random();var nEv=er<.16?0:er<.8?1:2;
-    var fired=0;
-    while(fired<nEv){
-      var e=pickEvent();if(!e)break;
-      e.run();fired++;
+    if(window.LIFE&&LIFE.tick){LIFE.tick()}
+    else{
+      var er=Math.random();var nEv=er<.16?0:er<.8?1:2;
+      var fired=0;
+      while(fired<nEv){
+        var e=pickEvent();if(!e)break;
+        e.run();fired++;
+      }
+      if(!fired)fbig("A quiet year. Not every year needs to be loud.");
     }
-    if(!fired)fbig("A quiet year. Not every year needs to be loud.");
     /* career progression offers */
     if(!G.rogue)careerProgress();
     if(!G.rogue&&rankRank()>=2&&G.age>=13&&chance(.05))rogueOffer();
@@ -2221,7 +2231,7 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"Narrator Fix",b:"Version 2.2.1. The intro narrator now speaks in one consistent English voice at a calm, low pitch for the whole intro, instead of a random voice per line. Softer wind in the mix too."},{d:"Nov 22, 2026",t:"The Cinematic Opening",b:"Version 2.2.0. Starting a new life now opens a cinematic intro: a black screen that fades into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while a narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. The narrator picks a random voice on each line where the browser supports it, and subtitles always run alongside. Skip Intro sits on screen the whole time, and settings gains a Replay Intro option. It plays for new lives only: loading a save or continuing goes straight in. About 50 seconds, skippable in one tap."},{d:"Nov 22, 2026",t:"Specializations & Sharper Missions",b:"Version 2.1.0. After graduation the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays."},{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
+var UPDATES=[{d:"Nov 22, 2026",t:"The Life Simulator Overhaul — Phase 2",b:"Version 3.0.0. Every year of a life can now unfold as real story scenes: a dynamic event engine reads your age, village, clan, family, personality, reputation, relationships, rank and everything that happened before, then builds events that remember you — with 20+ categories from family and academy life to rivalries, tragedies, celebrations, romance, betrayals, political moves, war years, legendary meetings and genuinely rare secret events. Each scene is a full screen: title, category, rarity, age and location, narration, dialogue with named NPCs, and choices that actually change your life — some consequences land immediately, others wait years in your future and come back for you. NPCs remember what you did for them and to them, and greet you differently ever after. A personality system grows through your decisions (brave, ruthless, calm, reckless and more) instead of being picked at birth. Deep relationships track trust, respect and history, with milestones when bonds shift. Academy life gains real classmates and an instructor, classroom drama, prodigy recognition and exam pressure. Rivals grow on their own for years and return. Talents reveal themselves in tiers, from seal-shaping to a legendary wanderer's gift. A new Year Summary closes every age-up with what changed — stats, bonds, discoveries, honors — and a Life Record page (new Record tab) writes your biography only from what actually happened. Update logs now close with an X or a tap outside, no scrolling required. Existing saves, saves slots, features and menus are untouched; older saves migrate safely."},{d:"Nov 22, 2026",t:"Narrator Fix",b:"Version 2.2.1. The intro narrator now speaks in one consistent English voice at a calm, low pitch for the whole intro, instead of a random voice per line. Softer wind in the mix too."},{d:"Nov 22, 2026",t:"The Cinematic Opening",b:"Version 2.2.0. Starting a new life now opens a cinematic intro: a black screen that fades into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while a narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. The narrator picks a random voice on each line where the browser supports it, and subtitles always run alongside. Skip Intro sits on screen the whole time, and settings gains a Replay Intro option. It plays for new lives only: loading a save or continuing goes straight in. About 50 seconds, skippable in one tap."},{d:"Nov 22, 2026",t:"Specializations & Sharper Missions",b:"Version 2.1.0. After graduation the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays."},{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
  {d:"Nov 22, 2026",t:"New Name",b:"Shinobi Sprint is now SHINOBI: LIFE UNBOUND. Same life sim, bigger name. Title screen, intro, credits, and page title all carry the new banner."},
  {d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
  {d:"Nov 22, 2026",t:"Cross Links",b:"A direct link to Shinobi Legacy now sits in the title footer, so you can jump from the sprint sim to the main game in one tap."},
@@ -2375,7 +2385,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.2.2";
+var GAME_VERSION="3.0.0";
 function updStatus(text,upd){
   var s=document.getElementById("t-status");
   if(!s)return;

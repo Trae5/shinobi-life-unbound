@@ -340,7 +340,36 @@ h1,h2,h3{margin:0;line-height:1.2}
 .cc-clancard p.cc-desc{color:#d8d2c4;font-size:13px;line-height:1.6}
 .cc-finalsum{width:min(520px,92vw);text-align:left;font-size:13px;color:#c9c4d2;line-height:1.8;margin:10px 0 2px}
 .cc-finalsum b{color:var(--gold)}
-#upd{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,7,9,.97);z-index:9999}#upd.on{display:flex}.upd-card{max-width:420px;text-align:center;padding:28px}.upd-count{font-size:64px;font-weight:900;color:var(--gold);margin:10px 0;font-family:Georgia,serif}</style>
+#upd{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,7,9,.97);z-index:9999}#upd.on{display:flex}.upd-card{max-width:420px;text-align:center;padding:28px}.upd-count{font-size:64px;font-weight:900;color:var(--gold);margin:10px 0;font-family:Georgia,serif}
+/* ---- LIFE v3: scenes, dialogue, summary, record ---- */
+.sc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.sc-head .ek{display:inline-flex;align-items:center;gap:7px;color:#fff;background:var(--crimson-deep);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.sc-rar{font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid currentColor;background:rgba(0,0,0,.25)}
+.sc-meta{color:var(--gold);font-size:11.5px;font-weight:700;letter-spacing:.3px;margin-bottom:8px;opacity:.85}
+.sc-art{font-size:44px;text-align:center;padding:14px 0 6px;filter:drop-shadow(0 4px 14px rgba(194,42,62,.35))}
+.sc-line{color:#cfc9bd;font-size:14px;line-height:1.55;margin:0 0 10px}
+.sc-dlg{display:flex;gap:10px;align-items:flex-start;margin:0 0 10px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-left:3px solid var(--crimson);border-radius:10px}
+.sc-dlg .sc-face{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:linear-gradient(160deg,var(--crimson-deep),#5a1420);display:flex;align-items:center;justify-content:center;font-weight:900;color:#f5e6c4;font-size:15px;border:1px solid rgba(255,255,255,.15)}
+.sc-dlg .sc-bubble{min-width:0}
+.sc-dlg .sc-who{display:block;color:var(--gold);font-size:12px;font-weight:800;margin-bottom:2px}
+.sc-dlg span{color:#e8e2d4;font-size:14px;line-height:1.5}
+.sc-choices{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.sc-choice{display:block;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1px solid var(--line);color:#e8e2d4;border-radius:11px;padding:11px 14px;cursor:pointer;transition:all .15s}
+.sc-choice b{display:block;font-size:14px;font-weight:800;color:#fff}
+.sc-choice small{display:block;color:#9a948a;font-size:12px;margin-top:2px}
+.sc-choice:hover{border-color:var(--crimson);background:rgba(194,42,62,.12);transform:translateX(2px)}
+.sc-continue{background:linear-gradient(180deg,var(--crimson-deep),#6d1723);border-color:rgba(255,255,255,.16);text-align:center}
+.sc-res{color:#e9c46a;font-size:13.5px;line-height:1.5;margin:4px 0 8px;font-style:italic}
+.sc-summary{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.sc-sumblock{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+.sc-sumtitle{display:block;color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+.sc-sumrow{font-size:13.5px;color:#cfc9bd;padding:2px 0}
+.sc-sumrow.sup{color:#8fce8f}.sc-sumrow.sdown{color:#e08a8a}
+.fentry.hl{background:rgba(211,169,76,.06);border-left:3px solid var(--gold)}
+.mcloseX{position:absolute;top:8px;right:10px;background:none;border:0;color:#b9b2a6;font-size:22px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:8px;z-index:5}
+.mcloseX:hover{color:#fff;background:rgba(255,255,255,.08)}
+#mcard{position:relative}
+</style>
 </head>
 <body>
 
@@ -554,7 +583,7 @@ h1,h2,h3{margin:0;line-height:1.2}
  <button type="button" id="cine-skip">SKIP INTRO</button>
  <div class="vig"></div>
 </div>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=cloud-v3"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=cloud-v3"></script><script src="life.js?v=l3"></script>
 
 <div id="upd" role="alertdialog" aria-modal="true" aria-label="Game update"><div class="upd-card"><div class="mk" style="color:var(--gold)">MAINTENANCE</div><h3 class="serif" style="color:var(--gold)">Update incoming</h3><div class="mtext">A new version just went live. The game is going down for the update.</div><div class="upd-count" id="upd-count">30</div><div class="mtext">refreshing automatically, your saves are safe</div></div></div>
 <script>(function(){var secret='please',pos=0,last=0;function reset(){pos=0;last=0}window.addEventListener('blur',reset);document.addEventListener('keydown',function(e){var t=e.target,title=document.getElementById('screen-title'),intro=document.getElementById('ss-intro');if(!title||!title.classList.contains('on')||(intro&&!intro.hidden)||document.querySelector('#modal.on,#upd.on')||e.defaultPrevented||e.repeat||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||e.shiftKey||(t instanceof Element&&(t.matches('input,textarea,select')||t.isContentEditable))){reset();return}var now=Date.now();if(now-last>3000)pos=0;last=now;var key=e.key;if(key===secret[pos])pos++;else pos=key===secret[0]?1:0;if(pos===secret.length){reset();window.location.href='owner.html'}})})();</script></body>
