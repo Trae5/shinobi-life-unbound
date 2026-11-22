@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shinobi Community — Bug Reports, Feature Requests & Chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0709;--panel:#160d10;--panel2:#1e1216;--line:#3a2226;--gold:#dfb963;--gold2:#f3d98a;--red:#8a1c1c;--red2:#b32626;--ink:#efe3c8;--dim:#a99583;--green:#4fae6a;--amber:#e0a53c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(138,28,28,.28),transparent 70%),radial-gradient(ellipse 60% 40% at 50% 110%,rgba(223,185,99,.06),transparent 70%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 18px 60px}
+header{padding:34px 0 6px;text-align:center}
+h1{font-family:Cinzel,serif;font-weight:900;font-size:clamp(28px,6vw,44px);color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
+.sub{color:var(--dim);font-size:14px;margin-top:6px;letter-spacing:.06em}
+nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:22px 0 26px;position:sticky;top:0;background:rgba(13,7,9,.92);backdrop-filter:blur(6px);padding:10px 0;z-index:50;border-bottom:1px solid var(--line)}
+nav button{font-family:Cinzel,serif;font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--dim);border:1px solid transparent;border-radius:20px;padding:9px 16px;cursor:pointer;transition:.15s}
+nav button:hover{color:var(--gold)}
+nav button.on{color:var(--gold2);border-color:var(--gold);background:rgba(223,185,99,.08)}
+.view{display:none;animation:fade .25s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-family:Cinzel,serif;color:var(--gold);font-size:20px;letter-spacing:.08em;margin:8px 0 4px;text-transform:uppercase}
+.lead{color:var(--dim);font-size:14px;line-height:1.6;margin-bottom:18px}
+.gamecard{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:22px;margin:14px 0}
+.gamecard h3{font-family:Cinzel,serif;color:var(--gold2);font-size:17px;letter-spacing:.05em;margin-bottom:8px}
+.gamecard p{color:var(--dim);font-size:14px;line-height:1.6}
+.btn{display:inline-block;font-family:Cinzel,serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:8px;padding:11px 18px;cursor:pointer;transition:.15s;margin-top:12px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn.danger{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}
+.filters button{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--panel);color:var(--dim);border:1px solid var(--line);border-radius:16px;padding:7px 14px;cursor:pointer}
+.filters button.on{color:var(--gold2);border-color:var(--gold)}
+.card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red2);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.card.fixed{border-left-color:var(--green)}
+.card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.card h4{color:var(--ink);font-size:15.5px;font-weight:700;line-height:1.35}
+.badge{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:10px;padding:4px 10px;white-space:nowrap}
+.badge.open{background:rgba(179,38,38,.18);color:#ff9a8a;border:1px solid rgba(179,38,38,.45)}
+.badge.fixed{background:rgba(79,174,106,.15);color:#8fe0a8;border:1px solid rgba(79,174,106,.4)}
+.badge.meta{background:rgba(223,185,99,.1);color:var(--gold);border:1px solid rgba(223,185,99,.35)}
+.badge.done{background:rgba(223,185,99,.16);color:var(--gold2);border:1px solid var(--gold)}
+.card p{color:var(--dim);font-size:13.5px;line-height:1.6;margin-top:7px;white-space:pre-wrap;word-wrap:break-word}
+.card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:8px}
+.who{color:var(--dim);font-size:12px}
+.up{display:inline-flex;align-items:center;gap:6px;background:rgba(223,185,99,.07);border:1px solid var(--line);color:var(--gold);border-radius:16px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.up:hover{border-color:var(--gold)}
+.up.mine{background:rgba(223,185,99,.18);border-color:var(--gold)}
+.up.done{cursor:default;opacity:.8}
+.empty{color:var(--dim);text-align:center;padding:40px 0;font-size:14px}
+.modal{position:fixed;inset:0;background:rgba(5,2,3,.78);display:none;place-items:center;z-index:100;padding:18px}
+.modal.on{display:grid}
+.mbox{background:var(--panel);border:1px solid var(--gold);border-radius:14px;padding:26px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.mbox h3{font-family:Cinzel,serif;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-size:17px;margin-bottom:14px}
+.mbox label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:12px 0 5px}
+.mbox input,.mbox select,.mbox textarea{width:100%;background:#0f0a0c;border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:Inter;font-size:14px;padding:10px 12px}
+.mbox textarea{min-height:96px;resize:vertical}
+.mbox input:focus,.mbox select:focus,.mbox textarea:focus{outline:none;border-color:var(--gold)}
+.mrow{display:flex;gap:10px;margin-top:18px}
+.mrow .btn{margin:0;flex:1}
+.chatwrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.chatlog{height:52vh;min-height:320px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:82%}
+.msg .nm{font-size:11.5px;font-weight:700;color:var(--gold);letter-spacing:.04em;margin-bottom:3px}
+.msg .tx{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:14px;line-height:1.5;word-wrap:break-word}
+.msg.me{align-self:flex-end}
+.msg.me .tx{background:rgba(223,185,99,.14);border-color:rgba(223,185,99,.4)}
+.msg .tm{font-size:10.5px;color:var(--dim);margin-top:3px}
+.chatbar{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--panel2)}
+.chatbar input{flex:1;background:#0f0a0c;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 14px;font-size:14px}
+.chatbar input:focus{outline:none;border-color:var(--gold)}
+.chatbar button{font-family:Cinzel,serif;font-weight:700;color:var(--bg);background:var(--gold);border:none;border-radius:10px;padding:0 20px;cursor:pointer;letter-spacing:.06em}
+.banner{display:none;background:rgba(179,38,38,.15);border:1px solid var(--red2);color:#ffb3a7;border-radius:10px;padding:12px 16px;font-size:13.5px;margin-bottom:14px}
+footer{text-align:center;color:var(--dim);font-size:12.5px;margin-top:44px;line-height:2}
+footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Shinobi Community</h1>
+<div class="sub">bug reports · feature requests · live chat — Shinobi Legacy &amp; Shinobi: Life Unbound</div>
+</header>
+<nav>
+<button data-v="home" class="on">Home</button>
+<button data-v="legacy">Shinobi Legacy</button>
+<button data-v="unbound">Life Unbound</button>
+<button data-v="bugs">Bug Reports</button>
+<button data-v="requests">Feature Requests</button>
+<button data-v="chat">Chat</button>
+</nav>
+<div class="banner" id="cloudwarn">Cloud is unreachable right now, so posting is offline. Try again in a bit.</div>
+
+<section class="view on" id="view-home">
+<h2>Welcome, shinobi</h2>
+<p class="lead">This is the community hub for both games. Report what breaks, vote for what should be added next, and talk in the live chat. Everything posted here lands on the developer's radar.</p>
+<div class="gamecard"><h3>Shinobi Legacy · 3D MMORPG</h3><p>The flagship 3D ninja MMORPG. Clans, villages, jutsu, missions, two worlds.</p><a class="btn" href="https://shinobi-legacy.sites.tab.bot/" target="_blank" rel="noopener">Play Shinobi Legacy</a></div>
+<div class="gamecard"><h3>Shinobi: Life Unbound · Life Sim</h3><p>Live an entire shinobi life from birth: village, fate, family, training, and every choice in between.</p><a class="btn" href="https://trae5.github.io/shinobi-sprint/" target="_blank" rel="noopener">Play Life Unbound</a></div>
+</section>
+
+<section class="view" id="view-legacy">
+<h2>Shinobi Legacy</h2>
+<p class="lead">Bugs and requests for the 3D MMORPG. Post on the Bug Reports or Feature Requests tab and pick Shinobi Legacy, it shows up here too.</p>
+<h3 style="font-family:Cinzel,serif;color:var(--gold);font-size:14px;letter-spacing:.08em;margin:16px 0 8px">OPEN BUGS</h3><div id="legacy-bugs"></div>
+<h3 style="font-family:Cinzel,serif;color:var(--gold);font-size:14px;letter-spacing:.08em;margin:16px 0 8px">TOP REQUESTS</h3><div id="legacy-reqs"></div>
+</section>
+
+<section class="view" id="view-unbound">
+<h2>Shinobi: Life Unbound</h2>
+<p class="lead">Bugs and requests for the life sim. Same deal: post on the Bug Reports or Feature Requests tab and pick Life Unbound.</p>
+<h3 style="font-family:Cinzel,serif;color:var(--gold);font-size:14px;letter-spacing:.08em;margin:16px 0 8px">OPEN BUGS</h3><div id="unbound-bugs"></div>
+<h3 style="font-family:Cinzel,serif;color:var(--gold);font-size:14px;letter-spacing:.08em;margin:16px 0 8px">TOP REQUESTS</h3><div id="unbound-reqs"></div>
+</section>
+
+<section class="view" id="view-bugs">
+<h2>Bug Reports</h2>
+<p class="lead">Found something broken? Post it. Open bugs stay up until they are fixed in a live update.</p>
+<button class="btn danger" id="newbug">Report a Bug</button>
+<div class="filters" id="bugfilters"></div>
+<div id="buglist"></div>
+</section>
+
+<section class="view" id="view-requests">
+<h2>Feature Requests</h2>
+<p class="lead">Want something added? Post it and upvote the ones you want most. The highest votes get looked at first.</p>
+<button class="btn" id="newreq">Request a Feature</button>
+<div class="filters" id="reqfilters"></div>
+<div id="reqlist"></div>
+</section>
+
+<section class="view" id="view-chat">
+<h2>Live Chat</h2>
+<p class="lead">One room for the whole community. Be cool.</p>
+<div class="chatwrap">
+<div class="chatlog" id="chatlog"></div>
+<div class="chatbar"><input id="chatin" maxlength="300" placeholder="Say something..." autocomplete="off"><button id="chatsend">Send</button></div>
+</div>
+</section>
+
+<footer>
+Shinobi Community · fan hub for <a href="https://shinobi-legacy.sites.tab.bot/" target="_blank" rel="noopener">Shinobi Legacy</a> and <a href="https://trae5.github.io/shinobi-sprint/" target="_blank" rel="noopener">Shinobi: Life Unbound</a>
+</footer>
+</div>
+
+<div class="modal" id="bugmodal"><div class="mbox">
+<h3>Report a Bug</h3>
+<label>Game</label><select id="bg-game"><option value="legacy">Shinobi Legacy</option><option value="unbound">Shinobi: Life Unbound</option></select>
+<label>Title</label><input id="bg-title" maxlength="120" placeholder="Short summary of the bug">
+<label>What happens</label><textarea id="bg-body" maxlength="2000" placeholder="What went wrong, what you expected to happen"></textarea>
+<label>Steps to reproduce (optional)</label><textarea id="bg-steps" maxlength="1000" placeholder="1. Go to... 2. Click..."></textarea>
+<div class="mrow"><button class="btn ghost" id="bg-cancel">Cancel</button><button class="btn danger" id="bg-post">Post Bug</button></div>
+</div></div>
+
+<div class="modal" id="reqmodal"><div class="mbox">
+<h3>Request a Feature</h3>
+<label>Game</label><select id="rq-game"><option value="legacy">Shinobi Legacy</option><option value="unbound">Shinobi: Life Unbound</option><option value="both">Both games</option></select>
+<label>Title</label><input id="rq-title" maxlength="120" placeholder="Short summary of the idea">
+<label>Details</label><textarea id="rq-body" maxlength="2000" placeholder="Describe the feature and why it would be great"></textarea>
+<div class="mrow"><button class="btn ghost" id="rq-cancel">Cancel</button><button class="btn" id="rq-post">Post Request</button></div>
+</div></div>
+
+<div class="modal" id="namemodal"><div class="mbox">
+<h3>Pick a display name</h3>
+<p style="color:var(--dim);font-size:13.5px;line-height:1.6">This is what other players see on your posts and in chat.</p>
+<label>Display name</label><input id="nm-in" maxlength="24" placeholder="e.g. ShadowOfTheLeaf">
+<div class="mrow"><button class="btn" id="nm-save">Save</button></div>
+</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+var CFG={apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'};
+var app=firebase.initializeApp(CFG,'community'),auth=app.auth(),db=app.firestore();
+var UID=null,CLOUD=true,BUGS=[],REQS=[],bugFilter='all',bugStatus='all',reqFilter='all',reqSort='votes',lastChat=0;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function name(){return localStorage.getItem('shinobi_com_name')||''}
+function ago(iso){var d=new Date(iso).getTime();if(!d)return'';var s=(Date.now()-d)/1000;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+auth.onAuthStateChanged(function(u){if(u){UID=u.uid;boot()}else{auth.signInAnonymously().catch(function(){cloudFail()})}});
+function cloudFail(){CLOUD=false;document.getElementById('cloudwarn').style.display='block'}
+function boot(){
+ db.collection('community_bugs').orderBy('when','desc').limit(300).onSnapshot(function(s){BUGS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderBugs();renderHome()},function(e){cloudFail()});
+ db.collection('community_features').orderBy('when','desc').limit(300).onSnapshot(function(s){REQS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderReqs();renderHome()},function(e){cloudFail()});
+ db.collection('community_chat').orderBy('when','desc').limit(120).onSnapshot(function(s){var el=document.getElementById('chatlog');if(!el)return;var msgs=s.docs.map(function(d){return d.data()}).reverse();el.innerHTML=msgs.map(function(m){return '<div class="msg'+(m.uid===UID?' me':'')+'"><div class="nm">'+esc(m.name)+'</div><div class="tx">'+esc(m.text)+'</div><div class="tm">'+ago(m.when)+'</div></div>'}).join('');el.scrollTop=el.scrollHeight},function(e){cloudFail()});
+ if(!name())setTimeout(openName,600);
+}
+/* tabs */
+document.querySelectorAll('nav button').forEach(function(b){b.onclick=function(){document.querySelectorAll('nav button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on')});document.getElementById('view-'+b.dataset.v).classList.add('on')}});
+function go(v){document.querySelector('nav button[data-v="'+v+'"]').click()}
+/* name */
+function openName(){document.getElementById('namemodal').classList.add('on')}
+document.getElementById('nm-save').onclick=function(){var v=document.getElementById('nm-in').value.trim();if(!v)return;localStorage.setItem('shinobi_com_name',v);document.getElementById('namemodal').classList.remove('on')};
+/* bugs */
+function gameName(g){return g==='legacy'?'Shinobi Legacy':g==='unbound'?'Life Unbound':'Both games'}
+function renderHome(){['legacy','unbound'].forEach(function(g){
+ var bl=document.getElementById(g+'-bugs');var bs=BUGS.filter(function(b){return b.game===g&&b.status!=='fixed'}).slice(0,4);
+ bl.innerHTML=bs.length?bs.map(bugCard).join(''):'<div class="empty">No open bugs. Nice.</div>';
+ var rl=document.getElementById(g+'-reqs');var rs=REQS.filter(function(r){return r.game===g||r.game==='both'}).sort(function(a,b){return(b.votes||0)-(a.votes||0)}).slice(0,4);
+ rl.innerHTML=rs.length?rs.map(reqCard).join(''):'<div class="empty">No requests yet. Post the first.</div>'})}
+function bugFilterChips(){
+ var t=document.getElementById('bugfilters');var g='';[['all','All'],['legacy','Legacy'],['unbound','Life Unbound']].forEach(function(f){g+='<button data-f="'+f[0]+'" class="'+(bugFilter===f[0]?'on':'')+'">'+f[1]+'</button>'});g+='<span style="width:10px"></span>';[['all','Any status'],['open','Open'],['fixed','Fixed']].forEach(function(f){g+='<button data-s="'+f[0]+'" class="'+(bugStatus===f[0]?'on':'')+'">'+f[1]+'</button>'});t.innerHTML=g;
+ t.querySelectorAll('[data-f]').forEach(function(b){b.onclick=function(){bugFilter=b.dataset.f;renderBugs()}});t.querySelectorAll('[data-s]').forEach(function(b){b.onclick=function(){bugStatus=b.dataset.s;renderBugs()}})}
+function renderBugs(){
+ bugFilterChips();
+ var list=BUGS.filter(function(b){return(bugFilter==='all'||b.game===bugFilter)&&(bugStatus==='all'||b.status===bugStatus)});
+ document.getElementById('buglist').innerHTML=list.length?list.map(bugCard).join(''):'<div class="empty">Nothing here yet.</div>'}
+function bugCard(b){return '<div class="card'+(b.status==='fixed'?' fixed':'')+'"><div class="top"><h4>'+esc(b.title)+'</h4><div><span class="badge '+esc(b.status==='fixed'?'fixed':'open')+'">'+(b.status==='fixed'?'Fixed':'Open')+'</span> <span class="badge meta">'+esc(gameName(b.game))+'</span></div></div><p>'+esc(b.body)+'</p>'+(b.steps?'<p><b style="color:var(--gold)">Steps:</b> '+esc(b.steps)+'</p>':'')+'<div class="foot"><span class="who">'+esc(b.author||'anonymous')+' · '+ago(b.when)+'</span></div></div>'}
+function reqCard(r){var mine=UID&&r.voters&&r.voters[UID];var voted=r.votes||0;
+ return '<div class="card" style="border-left-color:var(--gold)"><div class="top"><h4>'+esc(r.title)+'</h4><div><span class="badge meta">'+esc(gameName(r.game))+'</span></div></div><p>'+esc(r.body)+'</p><div class="foot"><button class="up'+(mine?' mine':'')+(voted?'':'')+'" data-vote="'+r.id+'">▲ '+voted+(mine?' · you voted':'')+'</button><span class="who">'+esc(r.author||'anonymous')+' · '+ago(r.when)+'</span></div></div>'}
+var REQFILTER='all';
+function reqFilterChips(){var t=document.getElementById('reqfilters');var g='';[['all','All'],['legacy','Legacy'],['unbound','Life Unbound'],['both','Both']].forEach(function(f){g+='<button data-f="'+f[0]+'" class="'+(reqFilter===f[0]?'on':'')+'">'+f[1]+'</button>'});g+='<span style="width:10px"></span>';[['votes','Most voted'],['new','Newest']].forEach(function(f){g+='<button data-s="'+f[0]+'" class="'+(reqSort===f[0]?'on':'')+'">'+f[1]+'</button>'});t.innerHTML=g;
+ t.querySelectorAll('[data-f]').forEach(function(b){b.onclick=function(){reqFilter=b.dataset.f;renderReqs()}});t.querySelectorAll('[data-s]').forEach(function(b){b.onclick=function(){reqSort=b.dataset.s;renderReqs()}})}
+function renderReqs(){reqFilterChips();
+ var list=REQS.filter(function(r){return reqFilter==='all'||r.game===reqFilter});
+ if(reqSort==='votes')list=list.slice().sort(function(a,b){return(b.votes||0)-(a.votes||0)});
+ document.getElementById('reqlist').innerHTML=list.length?list.map(reqCard).join(''):'<div class="empty">Nothing here yet.</div>'}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-vote]');if(b&&!b.classList.contains('done')){if(!CLOUD)return;if(!UID){openName();return}var id=b.dataset.vote;var r=REQS.find(function(x){return x.id===id});if(r&&r.voters&&r.voters[UID])return;b.classList.add('done');db.collection('community_features').doc(id).update({votes:firebase.firestore.FieldValue.increment(1),['voters.'+UID]:true}).catch(function(){b.classList.remove('done');cloudFail()})}});
+/* modals */
+function modal(id){document.getElementById(id).classList.add('on')}
+function unmodal(id){document.getElementById(id).classList.remove('on')}
+document.getElementById('newbug').onclick=function(){if(!name()){openName();return}modal('bugmodal')};
+document.getElementById('newreq').onclick=function(){if(!name()){openName();return}modal('reqmodal')};
+document.getElementById('bg-cancel').onclick=function(){unmodal('bugmodal')};
+document.getElementById('rq-cancel').onclick=function(){unmodal('reqmodal')};
+document.getElementById('bg-post').onclick=function(){
+ if(!CLOUD)return cloudFail();
+ var t=document.getElementById('bg-title').value.trim(),b=document.getElementById('bg-body').value.trim();
+ if(!t||!b)return alert('Give it a title and a description.');
+ var g=document.getElementById('bg-game').value,s=document.getElementById('bg-steps').value.trim();
+ db.collection('community_bugs').add({game:g,title:t,body:b,steps:s,status:'open',author:name(),when:new Date().toISOString()}).then(function(){unmodal('bugmodal');go('bugs')}).catch(function(){cloudFail()})};
+document.getElementById('rq-post').onclick=function(){
+ if(!CLOUD)return cloudFail();
+ var t=document.getElementById('rq-title').value.trim(),b=document.getElementById('rq-body').value.trim();
+ if(!t||!b)return alert('Give it a title and a description.');
+ db.collection('community_features').add({game:document.getElementById('rq-game').value,title:t,body:b,votes:1,voters:(UID?((function(){var o={};o[UID]=true;return o})()):{}),author:name(),when:new Date().toISOString()}).then(function(){unmodal('reqmodal');go('requests')}).catch(function(){cloudFail()})};
+/* chat */
+document.getElementById('chatsend').onclick=sendChat;
+document.getElementById('chatin').addEventListener('keydown',function(e){if(e.key==='Enter')sendChat()});
+function sendChat(){
+ if(!CLOUD)return cloudFail();
+ if(!name()){openName();return}
+ var v=document.getElementById('chatin').value.trim();if(!v)return;
+ var now=Date.now();if(now-lastChat<2000)return;
+ lastChat=now;document.getElementById('chatin').value='';
+ db.collection('community_chat').add({uid:UID,name:name(),text:v,when:new Date().toISOString()}).catch(function(){cloudFail()})}
+/* one-time Tomo seed, only fires with ?seed=1 and only when the bug list is empty */
+if(location.search.indexOf('seed=1')>-1){(function(){
+ var SEED=[
+ {t:'Fast travel to Hidden Mist produces a gray empty world',b:'Two separate trips to the Hidden Mist Village rendered a gray, empty world: no avatar and no terrain visible. The HUD still showed full health (128/128) and chakra (96/96). Opening the map did not recover the scene. Traveling back to the Hidden Leaf Village restored the rendered scene and avatar, so a reload is not the only recovery.',s:'Travel from the Hidden Leaf to the Hidden Mist twice. Observe the gray empty world.',st:'open'},
+ {t:'Character creator locks you into a new slot',b:'There is no Back button in the character creator. Escape does nothing, and reloading returns you to the unfinished creator. Game text reads: "Finish this shinobi to play. No backing out of a new slot."',s:'Start creating a new character, then try to back out with Escape or reload.',st:'open'},
+ {t:'Hidden Cloud map, HUD and rendered scene disagree',b:'The map read "You are in the Hidden Cloud Village - home: Hidden Leaf", but the HUD still read "Hidden Leaf" and the scene rendered Leaf-style terrain and avatar.',s:'Fast travel between villages and compare the map text, HUD village label and the rendered scene.',st:'open'},
+ {t:'Aburame Clans panel wording (unverified)',b:'Could not confirm whether the Clans panel still lists Insect Armor and pairs Insect Swarm, Bug Tracking and Chakra Drain with Shadow Bind as the signature move. HUD jutsu slot 4 currently reads "Shadow Bind - 30 chakra, 10s."',s:'Check the Aburame clan panel in Menu → Clans against the HUD jutsu slots.',st:'open'},
+ {t:'Level and mastery persistence across reload (unverified)',b:'No level-up was gained during the latest pass, so persistence of changed level or mastery progress across reload remains unverified.',s:'Level up or raise a clan mastery, then reload and check the values.',st:'open'},
+ {t:'Depleted chakra returned to full on reload',b:'After reloading, depleted chakra returned to full. Whether that is intended is unconfirmed.',s:'Use jutsu to lower chakra, reload the page, compare chakra values.',st:'open'}
+ ];
+ var NOW=new Date(Date.now()-9*86400000).toISOString();
+ db.collection('community_bugs').where('tomoseed','==',true).limit(1).get().then(function(s){
+ if(!s.empty){console.log('seed already done');return}
+ var batch=db.batch();
+ SEED.forEach(function(x){batch.set(db.collection('community_bugs').doc(),{game:'legacy',title:x.t,body:x.b,steps:x.s,status:x.st,author:'Tomo playtest (Nov 20 sweep)',tomoseed:true,when:NOW})});
+ batch.commit().then(function(){console.log('seeded')}).catch(function(e){console.log('seed failed',e)})}).catch(function(e){console.log('seed check failed',e)})})()}
+</script>
+</body>
+</html>
