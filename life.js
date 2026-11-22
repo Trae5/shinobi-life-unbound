@@ -1216,5 +1216,6 @@ function init(){
   }catch(e){}
 }
 return {tick:tick,ensure:ensure,pack:pack,unpack:unpack,init:init,queue:queue,yearSummary:yearSummary,finishYear:finishYear,playScenes:function(){if(SCENEQ.length&&!SCENE_ON){SCENE_ON=true;playScene()}},trait:trait,voiceFor:voiceFor,greet:greet,remember:remember,seedClassroom:seedClassroom,renderStory:renderStory,get pendingHandlers(){return PENDING_HANDLERS}};
+window.LIFE={TPL:TPL,FX:FX};
 })();
 LIFE.init();
