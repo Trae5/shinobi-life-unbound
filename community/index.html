@@ -449,7 +449,7 @@ function boot(){
   ['community_reports',function(s){REPORTS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});if(isOwner())renderAdmin()}]
  ];
  var COREC={community_bugs:1,community_features:1,community_chat:1};
- subs.forEach(function(p){var q=db.collection(p[0]);if(p[0]!=='community_profiles')q=q.orderBy('when','desc');q=q.limit(300);q.onSnapshot(function(s){p[1](s)},function(e){if(p[0]==='community_profiles'){PROFERR=true;renderMe();console.warn('profiles stream failed',e);return}if(p[0]==='community_reports'||p[0]==='community_modlog')return;if(!COREC[p[0]])return;cloudFail()})});
+ subs.forEach(function(p){var q=db.collection(p[0]);if(p[0]!=='community_profiles')q=q.orderBy('when','desc');q=q.limit(300);q.onSnapshot(function(s){p[1](s);refreshReactions()},function(e){if(p[0]==='community_profiles'){PROFERR=true;renderMe();console.warn('profiles stream failed',e);return}if(p[0]==='community_reports'||p[0]==='community_modlog')return;if(!COREC[p[0]])return;cloudFail()})});
  db.collection('community_notifications').where('to','==',UID).onSnapshot(function(s){NOTIFS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});updateBell()},function(e){});
  db.collection('community_chat').orderBy('when','desc').limit(120).onSnapshot(function(s){var el=document.getElementById('chatlog');if(!el)return;var msgs=s.docs.map(function(d){return d.data()}).reverse();el.innerHTML=msgs.map(function(m){return '<div class="msg'+(m.uid===UID?' me':'')+'"><div class="nm">'+esc(m.name)+'</div><div class="tx">'+esc(m.text)+'</div><div class="tm">'+ago(m.when)+'</div></div>'}).join('');el.scrollTop=el.scrollHeight},function(e){cloudFail()});
  if(!name())setTimeout(openName,600);
@@ -503,7 +503,7 @@ function renderBugs(){
  document.getElementById('buglist').innerHTML=list.length?list.map(bugCard).join(''):'<div class="empty">No bug reports here yet.<br>Found something broken? Be the first to report it.</div>';
 }
 function bugCard(b){var st=bugStatusOf(b);var cls=st==='new'?'new':st==='confirmed'?'confirmed':st==='investigating'?'investigating':st==='fixing'?'fixing':st==='fixed'?'fixed':'closed';
- return '<div class="card'+(st==='fixed'||st==='closed'?' fx':'')+(b.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'bug\',\''+b.id+'\')">'+esc(b.title)+'</h4><div><span class="badge '+cls+'">'+esc(statusLabel(BUGSTATUSES,st))+'</span> <span class="badge meta">'+esc(gameName(b.game))+'</span> '+(b.severity?'<span class="badge sev '+(b.severity==='high'?'':b.severity)+'">'+(b.severity==='high'?'Game-breaking':b.severity==='med'?'Moderate':'Minor')+'</span>':'')+'</div></div><p>'+esc(b.body)+'</p>'+(b.steps?'<p><b style="color:var(--gold)">Steps:</b> '+esc(b.steps)+'</p>':'')+(b.devReply?'<div class="devreply"><b>Developer:</b> '+esc(b.devReply)+'</div>':'')+'<div class="foot"><span class="who">'+whoChip(b)+' · '+ago(b.when)+'</span><span style="display:flex;gap:6px;align-items:center"><span class="who">💬 '+(b.commentsCount||0)+'</span><button class="up" data-detail="bug:'+b.id+'">View</button><button class="up" data-report="bug:'+b.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="bug:'+b.id+'">Dev</button>':'')+'</span></div></div>'}
+ return '<div class="card'+(st==='fixed'||st==='closed'?' fx':'')+(b.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'bug\',\''+b.id+'\')">'+esc(b.title)+'</h4><div><span class="badge '+cls+'">'+esc(statusLabel(BUGSTATUSES,st))+'</span> <span class="badge meta">'+esc(gameName(b.game))+'</span> '+(b.severity?'<span class="badge sev '+(b.severity==='high'?'':b.severity)+'">'+(b.severity==='high'?'Game-breaking':b.severity==='med'?'Moderate':'Minor')+'</span>':'')+'</div></div><p>'+esc(b.body)+'</p>'+rxRow(BUGS.indexOf(b)>=0?'bug':'feature',b.id,b)+(b.steps?'<p><b style="color:var(--gold)">Steps:</b> '+esc(b.steps)+'</p>':'')+(b.devReply?'<div class="devreply"><b>Developer:</b> '+esc(b.devReply)+'</div>':'')+'<div class="foot"><span class="who">'+whoChip(b)+' · '+ago(b.when)+'</span><span style="display:flex;gap:6px;align-items:center"><span class="who">💬 '+(b.commentsCount||0)+'</span><button class="up" data-detail="bug:'+b.id+'">View</button><button class="up" data-report="bug:'+b.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="bug:'+b.id+'">Dev</button>':'')+'</span></div></div>'}
 function dupeCheck(){var q=norm(document.getElementById('bg-title').value);var el=document.getElementById('bg-dupewarn');if(!q||q.length<4){el.innerHTML='';return}
  var hits=BUGS.filter(function(b){var t=norm(b.title);return t.indexOf(q)>=0||q.indexOf(t)>=0}).slice(0,3);
  el.innerHTML=hits.length?'<div class="devreply" style="border-left-color:var(--red2);border-color:rgba(179,38,38,.4);background:rgba(179,38,38,.08)"><b>Similar reports already exist:</b><br>'+hits.map(function(h){return '• '+esc(h.title)}).join('<br>')+'<br><span style="color:var(--dim)">Check them before posting a duplicate.</span></div>':''}
@@ -514,7 +514,7 @@ document.getElementById('bg-post').onclick=function(){
  if(!guard('post',30000))return;
  var dup=BUGS.find(function(x){return norm(x.title)===norm(t)&&!x.hidden});
  if(dup&&!confirm('A bug with the same title already exists. Post anyway?'))return;
- var doc={game:document.getElementById('bg-game').value,title:t,body:b,steps:document.getElementById('bg-steps').value.trim(),category:document.getElementById('bg-cat').value,severity:document.getElementById('bg-sev').value,status:'new',author:name(),uid:UID,when:new Date().toISOString()};
+ var doc={reactions:{},game:document.getElementById('bg-game').value,title:t,body:b,steps:document.getElementById('bg-steps').value.trim(),category:document.getElementById('bg-cat').value,severity:document.getElementById('bg-sev').value,status:'new',author:name(),uid:UID,when:new Date().toISOString()};
  db.collection('community_bugs').add(doc).then(function(){closeModal('bugmodal');document.getElementById('bg-title').value='';document.getElementById('bg-body').value='';document.getElementById('bg-steps').value='';document.getElementById('bg-dupewarn').innerHTML='';bumpCount('bugs');gainRep(2);pushActivity('bug',doc.game,'reported a bug: '+t,doc.title);toast('Bug reported. Thank you.');go('bugs')}).catch(function(e){cloudFail();toast('Could not post right now.')})};
 /* ---------- feature requests ---------- */
 function renderReqs(){
@@ -531,7 +531,7 @@ function renderReqs(){
 function commentCount(ptype,id){var n=0;COMS.forEach(function(c){if(c.ptype===ptype&&c.parent===id)n++});return n}
 function reqCard(r){var st=reqStatusOf(r);var cls={review:'review',considering:'considering',planned:'planned',dev:'dev',implemented:'implemented',declined:'declined'}[st];
  var up=r.voters&&r.voters[UID],down=r.dvoters&&r.dvoters[UID];var score=(r.votes||0)-(r.dvotes||0);
- return '<div class="card fq'+(r.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'feature\',\''+r.id+'\')">'+esc(r.title)+'</h4><div><span class="badge '+cls+'">'+esc(statusLabel(REQSTATUSES,st))+'</span> <span class="badge meta">'+esc(gameName(r.game))+'</span>'+(r.category?' <span class="badge meta">'+esc(r.category)+'</span>':'')+'</div></div><p>'+esc(r.body)+'</p>'+(r.devReply?'<div class="devreply"><b>Developer:</b> '+esc(r.devReply)+'</div>':'')+'<div class="foot"><span style="display:flex;gap:6px;align-items:center"><button class="up'+(up?' mine':'')+'" data-vote="'+r.id+':up">▲ '+score+(up?' · voted':'')+'</button><button class="up down'+(down?' mine':'')+'" data-vote="'+r.id+':down">▼</button></span><span class="who">'+whoChip(r)+' · '+ago(r.when)+' · 💬 '+commentCount('feature',r.id)+' <button class="up" data-detail="feature:'+r.id+'">View</button><button class="up" data-report="feature:'+r.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="feature:'+r.id+'">Dev</button>':'')+'</span></div></div>'}
+ return '<div class="card fq'+(r.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'feature\',\''+r.id+'\')">'+esc(r.title)+'</h4><div><span class="badge '+cls+'">'+esc(statusLabel(REQSTATUSES,st))+'</span> <span class="badge meta">'+esc(gameName(r.game))+'</span>'+(r.category?' <span class="badge meta">'+esc(r.category)+'</span>':'')+'</div></div><p>'+esc(r.body)+'</p>'+rxRow(BUGS.indexOf(r)>=0?'bug':'feature',r.id,r)+(r.devReply?'<div class="devreply"><b>Developer:</b> '+esc(r.devReply)+'</div>':'')+'<div class="foot"><span style="display:flex;gap:6px;align-items:center"><button class="up'+(up?' mine':'')+'" data-vote="'+r.id+':up">▲ '+score+(up?' · voted':'')+'</button><button class="up down'+(down?' mine':'')+'" data-vote="'+r.id+':down">▼</button></span><span class="who">'+whoChip(r)+' · '+ago(r.when)+' · 💬 '+commentCount('feature',r.id)+' <button class="up" data-detail="feature:'+r.id+'">View</button><button class="up" data-report="feature:'+r.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="feature:'+r.id+'">Dev</button>':'')+'</span></div></div>'}
 document.addEventListener('click',function(e){
  var v=e.target.closest('[data-vote]');
  if(v){if(!CLOUD)return cloudFail();if(!UID){openName();return}
@@ -553,7 +553,7 @@ document.getElementById('rq-post').onclick=function(){
  if(!t||!b)return toast('Give it a title and a description.');
  if(!guard('post',30000))return;
  var voters={};if(UID)voters[UID]=true;
- var doc={game:document.getElementById('rq-game').value,title:t,body:b,category:document.getElementById('rq-cat').value,status:'review',votes:1,voters:voters,dvotes:0,author:name(),uid:UID,when:new Date().toISOString()};
+ var doc={reactions:{},game:document.getElementById('rq-game').value,title:t,body:b,category:document.getElementById('rq-cat').value,status:'review',votes:1,voters:voters,dvotes:0,author:name(),uid:UID,when:new Date().toISOString()};
  db.collection('community_features').add(doc).then(function(){closeModal('reqmodal');document.getElementById('rq-title').value='';document.getElementById('rq-body').value='';bumpCount('features');gainRep(2);pushActivity('feature',doc.game,'requested a feature: '+t,doc.title);toast('Request posted.');go('requests')}).catch(function(e){cloudFail();toast('Could not post right now.')})};
 /* ---------- discussions ---------- */
 function openNewDiscussion(){if(!name()){openName();return}openModal('dismodal')}
@@ -568,7 +568,7 @@ function renderDiscussions(){
 function reactionCount(d){var r=d.reactions||{},n=0;Object.keys(r).forEach(function(k){n+=Object.keys(r[k]).length});return n}
 function disCard(d){var pin=d.pinned?'<span class="badge pin">📌 Pinned</span> ':'';
  var tags=(d.tags||[]).map(function(t){return '<span class="badge meta">'+esc(t)+'</span>'}).join(' ');
- return '<div class="card dis'+(d.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'discussion\',\''+d.id+'\')">'+esc(d.title)+'</h4><div>'+pin+'<span class="badge meta">'+esc(gameName(d.game))+'</span>'+tags+'</div></div><p>'+(d.body.length>220?esc(d.body.slice(0,220))+'…':esc(d.body))+'</p><div class="foot"><span class="who">'+whoChip(d)+' · '+ago(d.when)+' · 💬 '+commentCount('discussion',d.id)+' · 🔥 '+reactionCount(d)+'</span><span style="display:flex;gap:6px"><button class="up" data-detail="discussion:'+d.id+'">Open</button><button class="up" data-report="discussion:'+d.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="discussion:'+d.id+'">Dev</button>':'')+'</span></div></div>'}
+ return '<div class="card dis'+(d.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'discussion\',\''+d.id+'\')">'+esc(d.title)+'</h4><div>'+pin+'<span class="badge meta">'+esc(gameName(d.game))+'</span>'+tags+'</div></div><p>'+(d.body.length>220?esc(d.body.slice(0,220))+'…':esc(d.body))+'</p>'+rxRow('discussion',d.id,d)+'<div class="foot"><span class="who">'+whoChip(d)+' · '+ago(d.when)+' · 💬 '+commentCount('discussion',d.id)+' · 🔥 '+reactionCount(d)+'</span><span style="display:flex;gap:6px"><button class="up" data-detail="discussion:'+d.id+'">Open</button><button class="up" data-report="discussion:'+d.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="discussion:'+d.id+'">Dev</button>':'')+'</span></div></div>'}
 document.getElementById('ds-post').onclick=function(){
  if(!CLOUD)return cloudFail();if(muted())return;
  var t=document.getElementById('ds-title').value.trim(),b=document.getElementById('ds-body').value.trim();
@@ -659,15 +659,8 @@ var CURRENT=null,RP=null,pendingReply=null;
 function findDoc(ptype,id){var arr=ptype==='bug'?BUGS:ptype==='feature'?REQS:ptype==='discussion'?DISC:ptype==='announcement'?ANNS:COMS;
  for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i];return null}
 function statusTrack(list,cur){return '<div class="status-track">'+list.map(function(s){return '<span class="'+(s[0]===cur?'hit':'')+'">'+s[1]+'</span>'}).join('')+'</div>'}
-function react(ptype,id,emoji){if(!UID){openName();return}var d=findDoc(ptype,id);if(!d)return;
- var r=(d.reactions||{})[emoji]||{};var patch={};
- if(r[UID]){patch['reactions.'+emoji+'.'+UID]=firebase.firestore.FieldValue.delete()}else{patch['reactions.'+emoji+'.'+UID]=true}
- db.collection(ptype==='discussion'?'community_discussions':'community_announcements').doc(id).update(patch).catch(function(){toast('Could not react.')});
- openDetail(ptype,id)}
-function rxRow(ptype,id,d){var r=d.reactions||{};var html='';
- ['🔥','👍','💀','😂','❤️'].forEach(function(e){var n=Object.keys(r[e]||{}).length;var mine=r[e]&&r[e][UID];
- html+='<button class="rx'+(mine?' mine':'')+'" data-react="'+ptype+'|'+id+'|'+e+'">'+e+(n?' '+n:'')+'</button>'});
- return '<div class="reactions">'+html+'</div>'}
+function react(ptype,id,emoji){if(!UID){openName();return}var d=findDoc(ptype,id);if(!d)return;var r=(d.reactions||{})[UID]||{};var col={bug:'community_bugs',feature:'community_features',discussion:'community_discussions',announcement:'community_announcements',comment:'community_comments'}[ptype];if(!col)return;db.collection(col).doc(id).update(new firebase.firestore.FieldPath('reactions',UID,emoji),r[emoji]?firebase.firestore.FieldValue.delete():true).catch(function(){toast('Could not react.')})}
+function rxCount(d,e){var r=d.reactions||{};return Object.keys(r).filter(function(u){return r[u]&&typeof r[u]==='object'&&r[u][e]===true}).length} function rxRow(ptype,id,d){var r=d.reactions||{},html='';['🔥','👍','💀','😂','❤️'].forEach(function(e){var n=rxCount(d,e),mine=r[UID]&&r[UID][e]===true;html+='<button class="rx'+(mine?' mine':'')+'" data-react="'+ptype+'|'+id+'|'+e+'">'+e+(n?' '+n:'')+'</button>'});return '<div class="reactions">'+html+'</div>'} function refreshReactions(){document.querySelectorAll('[data-react]').forEach(function(b){var p=b.dataset.react.split('|'),d=findDoc(p[0],p[1]);if(!d)return;var r=d.reactions||{},n=rxCount(d,p[2]);b.classList.toggle('mine',!!(r[UID]&&r[UID][p[2]]===true));b.textContent=p[2]+(n?' '+n:'')})}
 function openDetail(ptype,id){var d=findDoc(ptype,id);if(!d)return;CURRENT={ptype:ptype,id:id};pendingReply=null;
  var h='';
  if(ptype==='bug'){var st=bugStatusOf(d);var cls=st==='new'?'new':st==='confirmed'?'confirmed':st==='investigating'?'investigating':st==='fixing'?'fixing':st==='fixed'?'fixed':'closed';
@@ -714,7 +707,7 @@ function commentsHTML(ptype,id){var cs=COMS.filter(function(c){return c.parent==
  return h}
 function commentHTML(c,all){var replies=all.filter(function(r){return r.replyTo===c.id});var likes=c.likes||{};var n=Object.keys(likes).length;var mine=likes[UID];
  var h='<div class="comment"><div class="cmeta">'+whoChip(c)+' · '+ago(c.when)+(n?' · ❤️ '+n:'')+' <span class="like'+(mine?' on':'')+'" data-like="'+c.id+'">'+(mine?'liked':'like')+'</span> <span class="replybtn" onclick="setReply(\''+c.id+'\')">reply</span></div><div class="ct">'+esc(c.text)+'</div>';
- replies.forEach(function(r){h+=commentHTML(r,all)});
+ h+=rxRow('comment',c.id,c);replies.forEach(function(r){h+=commentHTML(r,all)});
  return h+'</div>'}
 function setReply(cid){pendingReply=cid;var i=document.getElementById('cmt-input');if(i){i.focus();i.placeholder='Replying to a comment...'}}
 document.addEventListener('click',function(e){var l=e.target.closest('[data-like]');if(l){var c=COMS.find(function(x){return x.id===l.dataset.like});if(!c)return;
@@ -723,7 +716,7 @@ document.addEventListener('click',function(e){var l=e.target.closest('[data-like
  db.collection('community_comments').doc(c.id).update(patch).catch(function(){});openDetail(c.ptype,c.parent)}});
 function addComment(){if(!CLOUD)return cloudFail();if(muted())return;if(!name()){openName();return}
  var i=document.getElementById('cmt-input');var v=i.value.trim();if(!v)return;if(!guard('comment',15000))return;
- var doc={ptype:CURRENT.ptype,parent:CURRENT.id,replyTo:pendingReply||null,text:v,author:name(),uid:UID,when:new Date().toISOString(),likes:{}};
+ var doc={reactions:{},ptype:CURRENT.ptype,parent:CURRENT.id,replyTo:pendingReply||null,text:v,author:name(),uid:UID,when:new Date().toISOString(),likes:{}};
  db.collection('community_comments').add(doc).then(function(){
   i.value='';pendingReply=null;i.placeholder='Write a comment...';
   var col=CURRENT.ptype==='bug'?'community_bugs':CURRENT.ptype==='feature'?'community_features':CURRENT.ptype==='discussion'?'community_discussions':'community_announcements';
