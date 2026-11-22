@@ -1800,6 +1800,7 @@ var ICONS=[
 function iconFor(t){for(var i=0;i<ICONS.length;i++)if(ICONS[i][0].test(t))return ICONS[i][1];return "🌀"}
 function yearsAgo(e){var d=G.age-e.age;if(d<=0)return "just now";if(d===1)return "1 year ago";return d+" years ago"}
 function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove("on")},2200)}
+window.toast=toast; /* expose for the RPG layer (rpg files call toast() outside this closure) */
 function modal(title,kind,text,choices,cb){
   var card=$("#eventCard");card.style.display="block";CARD_HOLD=false;
   card.innerHTML="";
@@ -3000,7 +3001,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="5.0.2";
+var GAME_VERSION="5.0.3";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");
