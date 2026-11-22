@@ -24,40 +24,71 @@ h1,h2,h3{margin:0;line-height:1.2}
 .screen{display:none;min-height:100vh}
 .screen.on{display:block}
 
-/* ---------- title ---------- */
-#screen-title{display:none;place-items:center;text-align:center;padding:24px}
-#screen-title.on{display:grid}
-.t-mark{width:64px;height:64px;margin:0 auto 18px;background:var(--crimson);border-radius:50%;
-  display:grid;place-items:center;color:#fff;font-size:30px;font-weight:900;
-  box-shadow:0 0 40px rgba(194,42,62,.45), inset 0 0 0 3px rgba(255,255,255,.12)}
-.t-title{font-size:clamp(34px,7vw,52px);font-weight:900;letter-spacing:.06em}
+/* ---------- title v3 (cinematic) ---------- */
+#screen-title.on{display:block}
+.t-bg{position:fixed;inset:0;background:url("assets/title-bg.jpg?v=3") center/cover no-repeat;z-index:0}
+.t-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.55) 0%,rgba(8,8,12,.25) 45%,rgba(8,8,12,.8) 100%)}
+.t-scene{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:88px 20px 64px;text-align:center}
+.t-topleft{position:fixed;top:18px;left:22px;z-index:2;font-style:italic;font-size:15px;color:#f2e8d5;text-shadow:0 2px 8px rgba(0,0,0,.85);text-align:left;line-height:1.5}
+.t-ryo{position:fixed;top:16px;right:20px;z-index:2;display:flex;align-items:center;gap:7px;background:rgba(12,12,16,.72);border:1px solid rgba(211,169,76,.45);border-radius:20px;padding:7px 12px;color:var(--gold);font-size:14px;backdrop-filter:blur(4px)}
+.t-ryo .coin{font-size:15px}
+.t-ryo b{color:var(--gold)}
+.t-ryo small{color:var(--muted);font-size:11px;margin-right:2px}
+.t-ryo .plus{width:20px;height:20px;border-radius:6px;background:rgba(211,169,76,.18);border:1px solid rgba(211,169,76,.5);display:grid;place-items:center;font-weight:900;color:var(--gold);font-size:13px;margin-left:2px}
+.t-mark{width:60px;height:60px;margin:0 auto 14px;background:var(--crimson);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:28px;font-weight:900;box-shadow:0 0 46px rgba(194,42,62,.55), inset 0 0 0 3px rgba(255,255,255,.12)}
+.t-title{font-size:clamp(34px,7vw,52px);font-weight:900;letter-spacing:.06em;text-shadow:0 3px 18px rgba(0,0,0,.85)}
 .t-title em{font-style:normal;color:var(--crimson)}
-.t-sub{color:var(--gold);font-size:12px;letter-spacing:.34em;text-transform:uppercase;margin:10px 0 30px}
+.t-sub{color:var(--gold);font-size:11px;letter-spacing:.3em;text-transform:uppercase;margin:10px 0 26px;text-shadow:0 2px 8px rgba(0,0,0,.8)}
 .t-btns{display:grid;gap:10px;width:min(340px,88vw);margin:0 auto}
-.btn{display:block;width:100%;background:var(--crimson-deep);color:#fff;font-weight:800;letter-spacing:.08em;
-  padding:14px 18px;border-radius:10px;transition:filter .2s,transform .1s;border:1px solid rgba(255,255,255,.08)}
-.btn:hover{filter:brightness(1.15)}
-.btn:active{transform:scale(.98)}
-.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
-.btn.ghost:hover{border-color:var(--gold);color:#fff}
-.btn.small{padding:9px 14px;font-size:13px;width:auto;display:inline-block}
-.btn[disabled]{opacity:.4;pointer-events:none}
-.t-note{color:var(--muted);font-size:12px;margin-top:22px}
-
-/* ---------- creator ---------- */
-#screen-creator{padding:26px 16px 60px;max-width:660px;margin:0 auto}
-.c-head{text-align:center;margin-bottom:22px}
-.c-head h2{font-size:26px;font-weight:900;letter-spacing:.04em}
-.c-head p{color:var(--muted);font-size:13px;margin-top:6px}
+.btn.big{padding:16px 18px;font-size:16px;box-shadow:0 8px 30px rgba(194,42,62,.35), inset 0 0 0 1px rgba(255,255,255,.06)}
+.t-scene .btn.ghost{background:rgba(18,18,24,.72);backdrop-filter:blur(3px)}
+.t-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:min(340px,88vw);margin:8px auto 0}
+.btn.small2{padding:11px 10px;font-size:13px;background:rgba(14,14,20,.66);border:1px solid var(--line);color:var(--text);border-radius:9px;font-weight:700;letter-spacing:.04em;backdrop-filter:blur(3px)}
+.btn.small2:hover{border-color:var(--gold);color:#fff}
+.t-note{color:#b7b2c2;font-size:12px;margin-top:20px;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+.t-update{position:fixed;left:20px;bottom:52px;z-index:2;display:flex;flex-direction:column;gap:1px;background:linear-gradient(135deg,var(--crimson-deep),var(--crimson));border-radius:10px;padding:8px 14px;box-shadow:0 6px 22px rgba(194,42,62,.4);text-align:left}
+.t-update b{font-size:12px;letter-spacing:.08em}
+.t-update span{font-size:11px;color:#f4d9dd}
+.t-bottom{position:fixed;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:linear-gradient(180deg,rgba(8,8,12,0),rgba(8,8,12,.85));font-size:11px;color:#a09cb0}
+.t-ver{letter-spacing:.06em}
+.t-tag{letter-spacing:.14em;text-transform:uppercase;color:#cfc9bd}
+.t-social,.c-foot{display:flex;gap:12px}
+.t-social a,.c-foot a{color:#b7b2c2;display:inline-flex}
+.t-social a:hover,.c-foot a:hover{color:var(--gold)}
+.t-social svg,.c-foot svg{width:17px;height:17px;fill:currentColor}
+/* ---------- creator v3 ---------- */
+#screen-creator{position:relative;min-height:100vh;padding:0;max-width:none;margin:0}
+.c-bg{position:fixed;inset:0;background:url("assets/creator-bg.jpg?v=3") center/cover no-repeat;z-index:0}
+.c-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.5) 0%,rgba(8,8,12,.18) 40%,rgba(8,8,12,.8) 100%)}
+.c-scene{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:78px 18px 70px}
+.c-back{position:fixed;top:16px;left:18px;z-index:2;background:rgba(12,12,16,.72);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;backdrop-filter:blur(4px)}
+.c-back:hover{border-color:var(--gold);color:#fff}
 .field{margin-bottom:14px;position:relative}
 .field label{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .frow{display:flex;gap:10px}
 .frow .field{flex:1}
 .dice{position:absolute;right:8px;top:29px;color:var(--gold);font-size:15px;padding:4px 6px}
 .field input,.field select{padding-right:38px}
-.c-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
-.bio-preview{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;
-  font-size:13px;color:#cfc9bd;margin-top:16px;white-space:pre-wrap}
+.c-head{text-align:center;margin-bottom:20px}
+.c-head h2{font-size:30px;font-weight:900;letter-spacing:.03em;text-shadow:0 3px 14px rgba(0,0,0,.85)}
+.c-head em{font-style:italic;color:var(--crimson)}
+.c-head p{color:#c9c4d2;font-size:13px;margin-top:6px;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+.c-form{width:min(620px,94vw);background:rgba(14,14,20,.74);border:1px solid var(--line);border-radius:14px;padding:20px 18px 6px;backdrop-filter:blur(6px);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.c-form .field input,.c-form .field select{background:rgba(16,16,24,.9)}
+.bio-preview{width:min(620px,94vw);background:rgba(14,14,20,.74);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:16px;font-size:13px;color:#d8d2c4;margin-top:14px;backdrop-filter:blur(6px);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.c-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;width:min(620px,94vw)}
+.c-scene .btn.ghost{background:rgba(18,18,24,.72);backdrop-filter:blur(3px)}
+.btn.tall{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:13px 14px}
+.btn.tall b{font-size:15px;letter-spacing:.05em}
+.btn.tall small{font-size:11px;font-weight:500;opacity:.75;letter-spacing:.02em}
+.c-foot{position:fixed;right:18px;bottom:16px;z-index:2}
+@media(max-width:640px){
+  .t-topleft{display:none}
+  .t-update{left:12px;right:12px;bottom:46px;text-align:center}
+  .t-bottom{padding:8px 12px}
+  .t-tag{display:none}
+  .t-sub{letter-spacing:.18em;font-size:10px}
+}
 
 /* ---------- topbar ---------- */
 #screen-game{padding-bottom:96px}
@@ -250,43 +281,68 @@ h1,h2,h3{margin:0;line-height:1.2}
 <body>
 
 <div class="screen on" id="screen-title">
-  <div>
-    <div class="t-mark">忍</div>
-    <h1 class="t-title serif">SHINOBI <em>SPRINT</em></h1>
-    <div class="t-sub">Life of a Shinobi &middot; A Naruto Universe Life Simulator</div>
-    <div class="t-btns">
-      <button class="btn" id="btn-new">New Life</button>
-      <button class="btn ghost" id="btn-continue">Continue</button>
-      <button class="btn ghost" id="btn-saves">Save Slots</button>
-      <button class="btn ghost" id="btn-legacy">Legacy Hall</button>
+  <div class="t-bg" aria-hidden="true"></div>
+  <div class="t-scene">
+    <div class="t-topleft serif">Live the life.<br>Forge your legacy.</div>
+    <button class="t-ryo" id="t-ryo" title="Your latest saved life"><span class="coin">&#129689;</span><b id="t-ryo-val">0</b><small>ry&#333;</small><span class="plus">+</span></button>
+    <div>
+      <div class="t-mark">&#24525;</div>
+      <h1 class="t-title serif">SHINOBI <em>SPRINT</em></h1>
+      <div class="t-sub">Life of a Shinobi &middot; A Naruto Universe Life Simulator</div>
+      <div class="t-btns">
+        <button class="btn big" id="btn-new">New Life</button>
+        <button class="btn ghost" id="btn-continue">Continue</button>
+        <button class="btn ghost" id="btn-saves">Save Slots</button>
+        <button class="btn ghost" id="btn-legacy">Legacy Hall</button>
+      </div>
+      <div class="t-grid">
+        <button class="btn small2" id="btn-ach">Achievements</button>
+        <button class="btn small2" id="btn-settings">Settings</button>
+        <button class="btn small2" id="btn-credits">Credits</button>
+        <button class="btn small2" id="btn-exit">Exit</button>
+      </div>
+      <div class="t-note">Every life is random. Every choice has consequences.</div>
     </div>
-    <div class="t-note">Every life is random. Every choice has consequences.</div>
+    <div class="t-update"><b>Latest Update</b><span>New features and fixes!</span></div>
+    <div class="t-bottom">
+      <span class="t-ver">Version 1.0.0</span>
+      <span class="t-tag">A Naruto Inspired Life Simulator</span>
+      <span class="t-social"><a href="https://discord.com" aria-label="Discord" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.9 3l-.2.4c1.6.4 2.4.9 3.2 1.5-1.4-.7-2.8-1.4-5-1.4s-3.6.7-5 1.4c.8-.6 1.7-1.2 3.2-1.5L11.9 3a19.8 19.8 0 0 0-4.4 1.4C4.6 8.6 4 12.7 4.3 16.7c1.8 1.3 3.5 2.1 5.2 2.6l.9-1.5c-.8-.3-1.6-.7-2.3-1.2l.5-.4c2.9 1.4 6.7 1.4 9.6 0l.5.4c-.7.5-1.5.9-2.3 1.2l.9 1.5c1.7-.5 3.4-1.3 5.2-2.6.4-4.6-.7-8.7-2.2-12.3zM9.7 14.6c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8zm4.6 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8z"/></svg></a><a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12c0 1.6.1 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.3-1.6.4-3.2.4-4.8s-.1-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg></a><a href="https://x.com" aria-label="X" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.5l4.4 5.8L18.9 2zm-1.1 18h1.7L7.1 3.8H5.3L17.8 20z"/></svg></a></span>
+    </div>
   </div>
 </div>
 
 <div class="screen" id="screen-creator">
-  <div class="c-head">
-    <h2 class="serif">Begin a <span style="color:var(--crimson)">Life</span></h2>
-    <p>Roll the dice for a whole stranger, or shape your own shinobi.</p>
+  <div class="c-bg" aria-hidden="true"></div>
+  <div class="c-scene">
+    <button class="c-back" id="btn-back">&larr; Back to Menu</button>
+    <button class="t-ryo" id="c-ryo" title="Your latest saved life"><span class="coin">&#129689;</span><b id="c-ryo-val">0</b><small>ry&#333;</small></button>
+    <div class="c-head">
+      <h2 class="serif">Begin a <em>Life</em></h2>
+      <p>Roll the dice for a whole stranger, or shape your own shinobi.</p>
+    </div>
+    <div class="c-form">
+      <div class="frow">
+        <div class="field"><label>First name</label><input id="c-first" placeholder="random"><button class="dice" data-r="first">&#127922;</button></div>
+        <div class="field"><label>Last name</label><input id="c-last" placeholder="random"><button class="dice" data-r="last">&#127922;</button></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Gender</label><select id="c-gender"><option value="r">Random</option><option value="m">Male</option><option value="f">Female</option></select></div>
+        <div class="field"><label>Era</label><select id="c-era"></select></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Village</label><select id="c-village"></select></div>
+        <div class="field"><label>Clan</label><select id="c-clan"></select></div>
+      </div>
+    </div>
+    <div class="bio-preview" id="bioPreview">Roll a life to preview its story&#8230;</div>
+    <div class="c-actions">
+      <button class="btn ghost tall" id="btn-reroll"><b>&#127922; Re-Roll Life</b><small>Get a new character</small></button>
+      <button class="btn tall" id="btn-begin"><b>Begin This Life</b><small>Start your journey</small></button>
+    </div>
+    <div class="t-note">Most births are ordinary. Bloodlines are rare, and talent is earned.</div>
   </div>
-  <div class="frow">
-    <div class="field"><label>First name</label><input id="c-first" placeholder="random"><button class="dice" data-r="first">🎲</button></div>
-    <div class="field"><label>Last name</label><input id="c-last" placeholder="random"><button class="dice" data-r="last">🎲</button></div>
-  </div>
-  <div class="frow">
-    <div class="field"><label>Gender</label><select id="c-gender"><option value="r">Random</option><option value="m">Male</option><option value="f">Female</option></select></div>
-    <div class="field"><label>Era</label><select id="c-era"></select></div>
-  </div>
-  <div class="frow">
-    <div class="field"><label>Village</label><select id="c-village"></select></div>
-    <div class="field"><label>Clan</label><select id="c-clan"></select></div>
-  </div>
-  <div class="bio-preview" id="bioPreview">Roll a life to preview its story…</div>
-  <div class="c-actions">
-    <button class="btn ghost" id="btn-reroll">🎲 Re-roll Life</button>
-    <button class="btn" id="btn-begin">Begin This Life</button>
-  </div>
-  <div class="t-note" style="margin-top:16px">Most births are ordinary. Bloodlines are rare, and talent is earned.</div>
+  <div class="c-foot"><a href="https://discord.com" aria-label="Discord" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.9 3l-.2.4c1.6.4 2.4.9 3.2 1.5-1.4-.7-2.8-1.4-5-1.4s-3.6.7-5 1.4c.8-.6 1.7-1.2 3.2-1.5L11.9 3a19.8 19.8 0 0 0-4.4 1.4C4.6 8.6 4 12.7 4.3 16.7c1.8 1.3 3.5 2.1 5.2 2.6l.9-1.5c-.8-.3-1.6-.7-2.3-1.2l.5-.4c2.9 1.4 6.7 1.4 9.6 0l.5.4c-.7.5-1.5.9-2.3 1.2l.9 1.5c1.7-.5 3.4-1.3 5.2-2.6.4-4.6-.7-8.7-2.2-12.3zM9.7 14.6c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8zm4.6 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8z"/></svg></a><a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12c0 1.6.1 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.3-1.6.4-3.2.4-4.8s-.1-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg></a><a href="https://x.com" aria-label="X" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.5l4.4 5.8L18.9 2zm-1.1 18h1.7L7.1 3.8H5.3L17.8 20z"/></svg></a></div>
 </div>
 
 <div class="screen" id="screen-game">
@@ -337,5 +393,53 @@ h1,h2,h3{margin:0;line-height:1.2}
 <div class="toast" id="toast"></div>
 
 <script src="game.js?v=ll4"></script>
+
+<script>
+(function(){
+  var SLOTS="shinobi_sprint_slots_v2";
+  function latestRyo(){
+    try{
+      var all=JSON.parse(localStorage.getItem(SLOTS)||"[]"),best=null;
+      for(var i=0;i<all.length;i++){if(all[i]&&all[i].g&&(!best||all[i].when>best.when))best=all[i]}
+      return best&&best.g?Math.round(best.g.ryo||0):0;
+    }catch(e){return 0}
+  }
+  function setRyo(){
+    var v=latestRyo().toLocaleString("en-US");
+    var a=document.getElementById("t-ryo-val"),b=document.getElementById("c-ryo-val");
+    if(a)a.textContent=v;if(b)b.textContent=v;
+  }
+  setRyo();
+  document.getElementById("t-ryo").onclick=saveMenuFromTitle;
+  document.getElementById("c-ryo").onclick=saveMenuFromTitle;
+  document.getElementById("btn-back").onclick=function(){
+    document.getElementById("screen-creator").classList.remove("on");
+    document.getElementById("screen-title").classList.add("on");
+  };
+  document.getElementById("btn-ach").onclick=function(){
+    var lines=ACHIEVEMENTS.map(function(x){return x.n+" ("+x.d+")"}).join("\n");
+    modal("Achievements","Achievements","Twenty-two honors a shinobi can earn in a single life:\n\n"+lines);
+  };
+  document.getElementById("btn-settings").onclick=function(){
+    modal("Settings","Settings","Version 1.0.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",
+      [{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){
+        if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){
+          try{localStorage.removeItem(SLOTS);localStorage.removeItem("shinobi_sprint_legacy_v2");localStorage.removeItem("shinobi_sprint_ach_v2")}catch(e){}
+          toast("All data cleared");setRyo();
+        }
+      }},{t:"Close"}]);
+  };
+  document.getElementById("btn-credits").onclick=function(){
+    modal("Credits","Credits","SHINOBI SPRINT - Life of a Shinobi\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.");
+  };
+  document.getElementById("btn-exit").onclick=function(){
+    modal("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",
+      [{t:"Leave",fn:function(){
+        try{window.close()}catch(e){}
+        setTimeout(function(){toast("Close this tab whenever you're ready")},200);
+      }},{t:"Stay"}]);
+  };
+})();
+</script>
 </body>
 </html>
