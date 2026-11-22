@@ -2130,13 +2130,21 @@ var CINE_LINES=[
 ];
 var CINE_TOTAL=52100;
 var CINE=null;
+function cineNarrator(){
+  try{var S=window.speechSynthesis;if(!S)return null;
+    var vs=(S.getVoices()||[]).filter(function(v){return /^en/i.test(v.lang||"")});
+    if(!vs.length)vs=(S.getVoices()||[]).filter(function(v){return /en/i.test(v.lang||"")});
+    if(!vs.length)return null;
+    var prefs=["Google UK English Male","Daniel","Microsoft David","Google US English","Microsoft Mark","Alex","Aaron","Samantha","Google UK English Female"];
+    for(var i=0;i<prefs.length;i++)for(var j=0;j<vs.length;j++)if(vs[j].name&&vs[j].name.indexOf(prefs[i])>=0)return vs[j];
+    return vs[0]}catch(e){return null}
+}
 function cineSay(text){
-  try{var S=window.speechSynthesis;if(!S)return;
-    var vs=S.getVoices?S.getVoices()||[]:[];
-    if(vs.length){var v=vs[Math.floor(Math.random()*vs.length)];
-      var u=new SpeechSynthesisUtterance(text.replace(/[\u2026.]+$/,"")+".");
-      if(v)u.voice=v;u.rate=.82;u.pitch=.55+Math.random()*.4;u.volume=1;
-      S.speak(u)}}catch(e){}
+  try{var S=window.speechSynthesis;if(!S||!CINE)return;
+    var u=new SpeechSynthesisUtterance(text.replace(/[\u2026.]+$/,"")+".");
+    if(CINE.nar)u.voice=CINE.nar;
+    u.rate=.78;u.pitch=.42;u.volume=.95;
+    S.speak(u)}catch(e){}
 }
 function cineSub(t){var el2=$("#cine-sub");if(!el2)return;el2.classList.remove("show");void el2.offsetWidth;el2.textContent=t;el2.classList.add("show")}
 function cineAudio(){
@@ -2147,7 +2155,7 @@ function cineAudio(){
     for(var i=0;i<len;i++)d[i]=Math.random()*2-1;
     var src=ac.createBufferSource();src.buffer=buf;src.loop=true;
     var lp=ac.createBiquadFilter();lp.type="lowpass";lp.frequency.value=420;
-    var wg=ac.createGain();wg.gain.value=.055;
+    var wg=ac.createGain();wg.gain.value=.04;
     src.connect(lp);lp.connect(wg);wg.connect(master);src.start();
     var lfo=ac.createOscillator();lfo.frequency.value=.07;
     var lg=ac.createGain();lg.gain.value=.03;lfo.connect(lg);lg.connect(wg.gain);lfo.start();
@@ -2181,7 +2189,7 @@ function cineEnd(){if(!CINE)return;var d=CINE.done;CINE.stopped=true;CINE.timers
 function cinePlay(done){
   var c=$("#cine");if(!c){if(done)done();return}
   if(CINE)cineEnd();
-  CINE={done:done||null,timers:[],stopped:false,ac:cineAudio()};
+  CINE={done:done||null,timers:[],stopped:false,ac:cineAudio(),nar:cineNarrator()};
   var sk=$("#cine-skip");if(sk)sk.onclick=cineEnd;
   c.hidden=false;c.classList.remove("out");c.classList.add("on");
   var grps=[".g1",".g2",".g3",".g4",".g5"].map(function(q){return c.querySelector(q)});
@@ -2213,7 +2221,7 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"The Cinematic Opening",b:"Version 2.2.0. Starting a new life now opens a cinematic intro: a black screen that fades into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while a narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. The narrator picks a random voice on each line where the browser supports it, and subtitles always run alongside. Skip Intro sits on screen the whole time, and settings gains a Replay Intro option. It plays for new lives only: loading a save or continuing goes straight in. About 50 seconds, skippable in one tap."},{d:"Nov 22, 2026",t:"Specializations & Sharper Missions",b:"Version 2.1.0. After graduation the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays."},{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
+var UPDATES=[{d:"Nov 22, 2026",t:"Narrator Fix",b:"Version 2.2.1. The intro narrator now speaks in one consistent English voice at a calm, low pitch for the whole intro, instead of a random voice per line. Softer wind in the mix too."},{d:"Nov 22, 2026",t:"The Cinematic Opening",b:"Version 2.2.0. Starting a new life now opens a cinematic intro: a black screen that fades into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while a narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. The narrator picks a random voice on each line where the browser supports it, and subtitles always run alongside. Skip Intro sits on screen the whole time, and settings gains a Replay Intro option. It plays for new lives only: loading a save or continuing goes straight in. About 50 seconds, skippable in one tap."},{d:"Nov 22, 2026",t:"Specializations & Sharper Missions",b:"Version 2.1.0. After graduation the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays."},{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
  {d:"Nov 22, 2026",t:"New Name",b:"Shinobi Sprint is now SHINOBI: LIFE UNBOUND. Same life sim, bigger name. Title screen, intro, credits, and page title all carry the new banner."},
  {d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
  {d:"Nov 22, 2026",t:"Cross Links",b:"A direct link to Shinobi Legacy now sits in the title footer, so you can jump from the sprint sim to the main game in one tap."},
@@ -2265,7 +2273,7 @@ function wireTitle(){
   function menuOpen(id){
     try{
       if(id==="btn-ach"){var lines=ACHIEVEMENTS.map(function(x){var got=G&&G.achievements&&includes(G.achievements,x.id);return x.h&&!got?"? ? ? (a hidden honor)":x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements",ACHIEVEMENTS.length+" honors a shinobi can earn in a single life, some hidden until discovered:\n\n"+lines)}
-      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 2.2.0\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Replay Intro",d:"Watch the cinematic opening again",fn:function(){cinePlay(function(){})}},{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
+      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 2.2.1\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Replay Intro",d:"Watch the cinematic opening again",fn:function(){cinePlay(function(){})}},{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
       else if(id==="btn-credits"){modalSafe("Credits","Credits","SHINOBI: LIFE UNBOUND\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")}
       else if(id==="btn-exit"){modalSafe("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])}
       else if(id==="btn-back"){$("#screen-creator").classList.remove("on");$("#screen-title").classList.add("on")}
@@ -2367,7 +2375,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.2.0";
+var GAME_VERSION="2.2.1";
 function startUpdateWatch(){
   function check(){
     try{
