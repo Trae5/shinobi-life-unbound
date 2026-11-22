@@ -446,7 +446,8 @@ function boot(){
   ['community_profiles',function(s){PROFILES=s.docs.map(function(d){var v=d.data();v.uid=d.id;return v});renderMembers();renderHome();renderMe()}],
   ['community_reports',function(s){REPORTS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});if(isOwner())renderAdmin()}]
  ];
- subs.forEach(function(p){db.collection(p[0]).orderBy('when','desc').limit(300).onSnapshot(function(s){p[1](s)},function(e){if(p[0]==='community_reports')return;cloudFail()})});
+ var COREC={community_bugs:1,community_features:1,community_chat:1};
+ subs.forEach(function(p){db.collection(p[0]).orderBy('when','desc').limit(300).onSnapshot(function(s){p[1](s)},function(e){if(p[0]==='community_reports'||p[0]==='community_modlog')return;if(!COREC[p[0]])return;cloudFail()})});
  db.collection('community_notifications').where('to','==',UID).onSnapshot(function(s){NOTIFS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});updateBell()},function(e){});
  db.collection('community_chat').orderBy('when','desc').limit(120).onSnapshot(function(s){var el=document.getElementById('chatlog');if(!el)return;var msgs=s.docs.map(function(d){return d.data()}).reverse();el.innerHTML=msgs.map(function(m){return '<div class="msg'+(m.uid===UID?' me':'')+'"><div class="nm">'+esc(m.name)+'</div><div class="tx">'+esc(m.text)+'</div><div class="tm">'+ago(m.when)+'</div></div>'}).join('');el.scrollTop=el.scrollHeight},function(e){cloudFail()});
  if(!name())setTimeout(openName,600);
@@ -458,8 +459,8 @@ function ensureProfile(){
   if(d.exists){ME=d.data();ME.id=d.id;applyName()}
   else{var v=AVATARS[Math.floor(Math.random()*AVATARS.length)];
    ME={name:'',avatar:v,bio:'',joined:new Date().toISOString(),rep:0,badges:[],counts:{},lastSeenAnn:0};
-   db.collection('community_profiles').doc(UID).set(ME).then(applyName).catch(function(e){cloudFail()})}
- }).catch(function(e){cloudFail()})
+   db.collection('community_profiles').doc(UID).set(ME).then(applyName).catch(function(e){})}
+ }).catch(function(e){})
 }
 function applyName(){document.getElementById('hello-name').textContent=ME.name||'shinobi';renderMe();if(!ME.name&&!name())openName()}
 function saveProfile(patch){return db.collection('community_profiles').doc(UID).set(patch,{merge:true}).then(function(){Object.keys(patch).forEach(function(k){ME[k]=patch[k]})}).catch(function(e){toast('Could not save. Try again.')})}
@@ -572,7 +573,7 @@ document.getElementById('ds-post').onclick=function(){
  if(!guard('post',30000))return;
  var tags=document.getElementById('ds-tags').value.split(',').map(function(x){return x.trim()}).filter(Boolean).slice(0,5);
  var doc={game:document.getElementById('ds-game').value,title:t,body:b,tags:tags,pinned:false,reactions:{},author:name(),uid:UID,when:new Date().toISOString()};
- db.collection('community_discussions').add(doc).then(function(){closeModal('dismodal');document.getElementById('ds-title').value='';document.getElementById('ds-body').value='';document.getElementById('ds-tags').value='';bumpCount('discussions');gainRep(1);pushActivity('discussion',doc.game,'started a discussion: '+t,doc.title);toast('Discussion posted.');go('discussions')}).catch(function(e){cloudFail();toast('Could not post right now.')})};
+ db.collection('community_discussions').add(doc).then(function(){closeModal('dismodal');document.getElementById('ds-title').value='';document.getElementById('ds-body').value='';document.getElementById('ds-tags').value='';bumpCount('discussions');gainRep(1);pushActivity('discussion',doc.game,'started a discussion: '+t,doc.title);toast('Discussion posted.');go('discussions')}).catch(function(e){toast('Could not post right now.')})};
 /* ---------- announcements ---------- */
 function renderAnns(){
  var t=document.getElementById('newann');if(t)t.style.display=isOwner()?'':'none';
@@ -721,7 +722,7 @@ function addComment(){if(!CLOUD)return cloudFail();if(muted())return;if(!name())
   db.collection(col).doc(CURRENT.id).update({commentsCount:firebase.firestore.FieldValue.increment(1)}).catch(function(){});
   bumpCount('comments');gainRep(1);pushActivity('comment',target&&target.game,'commented on "'+(target&&target.title||'a post')+'"',target&&target.title);
   if(target&&target.uid&&target.uid!==UID)notify(target.uid,'reply',profName(UID,name())+' commented on "'+target.title+'"',{type:CURRENT.ptype,id:CURRENT.id});
-  openDetail(CURRENT.ptype,CURRENT.id)}).catch(function(e){cloudFail();toast('Could not post the comment.')})}
+  openDetail(CURRENT.ptype,CURRENT.id)}).catch(function(e){toast('Could not post the comment.')})}
 /* ---------- reports ---------- */
 function openReport(ptype,id){if(!name()){openName();return}RP={ptype:ptype,id:id};openModal('reportmodal')}
 document.getElementById('rp-send').onclick=function(){if(!RP||!CLOUD)return;var t=findDoc(RP.ptype,RP.id);
@@ -734,22 +735,6 @@ function readNotif(id){var n=NOTIFS.find(function(x){return x.id===id});db.colle
  closeModal('notifmodal');if(n&&n.ref&&n.ref.type&&n.ref.id)openDetail(n.ref.type,n.ref.id)}
 function markAllRead(){NOTIFS.filter(function(n){return !n.read}).forEach(function(n){db.collection('community_notifications').doc(n.id).update({read:true}).catch(function(){})});setTimeout(openNotifs,400)}
 function clearNotifs(){if(!NOTIFS.length||!confirm('Clear all notifications?'))return;NOTIFS.forEach(function(n){db.collection('community_notifications').doc(n.id).delete().catch(function(){})});setTimeout(function(){closeModal('notifmodal')},500)}
-/* one-time Tomo seed, only fires with ?seed=1 and only when the bug list is empty */
-if(location.search.indexOf('seed=1')>-1){(function(){
- var SEED=[
- {t:'Fast travel to Hidden Mist produces a gray empty world',b:'Two separate trips to the Hidden Mist Village rendered a gray, empty world: no avatar and no terrain visible. The HUD still showed full health (128/128) and chakra (96/96). Opening the map did not recover the scene. Traveling back to the Hidden Leaf Village restored the rendered scene and avatar, so a reload is not the only recovery.',s:'Travel from the Hidden Leaf to the Hidden Mist twice. Observe the gray empty world.',st:'open'},
- {t:'Character creator locks you into a new slot',b:'There is no Back button in the character creator. Escape does nothing, and reloading returns you to the unfinished creator. Game text reads: "Finish this shinobi to play. No backing out of a new slot."',s:'Start creating a new character, then try to back out with Escape or reload.',st:'open'},
- {t:'Hidden Cloud map, HUD and rendered scene disagree',b:'The map read "You are in the Hidden Cloud Village - home: Hidden Leaf", but the HUD still read "Hidden Leaf" and the scene rendered Leaf-style terrain and avatar.',s:'Fast travel between villages and compare the map text, HUD village label and the rendered scene.',st:'open'},
- {t:'Aburame Clans panel wording (unverified)',b:'Could not confirm whether the Clans panel still lists Insect Armor and pairs Insect Swarm, Bug Tracking and Chakra Drain with Shadow Bind as the signature move. HUD jutsu slot 4 currently reads "Shadow Bind - 30 chakra, 10s."',s:'Check the Aburame clan panel in Menu → Clans against the HUD jutsu slots.',st:'open'},
- {t:'Level and mastery persistence across reload (unverified)',b:'No level-up was gained during the latest pass, so persistence of changed level or mastery progress across reload remains unverified.',s:'Level up or raise a clan mastery, then reload and check the values.',st:'open'},
- {t:'Depleted chakra returned to full on reload',b:'After reloading, depleted chakra returned to full. Whether that is intended is unconfirmed.',s:'Use jutsu to lower chakra, reload the page, compare chakra values.',st:'open'}
- ];
- var NOW=new Date(Date.now()-9*86400000).toISOString();
- db.collection('community_bugs').where('tomoseed','==',true).limit(1).get().then(function(s){
- if(!s.empty){console.log('seed already done');return}
- var batch=db.batch();
- SEED.forEach(function(x){batch.set(db.collection('community_bugs').doc(),{game:'legacy',title:x.t,body:x.b,steps:x.s,status:x.st,author:'Tomo playtest (Nov 20 sweep)',tomoseed:true,when:NOW})});
- batch.commit().then(function(){console.log('seeded')}).catch(function(e){console.log('seed failed',e)})}).catch(function(e){console.log('seed check failed',e)})})()}
 /* ---------- home dashboard ---------- */
 function renderHome(){
  var el=document.getElementById('hello-name');if(el&&ME)el.textContent=ME.name||'shinobi';
