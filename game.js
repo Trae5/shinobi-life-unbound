@@ -1765,6 +1765,12 @@ function loadGame(idx){
   VIEW="home";VTAB="feed";closeCard();render();
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
+/* update log: every pushed update gets an entry here, the title chip reads the newest one */
+var UPDATES=[
+ {d:"Nov 22, 2026",t:"Life & Legacy",b:"Eras, bloodline awakening, narrative missions, jutsu training, descendant system, a rebuilt dashboard-style game screen, clan surname fix, and a full main-menu rework."},
+ {d:"Nov 22, 2026",t:"Clan Surnames",b:"A clan you pick always sticks now and your last name auto-fills with it. Random clan births take the clan surname, and relocated families get a line in your bio."},
+ {d:"Nov 22, 2026",t:"First-Pass Life Sim",b:"Shinobi Sprint rebuilt as a full life simulator: birth, family, school, career, missions, aging, death, and a Legacy Hall for finished lives."}
+];
 function wireTitle(){
   $("#btn-new").onclick=newLife;
   $("#btn-continue").onclick=function(){
@@ -1781,6 +1787,14 @@ function wireTitle(){
   $("#btn-bell").onclick=function(){switchView("home");VTAB="feed";render()};
   $("#btn-gear").onclick=function(){switchView("settings")};
   /* cinematic title extras */
+  var uc=$(".t-update");
+  if(uc){
+    var u=UPDATES[0];
+    var us=uc.querySelector("span");if(us)us.textContent=u.t+" \u2014 "+u.d;
+    uc.title="Tap to open the update log";
+    uc.style.cursor="pointer";
+    uc.onclick=function(){var log="";for(var i=0;i<UPDATES.length;i++){log+=(i?"\n\n":"")+UPDATES[i].d+" \u2014 "+UPDATES[i].t+"\n"+UPDATES[i].b}modalSafe("Update Log","Updates","What's new in Shinobi Sprint:\n\n"+log)};
+  }
   function titleRyo(){var all=slots(),best=null;for(var i=0;i<all.length;i++){if(all[i]&&all[i].g&&(!best||all[i].when>best.when))best=all[i]}return best&&best.g?Math.round(best.g.ryo||0):0}
   function setTitleRyo(){var v=titleRyo().toLocaleString("en-US");var a=$("#t-ryo-val"),b=$("#c-ryo-val");if(a)a.textContent=v;if(b)b.textContent=v}
   setTitleRyo();
