@@ -408,6 +408,31 @@ var BUGS=[],REQS=[],DISC=[],COMS=[],ANNS=[],ACT=[],NOTIFS=[],REPORTS=[],PROFILES
 var bugFilter='all',bugStatus='all',bugSev='all',reqFilter='all',reqStatus='all',reqSort='votes',disFilter='all',disSort='new',annFilter='all',actFilter='all',searchType='all',searchGame='all',homeGame='all',adminTab='compose';
 var lastChat=0,lastPost=0,lastComment=0;
 var AVATARS=['🥷','🦊','🐺','🐍','🦅','🐅','🐉','🔥','⚡','🌊','🌙','🍃','🌀','🎴','🍡','⛅'];
+/* Tab status is isolated from the community hub. */
+(function(){
+ try {
+  var card=document.createElement('div');card.className='card';card.style.marginBottom='16px';
+  var title=document.createElement('a');title.href='https://status.tab.bot/';title.target='_blank';title.rel='noopener noreferrer';title.textContent='Tab Status';title.style.fontWeight='bold';card.appendChild(title);
+  var body=document.createElement('div');body.style.marginTop='8px';card.appendChild(body);var anchor=document.getElementById('statrow');anchor.parentNode.insertBefore(card,anchor);
+  var stamp=null,agoNode=null;
+  function txt(el){return el?el.textContent.trim().replace(/\s+/g,' '):''}
+  function stateColor(s){switch(s.trim().toLowerCase()){case 'operational':return '#70bf86';case 'degraded performance':case 'partial outage':case 'under maintenance':case 'rollout':return '#d9a647';case 'major outage':return '#df5e5e';default:return '#928d91'}}
+  function fallback(){stamp=null;agoNode=null;body.textContent='';var a=document.createElement('a');a.href='https://status.tab.bot/';a.target='_blank';a.rel='noopener noreferrer';a.textContent='status feed unavailable';body.appendChild(a)}
+  function relative(){if(!stamp||!agoNode)return;var m=Math.max(0,Math.floor((Date.now()-stamp.getTime())/60000));agoNode.textContent=' · '+(m<1?'just now':m+' min ago')}
+  async function refresh(){try{
+   var res=await fetch('https://status.tab.bot/',{cache:'no-store'});if(!res.ok)throw Error('fetch failed');
+   var doc=new DOMParser().parseFromString(await res.text(),'text/html');var rows=Array.from(doc.querySelectorAll('li.row'));var services=[];
+   rows.forEach(function(row){var main=row.querySelector(':scope > .row-main');if(!main)return;var name=txt(main.querySelector('.row-name')),state=txt(main.querySelector('.state-word'))||'Unknown';if(name)services.push({name:name,state:state,child:row.classList.contains('sub-row')})});
+   var headline=doc.querySelector('section.hero h1#headline'),time=doc.querySelector('time#updated[datetime]');var updated=time?new Date(time.getAttribute('datetime')):null;
+   if(!services.length||!txt(headline)||!updated||isNaN(updated.getTime()))throw Error('invalid status page');
+   body.textContent='';var pill=document.createElement('span');pill.className='badge';pill.textContent=txt(headline);var overall=doc.querySelector('[data-overall]');var tone=stateColor(overall?overall.getAttribute('data-overall'):'');pill.style.cssText='display:inline-block;border:1px solid '+tone+';color:'+tone+';border-radius:999px;margin-bottom:8px';body.appendChild(pill);
+   var list=document.createElement('div');list.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:5px 16px';var group=null;services.forEach(function(s){if(!s.child||!group){group=document.createElement('div');list.appendChild(group)}var line=document.createElement('div');line.style.cssText='font-size:13px;'+(s.child?'padding-left:14px;':'');var dot=document.createElement('span');dot.textContent='● ';dot.style.color=stateColor(s.state);line.appendChild(dot);line.appendChild(document.createTextNode(s.name+' — '+s.state));group.appendChild(line)});body.appendChild(list);
+   var foot=document.createElement('div');foot.className='who';foot.style.marginTop='8px';foot.textContent='Updated '+updated.toLocaleString();agoNode=document.createElement('span');foot.appendChild(agoNode);body.appendChild(foot);stamp=updated;relative();
+  }catch(e){fallback()}}
+  fallback();refresh();setInterval(refresh,300000);setInterval(relative,60000);
+ }catch(e){/* Keep the hub independent of status errors. */}
+})();
+
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function ago(iso){var d=new Date(iso).getTime();if(!d)return'';var s=(Date.now()-d)/1000;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
 function gameName(g){return g==='legacy'?'Shinobi Legacy':g==='unbound'?'Life Unbound':'Both games'}
