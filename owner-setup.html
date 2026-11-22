@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Owner account setup</title></head><body>
+<h1>Owner account setup</h1><p>Create the owner's Firebase account. This page does not grant owner privileges; access requires an explicitly configured UID in Firestore rules.</p>
+<form id="signup"><label>Email <input type="email" id="email" autocomplete="username" required></label><br><label>Password <input type="password" id="password" autocomplete="new-password" minlength="6" required></label><br><button type="submit">Create account</button></form><p id="status" role="status"></p>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+const app=initializeApp({apiKey:'AIzaSyA6EnB41g34TnhhLNJcx8OA2vmTrShwoi4',authDomain:'shinobi-life-unbound.firebaseapp.com',projectId:'shinobi-life-unbound',storageBucket:'shinobi-life-unbound.firebasestorage.app',messagingSenderId:'231893959325',appId:'1:231893959325:web:4dc77151958863c51b0a74'});
+const auth=getAuth(app), form=document.querySelector('#signup'), status=document.querySelector('#status');
+form.addEventListener('submit',async e=>{e.preventDefault();status.textContent='Creating account…';try{const user=(await createUserWithEmailAndPassword(auth,document.querySelector('#email').value,document.querySelector('#password').value)).user;form.reset();form.hidden=true;status.textContent='Account created. Email: '+user.email+'; UID: '+user.uid;}catch(err){status.textContent='Account creation failed: '+err.message;}});
+</script></body></html>
