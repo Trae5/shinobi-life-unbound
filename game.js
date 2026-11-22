@@ -247,6 +247,13 @@ var MISSION_TYPES={
 };
 /* narrative mission templates: briefing, prep options, decision point, outcome by decision quality */
 var MTPL=[
+  {id:"cat",t:"The Roof Cat",ranks:["D"],
+   brief:"A merchant’s cat is stranded on the mission office roof. Two days up there, and the whole street has opinions.",
+   prep:[["Climb up slowly","cats respect patience"],["Bring dried fish","bribery is a legitimate tactic"]],
+   dec:[{t:"Reach for it gently",q:.6},{t:"Lure it with the fish first",q:.55,alt:"the fish works, mostly"}],
+   good:"The cat descends with dignity, as if the plan were its own. The merchant pays, the street applauds.",
+   mid:"You get the cat down along with most of the roof tiles.",
+   bad:"The cat relocates to a taller roof. Word spreads."},
   {id:"scout",t:"The Missing Scout",ranks:["C","B"],
    brief:"Your squad must find a scout who vanished near the border. Tracks lead toward an unfamiliar forest.",
    prep:[["Move fast and light","you reach the forest by dusk"],["Stock up and probe the perimeter","you map the treeline carefully"]],
@@ -646,6 +653,13 @@ EVS.child=[
    else fbig("A festival fills the streets with lanterns and grilled squid. You are allowed to stay up late.","world")}},
  {t:"sibling day",w:2,run:function(){var s=byKind("sibling");if(!s.length)return;var n=pick(s);
    fbig("You and "+n.name.split(" ")[0]+" "+pick(["build a fort from laundry poles","stage a puppet show for the neighbors","raid the pickle jar","race to the well and back"])+".");relUp(n,6);addStat("happiness",2)}}
+,
+ {t:"stray pup",w:2,run:function(){modal("The Pup","Childhood","A skinny stray pup has followed you home from the well for three days. It sits at the gate like it pays rent.",
+    [{t:"Sneak it food",fn:function(){G.flags.pup=true;addStat("happiness",3);fbig("The pup stays. Your mother pretends not to notice. The pup is now family.","good");tl(G.age,"Took in a stray pup")}},
+     {t:"Shoo it away",fn:function(){fbig("It watches you go with an expression you will remember later.","bad");addStat("happiness",-1)}}])}},
+ {t:"market mischief",w:2,run:function(){modal("The Market","Childhood","A fruit stall's pyramid wobbles as you pass. Only your hand is anywhere near it.",
+    [{t:"Steady the pyramid",fn:function(){addStat("discipline",2);fbig("You catch it one-handed. The stall owner gives you a free pear and a long look.","good")}},
+     {t:"Run",fn:function(){if(chance(.5)){fbig("You get three streets away before laughing. Best pear you never paid for.","good")}else{fbig("A shopkeeper catches your sleeve. Your parents hear about it by dinner.","bad");addStat("happiness",-2)}}}])}}
 ];
 EVS.academy=[
  {t:"class exam",w:5,run:function(){var score=Math.round(st("intelligence")*.6+st("discipline")*.3+st("taijutsu")*.1+luck());
@@ -682,6 +696,14 @@ EVS.academy=[
  {t:"era event: academy",w:2,run:function(){if(G.era.war>.1){fbig("Half your class graduates early and ships out. The remaining desks feel further apart.","world");addStat("happiness",-4)}
    else if(G.eraId==="boruto")fbig("Class uses electronic tablets now. Your instructor calls them 'the future' with visible suspicion.","world");
    else fbig("A jonin veteran visits class to tell war stories. Half are clearly exaggerated. They are better for it.","world")}}
+,
+ {t:"group project",w:2,run:function(){var fr=byKind("friend").filter(function(n){return n.alive});var a=G.academy;
+   if(fr.length){var n=pick(fr);relUp(n,4);if(a&&a.subj)a.subj.teamwork=clamp(a.subj.teamwork+5,0,100);
+     fbig("You and "+n.name.split(" ")[0]+" build the tactical project together. It wins praise and one argument about formation spacing.","good")}
+   else{addStat("intelligence",1);fbig("You do the group project alone. It is excellent and slightly lonely.")}}},
+ {t:"memorial visit",w:2,run:function(){modal("The Memorial","Academy","Class visits the memorial stone. Your instructor asks what service means. Half the class recites the textbook answer.",
+    [{t:"Answer honestly",fn:function(){rep(1);addStat("willpower",1);fbig("You say something quiet and true. Your instructor writes your name down, for better or worse.","good")}},
+     {t:"Recite the textbook line",fn:function(){if(G.academy)G.academy.grades=clamp(G.academy.grades+2,0,100);fbig("You recite it perfectly. It is exactly what is expected.","")}}])}}
 ];
 EVS.genin=[
  {t:"team bonding",w:3,run:function(){var t=G.teammates;if(!t.length)return;var n=pick(t);
@@ -694,6 +716,14 @@ EVS.genin=[
  {t:"chunin exam invite",w:2,run:function(){if(G.age<13||G.examDone)return;
    modal("Chunin Exams","Career","Your sensei has nominated you for the Chunin Exams. Two stages of combat, one of strategy, and paperwork that outlasts all of it.",
     [{t:"Enter the exams",d:"the chance of your life",fn:function(){startChunin()}},{t:"Wait for next cycle",d:"keep training"}])}}
+,
+ {t:"the weight of it",w:2,run:function(){addStat("happiness",-3);addStat("willpower",2);
+   fbig(pick(["Your first real field operation ends. You sit on the wall afterward and understand why the veterans drink tea, not sake.","You see another squad return from a failed operation. Nobody explains anything. Nothing needs explaining."]),"world")}},
+ {t:"team friction",w:2,run:function(){var t=G.teammates;if(t.length<2)return;var a=t[0],b=t[1];if(!a.alive||!b.alive)return;
+   modal("Squad Friction","Team",a.name.split(" ")[0]+" and "+b.name.split(" ")[0]+" are one stupid remark from a real fight over who carries the mission kit.",
+    [{t:"Split the kit yourself",fn:function(){relUp(a,3);relUp(b,3);addStat("leadership",2);fbig("You carry half each and say nothing. It somehow fixes it.","good")}},
+     {t:"Let them fight it out",fn:function(){var w=pick([a,b]);relUp(w,2);relUp(w===a?b:a,-4);fbig(w.name.split(" ")[0]+" wins the argument and the bruise. The kit gets split anyway.","bad")}},
+     {t:"Make it a race",fn:function(){relUp(a,4);relUp(b,4);addStat("happiness",2);fbig("First pair of legs to camp carries it. They arrive at a dead sprint, laughing.","good")}}])}}
 ];
 EVS.shinobi=[
  {t:"village duty",w:3,run:function(){var k=pick(["patrol the walls","staff the mission desk","train the newest genin intake","review border reports"]);
@@ -710,6 +740,12 @@ EVS.shinobi=[
    if(roll<.33){G.villageState.stability=clamp(G.villageState.stability+3,0,100);fbig("The council settles a land dispute with the merchants' guild. Steady hands all around.","world")}
    else if(roll<.66){G.villageState.stability=clamp(G.villageState.stability-4,0,100);fbig("A councilor is caught taking foreign coin. Heads roll, quietly, in the administrative sense.","world")}
    else{G.villageState.prosperity=clamp(G.villageState.prosperity+4,0,100);fbig("A new trade road opens through "+G.villageLabel+". Money moves, so does gossip.","world")}}}
+,
+ {t:"old rival's report",w:2,run:function(){var rv=byKind("rival")[0];if(!rv||!rv.alive)return;
+   fbig("A mission report crosses your desk with "+rv.name.split(" ")[0]+"'s name on it. "+pick(["They did well. You read it twice.","They cut a corner you would have cut. You do not report it.","They took a risk you would not have, and it paid."]),"world")}},
+ {t:"border skirmish",w:2,run:function(){if(!G.villageState.warActive)return;var win=ri(st("taijutsu")+st("ninjutsu"),st("taijutsu")+st("ninjutsu")+25)>=ri(55,85);
+   if(win){rep(2);addRyo(ri(500,2000));fbig("Border contact: a probing party tests the line at night and your squad holds it. The commendation is one line in a report you will never see.","good");addStat("taijutsu",2)}
+   else{var ij=pick(INJURIES);addStat("health",-ij.sev*ri(4,10));rep(1);fbig("Border contact goes badly for your squad. You get everyone back, and a "+ij.n+" for yourself.","bad")}}}
 ];
 EVS.adult=[
  {t:"marriage proposal",w:2,run:function(){if(G.family.spouse||!adult())return;var cand=findRel(function(n){return n.alive&&adult()&&n.age>=18&&(n.kind==="friend"||n.kind==="best friend")&&n.rel>=60&&n.rel<95});
@@ -771,6 +807,11 @@ EVS.awaken=[
  {t:"afraid of the dark",w:2,run:function(){modal("Night","Childhood","There is something under the bed. There is always something under the bed.",
     [{t:"Look under the bed yourself",fn:function(){addStat("willpower",2);addStat("confidence",1);fbig("It is a folded futon. You decide the dark is allowed to be empty.","good")}},
      {t:"Sleep with the lamp on",fn:function(){addStat("happiness",1);fbig("The lamp burns all night. Nobody mentions the oil cost.","")}}])}}
+,
+ {t:"elder notices",w:2,run:function(){if(!G.clanName)return;rep(1);addStat("chakraControl",2);
+   fbig("An elder of the "+G.clanName+" clan watches you play for a long moment, then speaks to your family behind closed doors. Something has been noticed.","rare");tl(G.age,"A clan elder took an interest in you")}},
+ {t:"first loss",w:2,run:function(){addStat("willpower",2);
+   fbig(pick(["An older kid from the next district flattens you in a field scrap. You get up. Slowly. That part matters.","You lose a footrace to a kid half a head shorter. You start training the next morning.","You lose your first real spar. You shake hands, then practice until your hands blister."]))}}
 ];
 EVS.family=[
  {t:"parent's advice",w:3,run:function(){var p=byKind("father").concat(byKind("mother")).concat(byKind("guardian")).filter(function(n){return n.alive})[0];if(!p)return;
@@ -804,6 +845,15 @@ EVS.village=[
  {t:"trade news",w:2,run:function(){G.villageState.prosperity=clamp(G.villageState.prosperity+ri(-2,3),0,100);
    fbig(pick(["Caravan season: the market is loud, full, and overpriced.","A grain shipment from the coast arrives early. Prices drop and everyone cooks elaborately.","The trade road south is washed out by rains. Merchants grumble; the mission desk quietly adds escort work."]),"world")}},
  {t:"border rumor",w:1,run:function(){if(G.era.war<.08)return;fbig(pick(["Rumor: patrols doubled at the border. Nobody says why out loud.","A wounded shinobi squad passes through the village at night. The ward stays quiet about it.","War council lanterns burn late at the "+G.villageData.kage+"'s tower."]),"world")}}
+,
+ {t:"wandering sage",w:.4,run:function(){var sp=pick(["strength","speed","intelligence","chakraControl","willpower"]);addStat(sp,3);
+   fbig("A wanderer with dusty sandals and a sword wrapped in linen watches you train, corrects one detail of your stance, and is gone before you turn around. "+cap(sp)+" takes a lasting step.","rare");tl(G.age,"A wandering sage corrected your form")}},
+ {t:"temple scroll",w:.4,run:function(){addStat("chakraControl",2);addStat("intelligence",2);
+   fbig("A monk at the hill temple lets you copy one page of a breathing scroll. It reads like poetry and works like training.","rare")}},
+ {t:"sick season",w:.5,run:function(){addStat("health",-4);fbig("A fever goes through the village for a month. The medics work double shifts; the market goes quiet.","bad")}},
+ {t:"kage summit",w:.3,run:function(){if(G.eraId==="warring")return;
+   fbig("A five-village summit makes the news: "+pick(["trade roads reopen","a joint statement on missing-nin","a border arbitration nobody expected to succeed"])+". The world moves, mostly sideways.","world");
+   G.villageState.prosperity=clamp(G.villageState.prosperity+2,0,100)}}
 ];
 EVS.career=[];
 
@@ -886,7 +936,7 @@ function startMission(rank){
   var pay={D:ri(80,200),C:ri(400,900),B:ri(2000,4500),A:ri(9000,18000),S:ri(35000,70000)}[rank];
   var squad=[].concat(G.teammates).filter(function(n){return n.alive});
   var teamScore=squad.reduce(function(s,n){return s+n.skill},0)+(G.sensei&&G.sensei.alive&&rank!=="S"?G.sensei.skill*.5:0);
-  modal("Mission Briefing","Mission — "+rank+"-Rank","“"+tpl.t+"”\n\n"+tpl.brief+(G.rogue?"\n\nNo village stands behind this one. There is only you and the target.":"")+"\n\nReward: "+money(pay)+(squad.length?"\nSquad: "+squad.map(function(n){return n.name.split(" ")[0]}).join(", "):"")+(G.sensei&&G.sensei.alive&&rank!=="S"?" · Sensei: "+G.sensei.name.split(" ")[0]:""),
+  modal("Mission Briefing","Mission — "+rank+"-Rank","“"+tpl.t+"”\n\n"+tpl.brief+(G.rogue?"\n\nNo village stands behind this one. There is only you and the target.":"")+"\n\nReward: "+money(pay)+(squad.length?"\nSquad: "+squad.map(function(n){return n.name.split(" ")[0]}).join(", "):"")+(G.sensei&&G.sensei.alive&&rank!=="S"?" · Sensei: "+G.sensei.name.split(" ")[0]:"")+(G.spec?"\nSpecialization: "+specName():"")+(G.fatigue>=70?"\nYou go in exhausted. It will cost you.":""),
     tpl.prep.map(function(p,i){return {t:p[0],d:p[1],i:i}}).concat([{t:"Decline the mission",decline:true}]),
     function(choice){
       if(!choice||choice.decline){fbig("You decline the "+rank+"-rank mission.");render();return}
@@ -897,6 +947,8 @@ function runMission(choice,tpl){
   var rank=choice.rank,pay=choice.pay,teamScore=choice.team||0;
   var prepBonus=choice.i===0?2:0;
   var self=Math.round(st("taijutsu")*.25+st("ninjutsu")*.25+st("intelligence")*.2+st("chakraControl")*.15+st("endurance")*.15);
+  if(G.spec==="combat"||G.spec==="intel")self+=3;else if(G.spec==="tracking")self+=2;else if(G.spec==="support")self+=1;
+  if(G.fatigue>=70)self-=5;
   var roll=ri(1,100);
   var target=({D:25,C:45,B:60,A:72,S:82}[rank])-prepBonus-Math.floor(teamScore*.8);
   var ok=roll+self>=target;
@@ -933,7 +985,7 @@ function finishMission(tpl,rank,pay,outcome){
     ms.fail++;ms.streak=0;
     rep(rank==="D"?-1:rank==="C"?-2:rank==="B"?-4:rank==="A"?-6:-10);
     outTxt="MISSION FAILED — "+tpl.bad;outCls="bad";fbig(outTxt,outCls);
-    var inj=pick(INJURIES);addStat("health",-inj.sev*ri(6,14));addStat("happiness",-3);
+    var inj=pick(INJURIES);addStat("health",-Math.round(inj.sev*(G.spec==="medical"?.6:1)*ri(6,14)));addStat("happiness",-3);
     fbig("You take a "+inj.n+" in the process.","bad");
   }
   G.fatigue=clamp(G.fatigue+ri(15,30),0,100);
@@ -949,6 +1001,21 @@ function enrollAcademy(){
   G.rank="Academy Student";G.career="Academy Student";
   fbig("You enroll in the Academy at age "+aAge+". Instructor "+G.academy.sensei+" takes attendance like it's a blood oath.","big");
   tl(aAge,"Enrolled in the Academy");
+}
+var SPECS=[
+ {id:"combat",n:"Combat",d:"front-line specialist"},
+ {id:"tracking",n:"Tracking",d:"hunter of marks"},
+ {id:"medical",n:"Medical",d:"healer"},
+ {id:"intel",n:"Intelligence",d:"analyst and codebreaker"},
+ {id:"support",n:"Support",d:"the one who holds the team together"},
+ {id:"instructor",n:"Instructor Track",d:"the one who builds the next generation"}
+];
+function specName(){var s=SPECS.find(function(x){return x.id===G.spec});return s?s.n:null}
+function offerSpec(){
+  if(G.spec)return;
+  modal("Specialization","Career","The assignment desk asks which path you intend to walk. It goes in your file, and your file follows you.",
+    SPECS.map(function(sp){return {t:sp.n,d:sp.d,fn:function(){G.spec=sp.id;tl(G.age,"Specialization: "+sp.n);
+      fbig("Specialization recorded: "+sp.n+". "+pick(["The desk clerk stamps your file twice, impressed or alarmed.","Your sensei reads the form and raises one eyebrow.","It suits you. Or it will, in ten years."]),"good")}}}));
 }
 var GRAD=null;
 function graduateExam(forced){
@@ -971,6 +1038,7 @@ function runGraduation(){
     else fbig("GRADUATION — You tie your headband and try not to shake. You are a genin of "+G.villageName+".","good");
     if(G.age<G.villageData.academyAge+4){if(!includes(G.achievements,"early_grad"))award("early_grad");fbig("You graduate years ahead of your age group. The other parents look at you differently now.","rare")}
     assignTeam();
+    offerSpec();
   }else if(G.age>=16){
     a.enrolled=false;G.rank="Civilian";G.career=pick(["farmhand","shop clerk","courier","dock worker"]);
     fbig("You age out of the Academy without graduating. Life continues outside the headband: work, family, quieter streets.","bad");
@@ -1122,7 +1190,7 @@ function ageUp(){
     G.academy.attendance=clamp((G.academy.attendance||60)+ri(-5,6),0,100);
     if(G.age>=G.villageData.academyAge+5||st("ninjutsu")>=35)GRAD={forced:G.age>=G.villageData.academyAge+5};
   }
-  else if(G.rank==="Genin"){addStat("taijutsu",ri(1,3));addStat("ninjutsu",ri(1,3))}
+  else if(G.rank==="Genin"){addStat("taijutsu",ri(1,3));addStat("ninjutsu",ri(1,3));if(G.spec==="combat")addStat("taijutsu",1);else if(G.spec==="medical")addStat("medical",1);else if(G.spec==="intel")addStat("intelligence",1);else if(G.spec==="tracking")addStat("perception",1);else if(G.spec==="instructor")addStat("leadership",1)}
   else if(rankRank()>=3){addStat("ninjutsu",1);addStat("intelligence",1);if(chance(.3))addStat("leadership",2)}
   if(G.age>30){if(chance(.3))addStat("strength",-1);if(chance(.25))addStat("speed",-1);if(G.age>50&&chance(.4))addStat("endurance",-1)}
   if(G.retired&&G.age>60&&chance(.25))addStat("health",-3);
@@ -1224,7 +1292,7 @@ function serializeG(){
     clanLeader:c.clanLeader,examDone:c.examDone,jutsu:c.jutsu,inventory:c.inventory,deathCause:c.deathCause,
     relationships:c.relationships,teammateIds:c.teammates.map(function(n){return n.id}),
     senseiId:c.sensei?c.sensei.id:null,familyIds:{spouse:c.family.spouse?c.family.spouse.id:null,kids:c.family.kids.map(function(n){return n.id})},
-    students:c.students.map(function(n){return n.id}),rival:G.rival,bio:c.bio,household:c.household,trained:c.trained||{},flags:c.flags||{}};
+    students:c.students.map(function(n){return n.id}),rival:G.rival,bio:c.bio,household:c.household,trained:c.trained||{},flags:c.flags||{},spec:c.spec||null};
   return out;
 }
 function deserializeG(o){
@@ -1237,6 +1305,7 @@ function deserializeG(o){
   if(!c.household)c.household=o.household||"normal";
   c.trained=o.trained||{};c.flags=o.flags||{};
   if(c.academy&&!c.academy.subj)c.academy.subj={chakra:50,taijutsu:50,shuriken:50,tactics:50,history:50,stealth:50,teamwork:50};
+  c.spec=o.spec||null;
   c.family.spouse=c.relationships.find(function(n){return n.id===o.familyIds.spouse})||null;
   c.family.kids=c.relationships.filter(function(n){return includes(o.familyIds.kids,n.id)});
   c.teammates=c.relationships.filter(function(n){return includes(o.teammateIds,n.id)});
@@ -1633,7 +1702,7 @@ function renderCharacter(){
   var v=$("#view-char");v.innerHTML="";
   var p=panel("shinobi record",G.rogue?"Missing-nin File":G.rank+" — "+G.career);
   var kv=el("div","kv");
-  [["Name",G.name],["Age",G.age],["Village",G.villageName],["Clan",G.clanName||"none"],["Bloodline",G.kkg?(G.kkgKnown?G.kkg+" (awakened)":G.kkg+" (dormant)"):"none"],["Chakra nature",G.natureKnown?G.nature:"undiscovered"],["Personality",G.personality.n+" — "+G.personality.d],["Missions",G.missionStats.total+" ("+G.missionStats.success+" success, "+G.missionStats.fail+" failed)"],["Reputation",Math.round(G.reputation)]].forEach(function(r){
+  [["Name",G.name],["Age",G.age],["Village",G.villageName],["Clan",G.clanName||"none"],["Bloodline",G.kkg?(G.kkgKnown?G.kkg+" (awakened)":G.kkg+" (dormant)"):"none"],["Chakra nature",G.natureKnown?G.nature:"undiscovered"],["Personality",G.personality.n+" — "+G.personality.d],["Specialization",G.spec?specName():"none"],["Household",G.household||"normal"],["Missions",G.missionStats.total+" ("+G.missionStats.success+" success, "+G.missionStats.fail+" failed)"],["Reputation",Math.round(G.reputation)]].forEach(function(r){
     kv.appendChild(el("b",null,r[0]));kv.appendChild(el("span",null,String(r[1])));
   });
   p.appendChild(kv);
@@ -2061,7 +2130,7 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
+var UPDATES=[{d:"Nov 22, 2026",t:"Specializations & Sharper Missions",b:"Version 2.1.0. After graduation the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays."},{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
  {d:"Nov 22, 2026",t:"New Name",b:"Shinobi Sprint is now SHINOBI: LIFE UNBOUND. Same life sim, bigger name. Title screen, intro, credits, and page title all carry the new banner."},
  {d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
  {d:"Nov 22, 2026",t:"Cross Links",b:"A direct link to Shinobi Legacy now sits in the title footer, so you can jump from the sprint sim to the main game in one tap."},
@@ -2113,7 +2182,7 @@ function wireTitle(){
   function menuOpen(id){
     try{
       if(id==="btn-ach"){var lines=ACHIEVEMENTS.map(function(x){var got=G&&G.achievements&&includes(G.achievements,x.id);return x.h&&!got?"? ? ? (a hidden honor)":x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements",ACHIEVEMENTS.length+" honors a shinobi can earn in a single life, some hidden until discovered:\n\n"+lines)}
-      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 2.0.0\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
+      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 2.1.0\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
       else if(id==="btn-credits"){modalSafe("Credits","Credits","SHINOBI: LIFE UNBOUND\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")}
       else if(id==="btn-exit"){modalSafe("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])}
       else if(id==="btn-back"){$("#screen-creator").classList.remove("on");$("#screen-title").classList.add("on")}
@@ -2215,7 +2284,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.0.0";
+var GAME_VERSION="2.1.0";
 function startUpdateWatch(){
   function check(){
     try{
