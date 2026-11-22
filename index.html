@@ -289,6 +289,50 @@ h1,h2,h3{margin:0;line-height:1.2}
   .brand span.txt{display:none}
   .feed{max-height:44vh}
 }
+
+/* ==== cinematic multi-step creator ==== */
+.cc-hide{display:none!important}
+.cc-prog{display:flex;gap:8px;justify-content:center;margin:4px 0 18px}
+.cc-prog i{width:26px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);transition:background .3s}
+.cc-prog i.on{background:var(--gold)}
+.cc-pane{display:none;flex-direction:column;align-items:center;text-align:center;animation:ccIn .45s ease}
+.cc-pane.on{display:flex}
+@keyframes ccIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.cc-kicker{letter-spacing:.28em;text-transform:uppercase;font-size:11px;color:var(--gold);margin-bottom:8px}
+.cc-sub{max-width:520px;color:#c9c4d2;font-size:14px;line-height:1.65;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+.cc-orb{width:74px;height:74px;border-radius:50%;border:1px solid rgba(211,169,76,.55);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--gold);margin:10px 0 18px;background:radial-gradient(circle at 30% 30%,rgba(211,169,76,.14),rgba(0,0,0,.45));box-shadow:0 0 44px rgba(211,169,76,.10)}
+.cc-namewrap{margin:20px 0 6px;width:min(420px,86vw)}
+#cc-name{width:100%;text-align:center;font-size:26px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(16,16,24,.85);color:var(--text)}
+#cc-name:focus{outline:none;border-color:var(--gold)}
+.cc-nameprev{font-size:32px;margin-top:10px;min-height:44px;color:var(--text)}
+.cc-nameprev em{font-style:italic;color:var(--crimson)}
+.cc-err{color:var(--danger);font-size:13px;min-height:18px}
+.cc-hint{color:var(--muted);font-size:12px}
+.cc-nav{margin-top:16px}
+.cc-vills{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:min(760px,94vw);margin:16px 0 4px}
+.cc-vill{cursor:pointer;border:1px solid var(--line);border-radius:14px;padding:16px 10px;background:rgba(14,14,20,.6);transition:border-color .25s,transform .25s,box-shadow .25s;text-align:center}
+.cc-vill:hover{transform:translateY(-3px)}
+.cc-vill.sel{border-color:var(--gold);box-shadow:0 0 0 1px rgba(211,169,76,.6) inset,0 10px 30px rgba(0,0,0,.45)}
+.cc-vill .vk{font-size:32px;display:block;margin-bottom:8px;color:var(--text)}
+.cc-vill b{display:block;font-size:13px}
+.cc-vill small{color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:3px}
+.cc-vill p{color:#c9c4d2;font-size:11px;line-height:1.5;margin-top:8px;min-height:66px}
+.cc-forging{display:flex;flex-direction:column;align-items:center;gap:12px;margin:20px 0}
+.cc-forging .ff{font-size:15px;color:#d8d2c4;min-height:22px}
+.cc-forging .fbar{width:min(320px,70vw);height:3px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden;position:relative}
+.cc-forging .fbar i{position:absolute;top:0;bottom:0;width:40%;background:var(--gold);animation:ccBar 1.1s linear infinite}
+@keyframes ccBar{from{left:-40%}to{left:100%}}
+.cc-spin{font-size:30px;font-family:Georgia,"Times New Roman",serif;min-height:44px;color:#e8c66b;letter-spacing:.02em}
+.cc-spin.slow{filter:none;text-shadow:0 0 24px rgba(211,169,76,.4)}
+.cc-clancard{width:min(460px,92vw);border:1px solid var(--line);border-radius:16px;padding:22px 20px;margin-top:14px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.4));animation:ccPop .5s ease}
+@keyframes ccPop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.cc-emb{width:64px;height:64px;border-radius:50%;border:2px solid var(--rc,#d3a94c);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px;color:#f0e6d2;background:rgba(0,0,0,.5);box-shadow:0 0 30px var(--rg,rgba(211,169,76,.25))}
+.cc-rar{display:inline-block;font-size:10px;letter-spacing:.3em;text-transform:uppercase;padding:4px 10px;border-radius:20px;border:1px solid var(--rc,#d3a94c);color:var(--rc,#d3a94c);margin-bottom:10px}
+.cc-clancard h4{font-size:24px;margin:2px 0 8px;font-weight:800}
+.cc-clancard .cc-spec{color:var(--muted);font-size:12px;margin-bottom:10px}
+.cc-clancard p.cc-desc{color:#d8d2c4;font-size:13px;line-height:1.6}
+.cc-finalsum{width:min(520px,92vw);text-align:left;font-size:13px;color:#c9c4d2;line-height:1.8;margin:10px 0 2px}
+.cc-finalsum b{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -330,11 +374,58 @@ h1,h2,h3{margin:0;line-height:1.2}
   <div class="c-scene">
     <button class="c-back" id="btn-back">&larr; Back to Menu</button>
     <button class="t-ryo" id="c-ryo" title="Your latest saved life"><span class="coin">&#129689;</span><b id="c-ryo-val">0</b><small>ry&#333;</small></button>
-    <div class="c-head">
+    <div class="cc-prog" id="cc-prog" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+    <div class="cc-pane on" id="cc-intro">
+      <div class="cc-orb">&#24525;</div>
+      <h2 class="serif">A life is <em>born</em></h2>
+      <p class="cc-sub">You choose only a name and a village. Everything else &mdash; your body, your era, your blood &mdash; is decided by the dice of birth. Most lives are ordinary. A few are not.</p>
+      <div class="cc-nav"><button class="btn tall" id="cc-go"><b>Forge Your Destiny</b><small>Begin the ritual</small></button></div>
+    </div>
+
+    <div class="cc-pane" id="cc-name">
+      <p class="cc-kicker">Step One</p>
+      <h2 class="serif">Name your <em>shinobi</em></h2>
+      <div class="cc-namewrap"><input id="cc-name" maxlength="16" autocomplete="off" spellcheck="false" placeholder="First name only"></div>
+      <p class="cc-err" id="cc-name-err"></p>
+      <div class="cc-nameprev" id="cc-nameprev"></div>
+      <p class="cc-hint">Your family name will be given to you, never chosen.</p>
+      <div class="cc-nav"><button class="btn cc-next" id="cc-name-next"><b>Continue</b><small>To the villages</small></button></div>
+    </div>
+
+    <div class="cc-pane" id="cc-village">
+      <p class="cc-kicker">Step Two</p>
+      <h2 class="serif">Choose your <em>village</em></h2>
+      <div class="cc-vills" id="cc-vills"></div>
+      <p class="cc-err" id="cc-vill-err"></p>
+      <div class="cc-nav"><button class="btn cc-next" id="cc-vill-next"><b>Continue</b><small>The dice take over</small></button></div>
+    </div>
+
+    <div class="cc-pane" id="cc-roll">
+      <p class="cc-kicker">The dice of birth</p>
+      <h2 class="serif">Forging your <em>shinobi</em></h2>
+      <div class="cc-forging"><div class="ff" id="cc-forgeline"></div><div class="fbar"><i></i></div></div>
+    </div>
+
+    <div class="cc-pane" id="cc-clan">
+      <p class="cc-kicker" id="cc-clan-kick">Bloodline roll</p>
+      <div class="cc-spin" id="cc-spin"></div>
+      <div class="cc-clancard" id="cc-clancard" hidden></div>
+    </div>
+
+    <div class="cc-pane" id="cc-final">
+      <p class="cc-kicker">Final</p>
+      <h2 class="serif">Your shinobi <em>awaits</em></h2>
+      <div class="cc-finalsum" id="cc-finalsum"></div>
+      <div class="bio-preview cc-bio" id="cc-bio"></div>
+      <div class="cc-nav"><button class="btn tall" id="cc-confirm"><b>Confirm This Life</b><small>Begin your journey</small></button></div>
+    </div>
+
+    <div class="c-head cc-hide">
       <h2 class="serif">Begin a <em>Life</em></h2>
       <p>Roll the dice for a whole stranger, or shape your own shinobi.</p>
     </div>
-    <div class="c-form">
+    <div class="c-form cc-hide">
       <div class="frow">
         <div class="field"><label>First name</label><input id="c-first" placeholder="random"><button class="dice" data-r="first">&#127922;</button></div>
         <div class="field"><label>Last name</label><input id="c-last" placeholder="random"><button class="dice" data-r="last">&#127922;</button></div>
@@ -348,12 +439,12 @@ h1,h2,h3{margin:0;line-height:1.2}
         <div class="field"><label>Clan</label><select id="c-clan"></select></div>
       </div>
     </div>
-    <div class="bio-preview" id="bioPreview">Roll a life to preview its story&#8230;</div>
-    <div class="c-actions">
+    <div class="bio-preview cc-hide" id="bioPreview">Roll a life to preview its story&#8230;</div>
+    <div class="c-actions cc-hide">
       <button class="btn ghost tall" id="btn-reroll"><b>&#127922; Re-Roll Life</b><small>Get a new character</small></button>
       <button class="btn tall" id="btn-begin"><b>Begin This Life</b><small>Start your journey</small></button>
     </div>
-    <div class="t-note">Most births are ordinary. Bloodlines are rare, and talent is earned.</div>
+    <div class="t-note cc-hide">Most births are ordinary. Bloodlines are rare, and talent is earned.</div>
   </div>
   <div class="c-foot"><a href="https://discord.com" aria-label="Discord" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.9 3l-.2.4c1.6.4 2.4.9 3.2 1.5-1.4-.7-2.8-1.4-5-1.4s-3.6.7-5 1.4c.8-.6 1.7-1.2 3.2-1.5L11.9 3a19.8 19.8 0 0 0-4.4 1.4C4.6 8.6 4 12.7 4.3 16.7c1.8 1.3 3.5 2.1 5.2 2.6l.9-1.5c-.8-.3-1.6-.7-2.3-1.2l.5-.4c2.9 1.4 6.7 1.4 9.6 0l.5.4c-.7.5-1.5.9-2.3 1.2l.9 1.5c1.7-.5 3.4-1.3 5.2-2.6.4-4.6-.7-8.7-2.2-12.3zM9.7 14.6c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8zm4.6 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8z"/></svg></a><a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12c0 1.6.1 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.3-1.6.4-3.2.4-4.8s-.1-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg></a><a href="https://x.com" aria-label="X" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.5l4.4 5.8L18.9 2zm-1.1 18h1.7L7.1 3.8H5.3L17.8 20z"/></svg></a></div>
 </div>

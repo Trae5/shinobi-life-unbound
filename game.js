@@ -1096,7 +1096,7 @@ function saveSlot(idx,data){
 }
 function serializeG(){
   var c=G;
-  var out={v:2,first:c.first,last:c.last,gender:c.gender,eraId:c.eraId,village:c.village,clanName:c.clanName,
+  var out={v:2,cid:c.cid,born:c.born,first:c.first,last:c.last,gender:c.gender,eraId:c.eraId,village:c.village,clanName:c.clanName,
     familyWealth:c.familyWealth,familyHistory:c.familyHistory,personality:c.personality,latentKG:c.latentKG,
     kkg:c.kkg,kkgKnown:c.kkgKnown,nature:c.nature,natureKnown:c.natureKnown,secondary:c.secondary,
     age:c.age,alive:c.alive,rank:c.rank,career:c.career,stats:c.stats,ryo:c.ryo,fatigue:c.fatigue,
@@ -1114,7 +1114,7 @@ function deserializeG(o){
   ["age","alive","rank","career","ryo","fatigue","missionStats","reputation","bounty","rogue","rogueYears",
    "priorRank","achievements","feed","timeline","villageState","retired","retiredYear","bestFriend",
    "clanLeader","examDone","jutsu","inventory","deathCause","bio","kkg","kkgKnown","nature","natureKnown",
-   "familyWealth","familyHistory","latentKG"].forEach(function(k){c[k]=o[k]});
+   "familyWealth","familyHistory","latentKG","cid","born"].forEach(function(k){c[k]=o[k]});
   c.stats=o.stats;c.academy=o.academy;
   c.family.spouse=c.relationships.find(function(n){return n.id===o.familyIds.spouse})||null;
   c.family.kids=c.relationships.filter(function(n){return includes(o.familyIds.kids,n.id)});
@@ -1730,6 +1730,148 @@ function fillCreator(){
   var o6=el("option",null,"No clan (civilian)");o6.value="none";cs.appendChild(o6);
   CLANS.forEach(function(c){var o7=el("option",null,c.n+" ("+c.r+")");o7.value=c.n;cs.appendChild(o7)});
 }
+
+/* ============================ cinematic multi-step creator ============================ */
+var CC={step:"intro",name:"",village:null,gender:null,eraId:null,clanRoll:null,last:"",timers:[]};
+var RARITY_COLOR={mythical:"#a06cd5",legendary:"#d3a94c",rare:"#d4555f",uncommon:"#3fb3a8",common:"#8a8f98"};
+var CLAN_KANJI={Uchiha:"\u6247",Hyuga:"\u65e5",Senju:"\u5343",Uzumaki:"\u6e29",Sarutobi:"\u733f",Nara:"\u5948",Akimichi:"\u79cb",Yamanaka:"\u5c71",Aburame:"\u6cb9",Inuzuka:"\u72ac",Kurama:"\u978d",Hatake:"\u7551",Shimura:"\u5fd7",Fuma:"\u98a8",Yuki:"\u96ea",Hozuki:"\u9b3c"};
+var CC_BAD=["fuck","shit","bitch","asshole","dick","cunt","nigg","fag","slut","whore","rape","porn","sex","cock","pussy","nazi","hitler"];
+function ccTimer(fn,ms){CC.timers.push(setTimeout(fn,ms))}
+function ccClear(){CC.timers.forEach(clearTimeout);CC.timers=[]}
+function ccShow(step){
+  CC.step=step;ccClear();
+  var order={intro:0,name:1,village:2,roll:3,clan:4,final:5};
+  ["#cc-intro","#cc-name","#cc-village","#cc-roll","#cc-clan","#cc-final"].forEach(function(id,n){
+    var p=$(id);if(p)p.classList.toggle("on",order[step]===n);
+  });
+  var dots=$("#cc-prog");if(dots){
+    var idx=order[step]-1;
+    dots.querySelectorAll("i").forEach(function(d,i){d.classList.toggle("on",i<=idx)});
+    dots.style.opacity=order[step]===0?"0":"1";
+  }
+}
+function ccReset(){
+  ccClear();
+  CC={step:"intro",name:"",village:null,gender:null,eraId:null,clanRoll:null,last:"",timers:[]};
+  ["#c-first","#c-last"].forEach(function(id){$(id).value=""});
+  ["#c-gender","#c-era","#c-village","#c-clan"].forEach(function(id){$(id).value=id==="#c-clan"?"r":"r"});
+  $("#cc-name").value="";$("#cc-name-err").textContent="";$("#cc-nameprev").innerHTML="";
+  $("#cc-vill-err").textContent="";$("#cc-vills").innerHTML="";$("#cc-spin").textContent="";$("#cc-spin").classList.remove("slow");$("#cc-spin").style.display="";
+  $("#cc-clancard").hidden=true;$("#cc-clancard").innerHTML="";
+  ccShow("intro");
+}
+function ccNameOK(n){
+  n=(n||"").trim();
+  if(n.length<2||n.length>16)return false;
+  if(!/^[A-Za-z][A-Za-z' -]*$/.test(n))return false;
+  var l=n.toLowerCase();
+  for(var i=0;i<CC_BAD.length;i++)if(l.indexOf(CC_BAD[i])>=0)return false;
+  return true;
+}
+function ccBuildVills(){
+  var wrap=$("#cc-vills");wrap.innerHTML="";
+  var desc={konoha:"The village hidden in the leaves. Fire country's heart, home of the Hokage and the strongest names in shinobi history.",suna:"The village hidden in sand. Hard desert life forges patient, deadly shinobi.",kiri:"The village hidden in mist. A ruthless past, and the quiet survivors it left.",kumo:"The village hidden in clouds. Prideful and strong, perched above the storms.",iwa:"The village hidden in stone. Unyielding earth, stubborn wills, immovable defense."};
+  Object.keys(VILLAGES).forEach(function(k){
+    var v=VILLAGES[k];
+    var d=document.createElement("div");d.className="cc-vill";d.dataset.v=k;
+    d.innerHTML='<span class="vk">'+v.kan+'</span><b>'+v.name+'</b><small>'+(v.label.replace("the ",""))+'</small><p>'+(desc[k]||"")+'</p>';
+    d.onclick=function(){
+      wrap.querySelectorAll(".cc-vill").forEach(function(c){c.classList.remove("sel")});
+      d.classList.add("sel");CC.village=k;$("#cc-vill-err").textContent="";
+    };
+    wrap.appendChild(d);
+  });
+}
+function ccForge(){
+  CC.gender=chance(.5)?"m":"f";
+  CC.eraId=pick(ERAS).id;
+  CC.clanRoll=chance(.42)?rollClan(CC.village):null;
+  CC.last=CC.clanRoll?CC.clanRoll.n:pick(SURNAMES);
+  $("#c-gender").value=CC.gender;
+  $("#c-era").value=CC.eraId;
+  $("#c-village").value=CC.village;
+  $("#c-clan").value=CC.clanRoll?CC.clanRoll.n:"none";
+  $("#c-first").value=CC.name;
+  $("#c-last").value=CC.last;
+  var era=ERAS.find(function(e){return e.id===CC.eraId});
+  var lines=["Rolling the dice of birth…","Body and spirit: sealed.","The era finds you: "+era.name+".","A household waits in "+VILLAGES[CC.village].label+"…"];
+  var i=0;
+  function next(){
+    if(i<lines.length){$("#cc-forgeline").textContent=lines[i];i++;ccTimer(next,520)}
+    else ccTimer(function(){ccShow("clan");ccClanReveal()},420);
+  }
+  next();
+}
+function ccClanReveal(){
+  var spin=$("#cc-spin"),card=$("#cc-clancard");
+  card.hidden=true;card.innerHTML="";spin.style.display="";spin.classList.remove("slow");
+  $("#cc-clan-kick").textContent=CC.clanRoll?"Bloodline roll":"Bloodline roll";
+  if(!CC.clanRoll){
+    spin.textContent="—";
+    ccTimer(function(){spin.style.display="none";ccShowClanCard(null)},900);
+    return;
+  }
+  var pool=CLANS.map(function(c){return c.n});
+  var t=0,delay=70,stop=1900;
+  function tick(){
+    spin.textContent=pick(pool);
+    t+=delay;delay=Math.min(320,delay*1.18);
+    if(t<stop)ccTimer(tick,delay);
+    else{
+      spin.classList.add("slow");spin.textContent=CC.clanRoll.n;
+      ccTimer(function(){spin.style.display="none";ccShowClanCard(CC.clanRoll)},650);
+    }
+  }
+  tick();
+}
+function ccShowClanCard(c){
+  var card=$("#cc-clancard");
+  var html;
+  if(!c){
+    html='<div class="cc-emb" style="--rc:#8a8f98;--rg:rgba(138,143,152,.25)">\u6c11</div>'+
+      '<span class="cc-rar" style="--rc:#8a8f98">Civilian</span>'+
+      '<h4>No clan</h4>'+
+      '<p class="cc-desc">No bloodline claimed you at birth. Your name is '+CC.last+', and your story is entirely yours to write.</p>';
+  }else{
+    var col=RARITY_COLOR[c.r]||"#8a8f98";
+    var emb=CLAN_KANJI[c.n]||c.n.charAt(0).toUpperCase();
+    html='<div class="cc-emb" style="--rc:'+col+';--rg:'+col.replace(")",", .3)").replace("#","rgba(").replace("rgb","#")+'">'+emb+'</div>'+
+      '<span class="cc-rar" style="--rc:'+col+'">'+c.r+'</span>'+
+      '<h4>Clan '+c.n+'</h4>'+
+      '<div class="cc-spec">'+c.spec+(c.kg?" · Kekkei genkai: "+c.kg:"")+'</div>'+
+      '<p class="cc-desc">'+c.d+'</p>';
+  }
+  html+='<div class="cc-nav"><button class="btn" id="cc-clan-next"><b>Continue</b><small>To your life</small></button></div>';
+  card.innerHTML=html;card.hidden=false;
+  $("#cc-clan-next").onclick=ccToFinal;
+}
+function ccToFinal(){
+  rollPreview();
+  var era=ERAS.find(function(e){return e.id===CC.eraId});
+  var s='<b>'+CC.name+' '+CC.last+'</b><br>'+
+    VILLAGES[CC.village].name+' · '+VILLAGES[CC.village].label+'<br>'+
+    era.name+' · '+(CC.gender==="m"?"Male":"Female")+'<br>'+
+    (CC.clanRoll?('Clan '+CC.clanRoll.n+' · '+CC.clanRoll.r):'No clan · civilian')+
+    (PENDING&&PENDING.kkg?'<br>Bloodline: '+PENDING.kkg+' (dormant)':'');
+  $("#cc-finalsum").innerHTML=s;
+  $("#cc-bio").textContent=PENDING?PENDING.bio:"";
+  ccShow("final");
+}
+
+function ccNameNext(){
+  var v=$("#cc-name").value.trim();
+  if(!v){$("#cc-name-err").textContent="Give your shinobi a name first.";return}
+  if(!ccNameOK(v)){$("#cc-name-err").textContent=v.length>16?"Sixteen letters or fewer.":"A plain name, 2-16 letters, nothing rude.";return}
+  CC.name=v.charAt(0).toUpperCase()+v.slice(1);
+  $("#c-first").value=CC.name;
+  ccShow("village");
+  if(!$("#cc-vills").children.length)ccBuildVills();
+}
+function ccVillNext(){
+  if(!CC.village){$("#cc-vill-err").textContent="Pick the village you are born into.";return}
+  ccShow("roll");ccForge();
+}
+
 var PENDING=null;
 function rollPreview(){
   var opts={first:$("#c-first").value,last:$("#c-last").value,gender:$("#c-gender").value,era:$("#c-era").value,village:$("#c-village").value,clan:$("#c-clan").value};
@@ -1742,6 +1884,8 @@ function rollPreview(){
 function beginLife(){
   if(!PENDING)rollPreview();
   G=PENDING;PENDING=null;
+  if(!G.cid)G.cid="c"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  G.born=Date.now();
   $("#screen-creator").classList.remove("on");
   $("#screen-game").classList.add("on");
   feed("You were born: "+G.name+" of "+(G.clanName?"clan "+G.clanName+" in ":"")+G.villageName+", "+G.eraName+".","big");
@@ -1752,7 +1896,9 @@ function beginLife(){
 function newLife(){
   $("#screen-title").classList.remove("on");
   $("#screen-creator").classList.add("on");
-  fillCreator();rollPreview();
+  fillCreator();
+  ccReset();ccBuildVills();
+  rollPreview();
 }
 function loadGame(idx){
   var all=slots();
@@ -1784,6 +1930,16 @@ function wireTitle(){
   $("#btn-ageup").onclick=function(){AGEUP_SPENT=0;ageUp()};
   $("#btn-reroll").onclick=rollPreview;
   $("#btn-begin").onclick=beginLife;
+  $("#cc-go").onclick=function(){ccShow("name");$("#cc-name").focus()};
+  $("#cc-name-next").onclick=ccNameNext;
+  $("#cc-vill-next").onclick=ccVillNext;
+  $("#cc-confirm").onclick=function(){ccClear();beginLife()};
+  $("#cc-name").addEventListener("input",function(){
+    var v=this.value.trim();
+    $("#cc-nameprev").innerHTML=v?('<em>'+v.replace(/[<>&]/g,"")+'</em>'):"";
+    $("#cc-name-err").textContent="";
+  });
+  $("#cc-name").addEventListener("keydown",function(e){if(e.key==="Enter")ccNameNext()});
   $("#btn-bell").onclick=function(){switchView("home");VTAB="feed";render()};
   $("#btn-gear").onclick=function(){switchView("settings")};
   /* cinematic title extras */
