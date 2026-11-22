@@ -1787,10 +1787,10 @@ function wireTitle(){
   var tr=$("#t-ryo");if(tr)tr.onclick=saveMenuFromTitle;
   var cr=$("#c-ryo");if(cr)cr.onclick=saveMenuFromTitle;
   var bb=$("#btn-back");if(bb)bb.onclick=function(){$("#screen-creator").classList.remove("on");$("#screen-title").classList.add("on")};
-  var ba=$("#btn-ach");if(ba)ba.onclick=function(){var lines=ACHIEVEMENTS.map(function(x){return x.n+" ("+x.d+")"}).join("\n");modal("Achievements","Achievements","Twenty-two honors a shinobi can earn in a single life:\n\n"+lines)};
-  var bs=$("#btn-settings");if(bs)bs.onclick=function(){modal("Settings","Settings","Version 1.0.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])};
-  var bc=$("#btn-credits");if(bc)bc.onclick=function(){modal("Credits","Credits","SHINOBI SPRINT - Life of a Shinobi\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")};
-  var bx=$("#btn-exit");if(bx)bx.onclick=function(){modal("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])};
+  var ba=$("#btn-ach");if(ba)ba.onclick=function(){var lines=ACHIEVEMENTS.map(function(x){return x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements","Twenty-two honors a shinobi can earn in a single life:\n\n"+lines)};
+  var bs=$("#btn-settings");if(bs)bs.onclick=function(){modalSafe("Settings","Settings","Version 1.0.0\n\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])};
+  var bc=$("#btn-credits");if(bc)bc.onclick=function(){modalSafe("Credits","Credits","SHINOBI SPRINT - Life of a Shinobi\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")};
+  var bx=$("#btn-exit");if(bx)bx.onclick=function(){modalSafe("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])};
   Array.prototype.forEach.call(D.querySelectorAll(".dice"),function(b){
     b.onclick=function(){var r=b.getAttribute("data-r");
       if(r==="first")$("#c-first").value=rollName($("#c-gender").value==="f"?"f":"m");
@@ -1877,5 +1877,7 @@ function showRetire(){
   modal("Retirement","Career","Full pension, honors, a house on the hill. The vest comes off on your terms.",
     [{t:"Retire with honors",fn:function(){G.retired=true;G.retiredYear=G.age;G.career="Retired Shinobi";award("retired");fbig("You retire with honors.","good");tl(G.age,"Retired with honors")}},{t:"Keep serving"}]);
 }
+function modalSafe(){try{modal.apply(null,arguments)}catch(e){try{D.title="ERR modal: "+(e&&e.message?e.message:String(e))}catch(_){}}}
+window.onerror=function(m,s,l){try{D.title="ERR "+String(m).slice(0,100)+" line "+l}catch(e){}}
 wireTitle();
 })();
