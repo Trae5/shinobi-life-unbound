@@ -1787,7 +1787,7 @@ function wireTitle(){
   $("#btn-bell").onclick=function(){switchView("home");VTAB="feed";render()};
   $("#btn-gear").onclick=function(){switchView("settings")};
   /* cinematic title extras */
-  var uc=$(".t-update");
+  var uc=$("#t-update");
   if(uc){
     var u=UPDATES[0];
     var us=uc.querySelector("span");if(us)us.textContent=u.t+" \u2014 "+u.d;
