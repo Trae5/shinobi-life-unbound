@@ -5,7 +5,7 @@
 
 /* ============================ utilities ============================ */
 var D=document;
-function $(id){return D.getElementById(id)}
+function $(id){return D.getElementById(String(id).replace(/^#/,""))}
 function el(tag,cls,txt){var e=D.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 function rnd(n){return Math.floor(Math.random()*n)}
 function pick(a){return a[rnd(a.length)]}
