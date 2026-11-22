@@ -36,6 +36,27 @@ h1,h2,h3{margin:0;line-height:1.2}
 .btn[disabled]{opacity:.4;pointer-events:none}
 .t-bg{position:fixed;inset:0;background:url("assets/title-bg.jpg?v=3") center/cover no-repeat;z-index:0}
 .t-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.55) 0%,rgba(8,8,12,.25) 45%,rgba(8,8,12,.8) 100%)}
+.t-bg{animation:t-breathe 46s ease-in-out infinite alternate;transform-origin:50% 42%;will-change:transform}
+@keyframes t-breathe{from{transform:scale(1) translate3d(0,0,0)}to{transform:scale(1.055) translate3d(-.6%,.4%,0)}}
+.t-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.t-cloud{position:absolute;border-radius:50%;filter:blur(34px);pointer-events:none;mix-blend-mode:screen}
+.tc1{left:-30%;top:4%;width:70%;height:34%;background:radial-gradient(closest-side,rgba(84,16,24,.5),rgba(84,16,24,0) 72%);animation:t-drift1 95s linear infinite}
+.tc2{left:-45%;top:20%;width:85%;height:40%;background:radial-gradient(closest-side,rgba(120,24,34,.38),rgba(120,24,34,0) 70%);animation:t-drift2 140s linear infinite}
+@keyframes t-drift1{from{transform:translate3d(-8%,0,0)}to{transform:translate3d(118%,6%,0)}}
+@keyframes t-drift2{from{transform:translate3d(112%,-4%,0)}to{transform:translate3d(-30%,3%,0)}}
+.t-moonglow{position:absolute;left:38%;top:23%;width:26%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,96,96,.3),rgba(255,96,96,.09) 55%,rgba(255,96,96,0) 72%);animation:t-moon 9s ease-in-out infinite alternate;pointer-events:none}
+@keyframes t-moon{from{opacity:.55;transform:translate(-50%,-50%) scale(1)}to{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
+.t-fog{position:absolute;left:-20%;width:140%;height:26%;filter:blur(26px);pointer-events:none}
+.tf1{bottom:6%;background:radial-gradient(60% 100% at 30% 60%,rgba(190,60,70,.24),rgba(190,60,70,0) 75%),radial-gradient(50% 90% at 70% 50%,rgba(150,40,55,.2),rgba(150,40,55,0) 75%);animation:t-fog1 60s ease-in-out infinite alternate}
+.tf2{bottom:-4%;background:radial-gradient(55% 100% at 55% 55%,rgba(120,26,36,.26),rgba(120,26,36,0) 78%);animation:t-fog2 80s ease-in-out infinite alternate}
+@keyframes t-fog1{from{transform:translate3d(-6%,2%,0)}to{transform:translate3d(6%,-1%,0)}}
+@keyframes t-fog2{from{transform:translate3d(5%,0,0)}to{transform:translate3d(-5%,2%,0)}}
+.t-embers{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen}
+.te1{background-image:radial-gradient(2px 2px at 12% 78%,rgba(255,150,90,.5),transparent 60%),radial-gradient(1.6px 1.6px at 28% 88%,rgba(255,120,80,.42),transparent 60%),radial-gradient(2px 2px at 47% 82%,rgba(255,150,90,.36),transparent 60%),radial-gradient(1.6px 1.6px at 63% 90%,rgba(255,130,85,.4),transparent 60%),radial-gradient(2px 2px at 81% 80%,rgba(255,150,90,.34),transparent 60%),radial-gradient(1.6px 1.6px at 92% 86%,rgba(255,120,80,.4),transparent 60%);animation:t-rise 22s linear infinite}
+.te2{background-image:radial-gradient(1.6px 1.6px at 18% 92%,rgba(255,140,90,.34),transparent 60%),radial-gradient(2px 2px at 37% 95%,rgba(255,120,80,.3),transparent 60%),radial-gradient(1.6px 1.6px at 55% 90%,rgba(255,140,90,.32),transparent 60%),radial-gradient(2px 2px at 72% 94%,rgba(255,130,85,.3),transparent 60%),radial-gradient(1.6px 1.6px at 88% 91%,rgba(255,140,90,.3),transparent 60%);animation:t-rise 31s linear infinite reverse}
+@keyframes t-rise{from{transform:translate3d(0,6%,0)}to{transform:translate3d(1.5%,-16%,0)}}
+@media (prefers-reduced-motion:reduce){.t-bg,.t-cloud,.t-moonglow,.t-fog,.t-embers{animation:none!important}.t-fx{display:none!important}}
+@media (max-width:760px){.t-fx{display:none}}
 .t-scene{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:88px 20px 64px;text-align:center}
 .t-topleft{position:fixed;top:18px;left:22px;z-index:2;font-style:italic;font-size:15px;color:#f2e8d5;text-shadow:0 2px 8px rgba(0,0,0,.85);text-align:left;line-height:1.5}
 .t-ryo{position:fixed;top:16px;right:20px;z-index:2;display:flex;align-items:center;gap:7px;background:rgba(12,12,16,.72);border:1px solid rgba(211,169,76,.45);border-radius:20px;padding:7px 12px;color:var(--gold);font-size:14px;backdrop-filter:blur(4px)}
@@ -394,7 +415,7 @@ h1,h2,h3{margin:0;line-height:1.2}
 <body>
 
 <div class="screen on" id="screen-title">
-  <div class="t-bg" aria-hidden="true"></div>
+  <div class="t-bg" aria-hidden="true"><svg class="t-fx" viewBox="0 0 1600 914" preserveAspectRatio="xMidYMid slice"><defs><filter id="tfx-cape" x="-40%" y="-40%" width="180%" height="180%"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="11" result="n"><animate attributeName="baseFrequency" dur="13s" values="0.012 0.028;0.017 0.036;0.012 0.028" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="20" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="tfx-hair" x="-60%" y="-60%" width="220%" height="220%"><feTurbulence type="fractalNoise" baseFrequency="0.05 0.09" numOctaves="2" seed="4" result="n"><animate attributeName="baseFrequency" dur="7s" values="0.05 0.09;0.062 0.11;0.05 0.09" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="tfx-soft14" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter><filter id="tfx-soft30" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="30"/></filter><mask id="tmask-cape" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="914"><ellipse cx="330" cy="520" rx="125" ry="155" fill="#fff" filter="url(#tfx-soft30)"/><ellipse cx="395" cy="470" rx="75" ry="120" fill="#fff" filter="url(#tfx-soft30)"/></mask><mask id="tmask-hair" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="914"><ellipse cx="372" cy="352" rx="60" ry="48" fill="#fff" filter="url(#tfx-soft14)"/></mask></defs><image href="assets/title-bg.jpg?v=3" x="0" y="0" width="1600" height="914" filter="url(#tfx-cape)" mask="url(#tmask-cape)"/><image href="assets/title-bg.jpg?v=3" x="0" y="0" width="1600" height="914" filter="url(#tfx-hair)" mask="url(#tmask-hair)"/></svg><div class="t-cloud tc1"></div><div class="t-cloud tc2"></div><div class="t-moonglow"></div><div class="t-fog tf1"></div><div class="t-fog tf2"></div><div class="t-embers te1"></div><div class="t-embers te2"></div></div>
   <div class="t-scene">
     <div class="t-topleft serif">Live the life.<br>Forge your legacy.</div>
     <button class="t-ryo" id="t-ryo" title="Your latest saved life"><span class="coin">&#129689;</span><b id="t-ryo-val">0</b><small>ry&#333;</small><span class="plus">+</span></button>
@@ -419,7 +440,7 @@ h1,h2,h3{margin:0;line-height:1.2}
     </div>
     <div class="t-update" id="t-update"><b>Latest Update</b><span>New features and fixes!</span></div>
     <div class="t-bottom">
-      <span class="t-ver">Version 2.2.1</span>
+      <span class="t-ver" id="t-ver-text">Version 3.1.1</span>
       <span class="t-tag">A Naruto Inspired Life Simulator</span>
       <span class="t-social"><a class="xlink" href="https://shinobi-legacy.sites.tab.bot/" target="_blank" rel="noopener" aria-label="Play Shinobi Legacy">Shinobi Legacy →</a><a href="https://discord.com" aria-label="Discord" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.9 3l-.2.4c1.6.4 2.4.9 3.2 1.5-1.4-.7-2.8-1.4-5-1.4s-3.6.7-5 1.4c.8-.6 1.7-1.2 3.2-1.5L11.9 3a19.8 19.8 0 0 0-4.4 1.4C4.6 8.6 4 12.7 4.3 16.7c1.8 1.3 3.5 2.1 5.2 2.6l.9-1.5c-.8-.3-1.6-.7-2.3-1.2l.5-.4c2.9 1.4 6.7 1.4 9.6 0l.5.4c-.7.5-1.5.9-2.3 1.2l.9 1.5c1.7-.5 3.4-1.3 5.2-2.6.4-4.6-.7-8.7-2.2-12.3zM9.7 14.6c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8zm4.6 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8z"/></svg></a><a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12c0 1.6.1 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.3-1.6.4-3.2.4-4.8s-.1-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg></a><a href="https://x.com" aria-label="X" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.5l4.4 5.8L18.9 2zm-1.1 18h1.7L7.1 3.8H5.3L17.8 20z"/></svg></a></span>
     </div>
@@ -608,8 +629,8 @@ h1,h2,h3{margin:0;line-height:1.2}
  <button type="button" id="cine-skip">SKIP INTRO</button>
  <div class="vig"></div>
 </div>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=3.1.0"></script><script src="life.js?v=3.1.0"></script>
-<script src="fate.js?v=3.1.0" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=3.1.1"></script><script src="life.js?v=3.1.1"></script>
+<script src="fate.js?v=3.1.1" defer></script>
 
 <div id="upd" role="alertdialog" aria-modal="true" aria-label="Game update"><div class="upd-card"><div class="mk" style="color:var(--gold)">MAINTENANCE</div><h3 class="serif" style="color:var(--gold)">Update incoming</h3><div class="mtext">A new version just went live. The game is going down for the update.</div><div class="upd-count" id="upd-count">30</div><div class="mtext">refreshing automatically, your saves are safe</div></div></div>
 <script>(function(){var secret='please',pos=0,last=0;function reset(){pos=0;last=0}window.addEventListener('blur',reset);document.addEventListener('keydown',function(e){var t=e.target,title=document.getElementById('screen-title'),intro=document.getElementById('ss-intro');if(!title||!title.classList.contains('on')||(intro&&!intro.hidden)||document.querySelector('#modal.on,#upd.on')||e.defaultPrevented||e.repeat||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||e.shiftKey||(t instanceof Element&&(t.matches('input,textarea,select')||t.isContentEditable))){reset();return}var now=Date.now();if(now-last>3000)pos=0;last=now;var key=e.key;if(key===secret[pos])pos++;else pos=key===secret[0]?1:0;if(pos===secret.length){reset();window.location.href='owner.html'}})})();</script></body>
