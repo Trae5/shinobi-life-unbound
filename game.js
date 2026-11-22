@@ -1967,6 +1967,7 @@ function ccReset(){
   $("#cc-genders").querySelectorAll(".cc-vill").forEach(function(c){c.classList.remove("sel")});$("#cc-gender-err").textContent="";
   $("#cc-vill-err").textContent="";$("#cc-vills").innerHTML="";$("#cc-era-err").textContent="";$("#cc-eras").innerHTML="";$("#cc-spin").textContent="";$("#cc-spin").classList.remove("slow");$("#cc-spin").style.display="";
   $("#cc-clancard").hidden=true;$("#cc-clancard").innerHTML="";
+  var sb=$("#cc-spin-btn");if(sb){sb.hidden=true;sb.disabled=false}var cf=$("#cc-clanless");if(cf)cf.hidden=true;var sl=$("#cc-spinsleft");if(sl)sl.textContent="";
   ccShow("intro");
 }
 function ccNameOK(n){
@@ -1997,14 +1998,11 @@ function ccForge(){
   CC.eraId=(CC.eraId&&CC.eraId!=="r")?CC.eraId:pick(ERAS).id;
   CC.origin=pick(ORIGINS);
   CC.trait=pick(TRAITS);
-  CC.clanRoll=chance(.42)?rollClan(CC.village):null;
-  CC.last=CC.clanRoll?CC.clanRoll.n:pick(SURNAMES);
   $("#c-gender").value=CC.gender;
   $("#c-era").value=CC.eraId;
   $("#c-village").value=CC.village;
-  $("#c-clan").value=CC.clanRoll?CC.clanRoll.n:"none";
+  $("#c-clan").value="none";
   $("#c-first").value=CC.name;
-  $("#c-last").value=CC.last;
   var era=ERAS.find(function(e){return e.id===CC.eraId});
   var lines=["Rolling the dice of birth…","Body and spirit: sealed.",(CC.eraPicked?"The era takes shape: "+era.name+".":"The era finds you: "+era.name+"."),"A household waits in "+VILLAGES[CC.village].label+"…","Fate whispers: you were "+CC.origin+".","They already say you are "+CC.trait+"."];
   var i=0;
@@ -2015,47 +2013,71 @@ function ccForge(){
   next();
 }
 function ccClanReveal(){
+  CC.clanSpins=3;CC.clanCur=null;
   var spin=$("#cc-spin"),card=$("#cc-clancard");
-  card.hidden=true;card.innerHTML="";spin.style.display="";spin.classList.remove("slow");
-  $("#cc-clan-kick").textContent=CC.clanRoll?"Bloodline roll":"Bloodline roll";
-  if(!CC.clanRoll){
-    spin.textContent="—";
-    ccTimer(function(){spin.style.display="none";ccShowClanCard(null)},900);
-    return;
-  }
-  var pool=CLANS.map(function(c){return c.n});
-  var t=0,delay=70,stop=1900;
+  card.hidden=true;card.innerHTML="";
+  spin.style.display="";spin.classList.remove("slow");spin.textContent="\u00b7 \u00b7 \u00b7";
+  $("#cc-clan-kick").textContent="Bloodline roll";
+  $("#cc-spinsleft").textContent="3 spins left";
+  var b=$("#cc-spin-btn");b.hidden=false;b.disabled=false;b.onclick=ccDoSpin;
+  var f=$("#cc-clanless");f.hidden=false;
+}
+function ccDoSpin(){
+  if(!CC.clanSpins)return;
+  var b=$("#cc-spin-btn");b.disabled=true;
+  CC.clanSpins--;
+  $("#cc-spinsleft").textContent=CC.clanSpins===2?"2 spins left":CC.clanSpins===1?"1 spin left":"last spin";
+  var spin=$("#cc-spin"),card=$("#cc-clancard");
+  card.hidden=true;card.innerHTML="";
+  spin.style.display="";spin.classList.remove("slow");
+  var pool=CLANS.filter(function(c){return !c.v||c.v===CC.village}).map(function(c){return c.n});
+  var rolled=rollClan(CC.village);
+  var t=0,delay=70,stop=1600;
   function tick(){
     spin.textContent=pick(pool);
-    t+=delay;delay=Math.min(320,delay*1.18);
+    t+=delay;delay=Math.min(300,delay*1.18);
     if(t<stop)ccTimer(tick,delay);
     else{
-      spin.classList.add("slow");spin.textContent=CC.clanRoll.n;
-      ccTimer(function(){spin.style.display="none";ccShowClanCard(CC.clanRoll)},650);
+      spin.classList.add("slow");spin.textContent=rolled.n;
+      ccTimer(function(){spin.style.display="none";ccShowClanCard(rolled)},550);
     }
   }
   tick();
 }
+function ccSpinAgain(){
+  CC.clanCur=null;
+  var card=$("#cc-clancard");card.hidden=true;card.innerHTML="";
+  $("#cc-spin").style.display="";$("#cc-spin").classList.remove("slow");
+  var b=$("#cc-spin-btn");b.disabled=false;
+  ccDoSpin();
+}
+function ccKeepClan(c){
+  CC.clanRoll=c;
+  CC.last=c?c.n:pick(SURNAMES);
+  $("#c-clan").value=c?c.n:"none";
+  $("#c-last").value=CC.last;
+  var spin=$("#cc-spin");spin.style.display="none";
+  $("#cc-spin-btn").hidden=true;$("#cc-clanless").hidden=true;$("#cc-spinsleft").textContent="";
+  ccToFinal();
+}
 function ccShowClanCard(c){
   var card=$("#cc-clancard");
-  var html;
-  if(!c){
-    html='<div class="cc-emb" style="--rc:#8a8f98;--rg:rgba(138,143,152,.25)">\u6c11</div>'+
-      '<span class="cc-rar" style="--rc:#8a8f98">Civilian</span>'+
-      '<h4>No clan</h4>'+
-      '<p class="cc-desc">No bloodline claimed you at birth. Your name is '+CC.last+', and your story is entirely yours to write.</p>';
-  }else{
-    var col=RARITY_COLOR[c.r]||"#8a8f98";
-    var emb=CLAN_KANJI[c.n]||c.n.charAt(0).toUpperCase();
-    html='<div class="cc-emb" style="--rc:'+col+';--rg:'+col.replace(")",", .3)").replace("#","rgba(").replace("rgb","#")+'">'+emb+'</div>'+
-      '<span class="cc-rar" style="--rc:'+col+'">'+c.r+'</span>'+
-      '<h4>Clan '+c.n+'</h4>'+
-      '<div class="cc-spec">'+c.spec+(c.kg?" · Kekkei genkai: "+c.kg:"")+'</div>'+
-      '<p class="cc-desc">'+c.d+'</p>';
-  }
-  html+='<div class="cc-nav"><button class="btn" id="cc-clan-next"><b>Continue</b><small>To your life</small></button></div>';
+  if(!c){ccKeepClan(null);return}
+  CC.clanCur=c;
+  var col=RARITY_COLOR[c.r]||"#8a8f98";
+  var emb=CLAN_KANJI[c.n]||c.n.charAt(0).toUpperCase();
+  var html='<div class="cc-emb" style="--rc:'+col+'">'+emb+'</div>'+
+    '<span class="cc-rar" style="--rc:'+col+'">'+c.r+'</span>'+
+    '<h4>Clan '+c.n+'</h4>'+
+    '<div class="cc-spec">'+c.spec+(c.kg?" \u00b7 Kekkei genkai: "+c.kg:"")+'</div>'+
+    '<p class="cc-desc">'+c.d+'</p>'+
+    '<div class="cc-clanacts">'+
+      '<button class="btn cc-next" id="cc-keep"><b>Keep this clan</b><small>it becomes your surname</small></button>'+
+      (CC.clanSpins>0?'<button class="btn ghost" id="cc-again"><b>Spin again</b><small>'+CC.clanSpins+' spin'+(CC.clanSpins===1?"":"s")+' left</small></button>':'')+
+    '</div>';
   card.innerHTML=html;card.hidden=false;
-  $("#cc-clan-next").onclick=ccToFinal;
+  $("#cc-keep").onclick=function(){ccKeepClan(c)};
+  var a=$("#cc-again");if(a)a.onclick=ccSpinAgain;
 }
 function ccToFinal(){
   if(window.FATE&&window.FATE.open){window.FATE.open();return}
@@ -2249,7 +2271,8 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"Choose Your Gender",b:"Version 3.1.4. The creator asks one more question before the dice roll: a new step between your name and your village, CHOOSE YOUR BODY. Pick a boy, pick a girl, or let fate decide between them. Your choice shapes the first names fate rolls for you and the life the engine builds; let fate decide keeps it a true coin flip. Existing saves are untouched."},{d:"Nov 22, 2026",t:"Narrator Voice Removed",b:"Version 3.1.3. The intro no longer has a spoken narrator voice. The opening lines still play as subtitles over the visuals, wind and score, and Skip Intro works the same as before."},{d:"Nov 22, 2026",t:"Update Chip Fix",b:"Version 3.1.2. Fixed the Latest Update chip and the top of the update log: the newest entries were collapsing into one record, so the chip kept showing an older update. The chip and log now open with the newest entry, one record per update."},{d:"Nov 22, 2026",t:"The Living Title Screen",b:"Version 3.1.1. The title screen is alive now: clouds drift across the sky, the red moon breathes, ground mist rolls through the valley, embers rise, and the hero on the cliff gets wind in his cloak and hair. The scene also slowly breathes behind the menu. The version in the footer now always matches the version pill, no more two numbers on one screen. Small screens and reduced-motion settings fall back to the still image."},{d:"Nov 22, 2026",t:"Village Passives & Fates",b:"Version 3.1.0. Every village now grants a permanent birth passive that touches real math: the Leaf learns 10% faster and bonds easier, the Sand survives danger that kills others and finds Wind affinity more often, the Mist hits harder and reads water, the Cloud grows speed and taijutsu, the Stone endures and loses less to failure, and two new birthplaces join the dice: the Hidden Rain (adaptability, intelligence, rare encounters) and the Hidden Sound (jutsu growth, unusual abilities). After the clan reveal, the creator asks CHOOSE YOUR FATE: pick a handicap, roll a random one at weighted rarity (common, uncommon, rare, legendary), or walk away whole. Eight fates, from Fragile Constitution to Born Blind, each with real restrictions in training and missions, exclusive story events, NPC reactions and village-specific adaptation chains (One Arm One Storm in the Cloud, Stone Hearth, Mist Reader, The Patient Student, Sand Walker, Rain Efficiency, The Sealed Chord). Handicaps are never erased by leveling: adaptation is earned through choices and years, tracked on your record under BIRTH & TRAITS. Saves stay safe and migrate cleanly."},{d:"Nov 22, 2026",t:"The Life Simulator Overhaul — Phase 2",b:"Version 3.0.0. Every year of a life can now unfold as real story scenes: a dynamic event engine reads your age, village, clan, family, personality, reputation, relationships, rank and everything that happened before, then builds events that remember you — with 20+ categories from family and academy life to rivalries, tragedies, celebrations, romance, betrayals, political moves, war years, legendary meetings and genuinely rare secret events. Each scene is a full screen: title, category, rarity, age and location, narration, dialogue with named NPCs, and choices that actually change your life — some consequences land immediately, others wait years in your future and come back for you. NPCs remember what you did for them and to them, and greet you differently ever after. A personality system grows through your decisions (brave, ruthless, calm, reckless and more) instead of being picked at birth. Deep relationships track trust, respect and history, with milestones when bonds shift. Academy life gains real classmates and an instructor, classroom drama, prodigy recognition and exam pressure. Rivals grow on their own for years and return. Talents reveal themselves in tiers, from seal-shaping to a legendary wanderer's gift. A new Year Summary closes every age-up with what changed — stats, bonds, discoveries, honors — and a Life Record page (new Record tab) writes your biography only from what actually happened. Update logs now close with an X or a tap outside, no scrolling required. Existing saves, saves slots, features and menus are untouched; older saves migrate safely."},{d:"Nov 22, 2026",t:"Narrator Fix",b:"Version 2.2.1. The intro narrator now speaks in one consistent English voice at a calm, low pitch for the whole intro, instead of a random voice per line. Softer wind in the mix too."},{d:"Nov 22, 2026",t:"The Cinematic Opening",b:"Version 2.2.0. Starting a new life now opens a cinematic intro: a black screen that fades into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while a narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. The narrator picks a random voice on each line where the browser supports it, and subtitles always run alongside. Skip Intro sits on screen the whole time, and settings gains a Replay Intro option. It plays for new lives only: loading a save or continuing goes straight in. About 50 seconds, skippable in one tap."},{d:"Nov 22, 2026",t:"Specializations & Sharper Missions",b:"Version 2.1.0. After graduation the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays."},{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
+var UPDATES=[{d:"Nov 22, 2026",t:"Roll Your Own Clan",b:"Version 3.2.0. The bloodline is yours to roll now. After the dice of birth forge your origin and trait, the clan step hands you three spins: each one rolls a real clan from your village\u2019s bloodline pool at full rarity odds, you keep the one you want or spin again, and the clan you keep becomes your surname. Used all three? You keep the last roll. Rather walk alone? A quiet option lets you stay clanless, a civilian with nothing but your own name. Village pools still respect their lands, rare and mythical clans stay rare, and existing saves are untouched."},
+  {d:"Nov 22, 2026",t:"Choose Your Gender",b:"Version 3.1.4. The creator asks one more question before the dice roll: a new step between your name and your village, CHOOSE YOUR BODY. Pick a boy, pick a girl, or let fate decide between them. Your choice shapes the first names fate rolls for you and the life the engine builds; let fate decide keeps it a true coin flip. Existing saves are untouched."},{d:"Nov 22, 2026",t:"Narrator Voice Removed",b:"Version 3.1.3. The intro no longer has a spoken narrator voice. The opening lines still play as subtitles over the visuals, wind and score, and Skip Intro works the same as before."},{d:"Nov 22, 2026",t:"Update Chip Fix",b:"Version 3.1.2. Fixed the Latest Update chip and the top of the update log: the newest entries were collapsing into one record, so the chip kept showing an older update. The chip and log now open with the newest entry, one record per update."},{d:"Nov 22, 2026",t:"The Living Title Screen",b:"Version 3.1.1. The title screen is alive now: clouds drift across the sky, the red moon breathes, ground mist rolls through the valley, embers rise, and the hero on the cliff gets wind in his cloak and hair. The scene also slowly breathes behind the menu. The version in the footer now always matches the version pill, no more two numbers on one screen. Small screens and reduced-motion settings fall back to the still image."},{d:"Nov 22, 2026",t:"Village Passives & Fates",b:"Version 3.1.0. Every village now grants a permanent birth passive that touches real math: the Leaf learns 10% faster and bonds easier, the Sand survives danger that kills others and finds Wind affinity more often, the Mist hits harder and reads water, the Cloud grows speed and taijutsu, the Stone endures and loses less to failure, and two new birthplaces join the dice: the Hidden Rain (adaptability, intelligence, rare encounters) and the Hidden Sound (jutsu growth, unusual abilities). After the clan reveal, the creator asks CHOOSE YOUR FATE: pick a handicap, roll a random one at weighted rarity (common, uncommon, rare, legendary), or walk away whole. Eight fates, from Fragile Constitution to Born Blind, each with real restrictions in training and missions, exclusive story events, NPC reactions and village-specific adaptation chains (One Arm One Storm in the Cloud, Stone Hearth, Mist Reader, The Patient Student, Sand Walker, Rain Efficiency, The Sealed Chord). Handicaps are never erased by leveling: adaptation is earned through choices and years, tracked on your record under BIRTH & TRAITS. Saves stay safe and migrate cleanly."},{d:"Nov 22, 2026",t:"The Life Simulator Overhaul — Phase 2",b:"Version 3.0.0. Every year of a life can now unfold as real story scenes: a dynamic event engine reads your age, village, clan, family, personality, reputation, relationships, rank and everything that happened before, then builds events that remember you — with 20+ categories from family and academy life to rivalries, tragedies, celebrations, romance, betrayals, political moves, war years, legendary meetings and genuinely rare secret events. Each scene is a full screen: title, category, rarity, age and location, narration, dialogue with named NPCs, and choices that actually change your life — some consequences land immediately, others wait years in your future and come back for you. NPCs remember what you did for them and to them, and greet you differently ever after. A personality system grows through your decisions (brave, ruthless, calm, reckless and more) instead of being picked at birth. Deep relationships track trust, respect and history, with milestones when bonds shift. Academy life gains real classmates and an instructor, classroom drama, prodigy recognition and exam pressure. Rivals grow on their own for years and return. Talents reveal themselves in tiers, from seal-shaping to a legendary wanderer's gift. A new Year Summary closes every age-up with what changed — stats, bonds, discoveries, honors — and a Life Record page (new Record tab) writes your biography only from what actually happened. Update logs now close with an X or a tap outside, no scrolling required. Existing saves, saves slots, features and menus are untouched; older saves migrate safely."},{d:"Nov 22, 2026",t:"Narrator Fix",b:"Version 2.2.1. The intro narrator now speaks in one consistent English voice at a calm, low pitch for the whole intro, instead of a random voice per line. Softer wind in the mix too."},{d:"Nov 22, 2026",t:"The Cinematic Opening",b:"Version 2.2.0. Starting a new life now opens a cinematic intro: a black screen that fades into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while a narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. The narrator picks a random voice on each line where the browser supports it, and subtitles always run alongside. Skip Intro sits on screen the whole time, and settings gains a Replay Intro option. It plays for new lives only: loading a save or continuing goes straight in. About 50 seconds, skippable in one tap."},{d:"Nov 22, 2026",t:"Specializations & Sharper Missions",b:"Version 2.1.0. After graduation the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays."},{d:"Nov 22, 2026",t:"The Living World Update \u2014 Phase 1",b:"Version 2.0.0. Quiet years and age-gated childhood: ages 0-4 are early childhood, ages 5-7 bring first chakra awareness. New family and village event pools that use your actual household. Real households at birth: orphans, guardians, grandparents, small, large and prestigious families, each shaping your start. Academy subjects tracked per class, and graduation is now a real assessment you choose to take: early graduation, special recognition, or repeating a year. Training gains now have diminishing returns and cost fatigue, with conditioning and meditation added. Friends, rivals, teammates and students age, train and earn promotions on their own. Hidden achievements added. New: when a new version goes live, the game counts down 30 seconds and refreshes itself."},{d:"Nov 22, 2026",t:"Pickable Era & Fate Rolls",b:"The creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life. They show in the forging, the final summary and your biography. Version 1.2.0."},{d:"Nov 22, 2026",t:"Version 1.1.0",b:"Version numbering is in effect: the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones. Today's batch (rebrand, creator overhaul, menu rework, intro every load) puts the game at 1.1.0."},{d:"Nov 22, 2026",t:"Intro Every Load",b:"The opening title sequence now plays on every visit and refresh, not just the first one. SKIP and Begin your story still get you straight in when you want to skip it."},
  {d:"Nov 22, 2026",t:"New Name",b:"Shinobi Sprint is now SHINOBI: LIFE UNBOUND. Same life sim, bigger name. Title screen, intro, credits, and page title all carry the new banner."},
  {d:"Nov 22, 2026",t:"Opening Title Sequence",b:"A new opening title sequence adds drifting embers, the SHINOBI SPRINT / LIFE OF A SHINOBI title build-in, a tagline, and Begin your story. Tap or skip to continue; a seen flag skips the intro on later loads. Shinobi Sprint is now a life-sim revamp."},
  {d:"Nov 22, 2026",t:"Cross Links",b:"A direct link to Shinobi Legacy now sits in the title footer, so you can jump from the sprint sim to the main game in one tap."},
@@ -2404,7 +2427,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="3.1.4";
+var GAME_VERSION="3.2.0";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");

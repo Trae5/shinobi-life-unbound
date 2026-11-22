@@ -354,6 +354,11 @@ h1,h2,h3{margin:0;line-height:1.2}
 @keyframes ccBar{from{left:-40%}to{left:100%}}
 .cc-spin{font-size:30px;font-family:Georgia,"Times New Roman",serif;min-height:44px;color:#e8c66b;letter-spacing:.02em}
 .cc-spin.slow{filter:none;text-shadow:0 0 24px rgba(211,169,76,.4)}
+.cc-spinsleft{text-align:center;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;min-height:16px;margin:10px 0 2px}
+.cc-clanacts{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.cc-clanless{text-align:center;margin-top:12px}
+.cc-clanless a{color:var(--muted);font-size:11px;letter-spacing:.04em;text-decoration:none;border-bottom:1px solid rgba(211,169,76,.25)}
+.cc-clanless a:hover{color:#e8c66b}
 .cc-clancard{width:min(460px,92vw);border:1px solid var(--line);border-radius:16px;padding:22px 20px;margin-top:14px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.4));animation:ccPop .5s ease}
 @keyframes ccPop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 .cc-emb{width:64px;height:64px;border-radius:50%;border:2px solid var(--rc,#d3a94c);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px;color:#f0e6d2;background:rgba(0,0,0,.5);box-shadow:0 0 30px var(--rg,rgba(211,169,76,.25))}
@@ -442,7 +447,7 @@ h1,h2,h3{margin:0;line-height:1.2}
     </div>
     <div class="t-update" id="t-update"><b>Latest Update</b><span>New features and fixes!</span></div>
     <div class="t-bottom">
-      <span class="t-ver" id="t-ver-text">Version 3.1.4</span>
+      <span class="t-ver" id="t-ver-text">Version 3.2.0</span>
       <span class="t-tag">A Naruto Inspired Life Simulator</span>
       <span class="t-social"><a class="xlink" href="https://shinobi-legacy.sites.tab.bot/" target="_blank" rel="noopener" aria-label="Play Shinobi Legacy">Shinobi Legacy →</a><a href="https://discord.com" aria-label="Discord" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.9 3l-.2.4c1.6.4 2.4.9 3.2 1.5-1.4-.7-2.8-1.4-5-1.4s-3.6.7-5 1.4c.8-.6 1.7-1.2 3.2-1.5L11.9 3a19.8 19.8 0 0 0-4.4 1.4C4.6 8.6 4 12.7 4.3 16.7c1.8 1.3 3.5 2.1 5.2 2.6l.9-1.5c-.8-.3-1.6-.7-2.3-1.2l.5-.4c2.9 1.4 6.7 1.4 9.6 0l.5.4c-.7.5-1.5.9-2.3 1.2l.9 1.5c1.7-.5 3.4-1.3 5.2-2.6.4-4.6-.7-8.7-2.2-12.3zM9.7 14.6c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8zm4.6 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8z"/></svg></a><a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12c0 1.6.1 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.3-1.6.4-3.2.4-4.8s-.1-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg></a><a href="https://x.com" aria-label="X" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.5l4.4 5.8L18.9 2zm-1.1 18h1.7L7.1 3.8H5.3L17.8 20z"/></svg></a></span>
     </div>
@@ -506,8 +511,13 @@ h1,h2,h3{margin:0;line-height:1.2}
 
     <div class="cc-pane" id="cc-clan">
       <p class="cc-kicker" id="cc-clan-kick">Bloodline roll</p>
+      <h2 class="serif">Roll your <em>clan</em></h2>
+      <p class="cc-fate-quote" style="max-width:560px">Three spins. Each rolls a clan of your village's bloodline pool; keep the one you want, or let the last spin decide. Prefer to walk alone? Stay clanless below.</p>
       <div class="cc-spin" id="cc-spin"></div>
+      <p class="cc-spinsleft" id="cc-spinsleft"></p>
+      <div class="cc-nav"><button class="btn cc-next" id="cc-spin-btn" hidden><b>Spin</b><small>roll your bloodline</small></button></div>
       <div class="cc-clancard" id="cc-clancard" hidden></div>
+      <p class="cc-clanless"><a href="#" id="cc-clanless" hidden>Stay clanless — a civilian life, only your own name</a></p>
     </div>
 
     <div class="cc-pane" id="cc-fate">
@@ -640,8 +650,8 @@ h1,h2,h3{margin:0;line-height:1.2}
  <button type="button" id="cine-skip">SKIP INTRO</button>
  <div class="vig"></div>
 </div>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=3.1.4"></script><script src="life.js?v=3.1.4"></script>
-<script src="fate.js?v=3.1.4" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="game.js?v=3.2.0"></script><script src="life.js?v=3.2.0"></script>
+<script src="fate.js?v=3.2.0" defer></script>
 
 <div id="upd" role="alertdialog" aria-modal="true" aria-label="Game update"><div class="upd-card"><div class="mk" style="color:var(--gold)">MAINTENANCE</div><h3 class="serif" style="color:var(--gold)">Update incoming</h3><div class="mtext">A new version just went live. The game is going down for the update.</div><div class="upd-count" id="upd-count">30</div><div class="mtext">refreshing automatically, your saves are safe</div></div></div>
 <script>(function(){var secret='please',pos=0,last=0;function reset(){pos=0;last=0}window.addEventListener('blur',reset);document.addEventListener('keydown',function(e){var t=e.target,title=document.getElementById('screen-title'),intro=document.getElementById('ss-intro');if(!title||!title.classList.contains('on')||(intro&&!intro.hidden)||document.querySelector('#modal.on,#upd.on')||e.defaultPrevented||e.repeat||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||e.shiftKey||(t instanceof Element&&(t.matches('input,textarea,select')||t.isContentEditable))){reset();return}var now=Date.now();if(now-last>3000)pos=0;last=now;var key=e.key;if(key===secret[pos])pos++;else pos=key===secret[0]?1:0;if(pos===secret.length){reset();window.location.href='owner.html'}})})();</script></body>
