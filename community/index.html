@@ -177,6 +177,8 @@ footer a{color:var(--gold)}
 .pill2.off{color:#ff9a8a;border-color:rgba(179,38,38,.5)}
 kbd{background:var(--panel3);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;font-size:11px;color:var(--gold)}
 .avatar{overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.card.patchnote{border-left:3px solid var(--gold)}
+.badge.ver{background:var(--gold);color:#241203;font-weight:700;border-color:var(--gold)}
 </style>
 </head>
 <body>
@@ -280,11 +282,26 @@ kbd{background:var(--panel3);border:1px solid var(--line2);border-radius:5px;pad
 <section class="view" id="view-trending">
 <h2>Trending &amp; Leaderboard</h2>
 <p class="lead">What the community is pushing for right now, and the players making it happen.</p>
+<div class="filters" id="trtabs">
+<button class="on" data-t="hot" onclick="trTab('hot')">Hot now</button>
+<button data-t="leader" onclick="trTab('leader')">Leaderboards</button>
+<button data-t="stats" onclick="trTab('stats')">Community stats</button>
+</div>
+<div id="tr-hot">
 <div class="grid2">
 <div><h3 class="sect">Most Wanted Features</h3><div id="tr-reqs"></div></div>
 <div><h3 class="sect">Most Discussed</h3><div id="tr-dis"></div></div>
 <div><h3 class="sect">Hot Bug Reports</h3><div id="tr-bugs"></div></div>
 <div><h3 class="sect">Top Contributors</h3><div id="tr-lb"></div></div>
+</div></div>
+<div id="tr-leader" style="display:none">
+<p class="lead">Every board the hub keeps, from reputation to bug hunting. Rankings update live.</p>
+<div class="filters" id="lbtabs"></div>
+<div id="tr-lb2" style="margin-top:12px"></div>
+</div>
+<div id="tr-stats" style="display:none">
+<p class="lead">The whole community in numbers, refreshed as you post.</p>
+<div id="tr-statbody"></div>
 </div>
 </section>
 
@@ -317,6 +334,7 @@ kbd{background:var(--panel3);border:1px solid var(--line2);border-radius:5px;pad
 <button data-t="bugs">Bug Status</button>
 <button data-t="moderation">Moderation</button>
 <button data-t="users">Users</button>
+<button data-t="comments">Comments</button>
 <button data-t="log">Action Log</button>
 <button data-t="stats">Statistics</button>
 </div>
@@ -468,7 +486,7 @@ function boot(){
   ['community_features',function(s){REQS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderReqs();renderHome();renderTrending()}],
   ['community_discussions',function(s){DISC=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderDiscussions();renderHome();renderTrending()}],
   ['community_comments',function(s){COMS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderDiscussions();renderTrending()}],
-  ['community_announcements',function(s){ANNS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderAnns();renderHome();checkAnnNotifs()}],
+  ['community_announcements',function(s){ANNS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderAnns();renderHome();checkAnnNotifs();seed410()}],
   ['community_activity',function(s){ACT=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});renderActivity();renderHome();renderTrending()}],
   ['community_profiles',function(s){PROFILES=s.docs.map(function(d){var v=d.data();v.uid=d.id;return v});if(!ME){for(var _i=0;_i<PROFILES.length;_i++){if(PROFILES[_i].uid===UID){ME=PROFILES[_i];applyName();break}}}PROFERR=false;renderMembers();renderHome();renderMe()}],
   ['community_reports',function(s){REPORTS=s.docs.map(function(d){var v=d.data();v.id=d.id;return v});if(isOwner())renderAdmin()}]
@@ -607,9 +625,11 @@ function renderAnns(){
  var t=document.getElementById('newann');if(t)t.style.display=isOwner()?'':'none';
  chipRow('annfilters',[['all','All'],['legacy','Legacy'],['unbound','Life Unbound'],['both','Both'],['patch','Patch notes'],['event','Events']],annFilter,function(k){annFilter=k;renderAnns()});
  var list=ANNS.filter(function(a){return !a.hidden&&(annFilter==='all'||a.game===annFilter||(annFilter==='patch'&&a.type==='Patch notes')||(annFilter==='event'&&a.type==='Event'))});
+ list.sort(function(x,y){var px=x.type==='Patch notes'?1:0,py=y.type==='Patch notes'?1:0;return px!==py?py-px:(y.when||'').localeCompare(x.when||'')});
  document.getElementById('annlist').innerHTML=list.length?list.map(annCard).join(''):'<div class="empty">No announcements yet.<br>When the developer posts news, it lands here.</div>'}
 function annCard(a){var fresh=(Date.now()-new Date(a.when).getTime())<48*3600000;
- return '<div class="card ann'+(a.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'announcement\',\''+a.id+'\')">'+esc(a.title)+'</h4><div>'+(fresh?'<span class="badge done">New</span> ':'')+'<span class="badge meta">'+esc(a.type||'Announcement')+'</span> <span class="badge meta">'+esc(gameName(a.game))+'</span></div></div>'+(a.image?'<img src="'+esc(a.image)+'" alt="" style="width:100%;border-radius:9px;margin-top:10px;max-height:260px;object-fit:cover" onerror="this.style.display=\'none\'">':'')+'<p>'+(a.body.length>300?esc(a.body.slice(0,300))+'…':esc(a.body))+'</p><div class="foot"><span class="who">'+whoChip(a)+' · '+ago(a.when)+'</span><span style="display:flex;gap:6px"><button class="up" data-detail="announcement:'+a.id+'">Read</button><button class="up" data-report="announcement:'+a.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="announcement:'+a.id+'">Dev</button>':'')+'</span></div></div>'}
+ var vm=(a.type==='Patch notes'&&(a.body||'').match(/Version (\d+\.\d+\.\d+)/))||null;
+ return '<div class="card ann'+(a.type==='Patch notes'?' patchnote':'')+(a.hidden?' hidden':'')+'"><div class="top"><h4 onclick="openDetail(\'announcement\',\''+a.id+'\')">'+esc(a.title)+'</h4><div>'+(fresh?'<span class="badge done">New</span> ':'')+'<span class="badge meta">'+esc(a.type||'Announcement')+'</span>'+(vm?' <span class="badge ver">v'+vm[1]+'</span>':'')+' <span class="badge meta">'+esc(gameName(a.game))+'</span></div></div>'+(a.image?'<img src="'+esc(a.image)+'" alt="" style="width:100%;border-radius:9px;margin-top:10px;max-height:260px;object-fit:cover" onerror="this.style.display=\'none\'">':'')+'<p>'+(a.body.length>300?esc(a.body.slice(0,300))+'…':esc(a.body))+'</p><div class="foot"><span class="who">'+whoChip(a)+' · '+ago(a.when)+'</span><span style="display:flex;gap:6px"><button class="up" data-detail="announcement:'+a.id+'">Read</button><button class="up" data-report="announcement:'+a.id+'" title="Report">⚑</button>'+(isOwner()?'<button class="up" data-admin="announcement:'+a.id+'">Dev</button>':'')+'</span></div></div>'}
 function checkAnnNotifs(){if(!ME||!ANNS.length)return;var latest=ANNS[0];
  if(latest.hidden||latest.uid===UID)return;
  if(!ME.lastSeenAnn||latest.when>ME.lastSeenAnn){
@@ -633,6 +653,54 @@ function renderTrending(){
  document.getElementById('tr-bugs').innerHTML=bg.length?bg.map(bugCard).join(''):'<div class="empty">Nothing yet.</div>';
  var lb=PROFILES.filter(function(p){return p.name&&((p.rep||0)>0||totalPosts(p)>0)}).sort(function(a,b){return(b.rep||0)-(a.rep||0)}).slice(0,10);
  document.getElementById('tr-lb').innerHTML=lb.length?lb.map(function(p,i){return '<div class="lbrow"><span class="rank">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</span><span class="avatar">'+avInner(p.avatar)+'</span><span class="who-name" data-prof="'+esc(p.uid)+'">'+esc(p.name)+'</span><span class="lbstat">'+(p.rep||0)+' rep · '+totalPosts(p)+' posts</span></div>'}).join(''):'<div class="empty">No contributors yet. Be the first.</div>'}
+/* ---------- trending tabs, leaderboards, stats ---------- */
+var trendingTab='hot',lbBoardSel='rep';
+function trTab(t){trendingTab=t;var a=document.getElementById('tr-hot'),b=document.getElementById('tr-leader'),c=document.getElementById('tr-stats');if(a)a.style.display=t==='hot'?'':'none';if(b)b.style.display=t==='leader'?'':'none';if(c)c.style.display=t==='stats'?'':'none';var tb=document.getElementById('trtabs');if(tb)tb.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x.dataset.t===t)});if(t==='leader')renderLeaderboard();if(t==='stats')renderStats()}
+function lbRow(p,i,val){return '<div class="lbrow"><span class="rank">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</span><span class="avatar">'+avInner(p.avatar)+'</span><span class="who-name" data-prof="'+esc(p.uid)+'">'+esc(p.name)+'</span><span class="lbstat">'+val+'</span></div>'}
+function renderLeaderboard(){
+ chipRow('lbtabs',[['rep','Reputation'],['posts','Most posts'],['bugs','Bug hunters'],['features','Idea crafters'],['comments','Top commenters']],lbBoardSel,function(k){lbBoardSel=k;renderLeaderboard()});
+ var ps=PROFILES.filter(function(p){return p.name});
+ function byUid(arr,uid){return arr.filter(function(x){return x.uid===uid}).length}
+ var boards={
+  rep:function(){return ps.filter(function(p){return(p.rep||0)>0||totalPosts(p)>0}).sort(function(a,b){return(b.rep||0)-(a.rep||0)}).slice(0,20).map(function(p,i){return lbRow(p,i,(p.rep||0)+' rep · '+totalPosts(p)+' posts')})},
+  posts:function(){return ps.filter(function(p){return totalPosts(p)>0}).sort(function(a,b){return totalPosts(b)-totalPosts(a)}).slice(0,20).map(function(p,i){return lbRow(p,i,totalPosts(p)+' posts · '+(p.rep||0)+' rep')})},
+  bugs:function(){return ps.map(function(p){return[p,byUid(BUGS,p.uid)]}).filter(function(x){return x[1]>0}).sort(function(a,b){return b[1]-a[1]}).slice(0,20).map(function(x,i){return lbRow(x[0],i,x[1]+' bug report'+(x[1]===1?'':'s'))})},
+  features:function(){return ps.map(function(p){return[p,byUid(REQS,p.uid)]}).filter(function(x){return x[1]>0}).sort(function(a,b){return b[1]-a[1]}).slice(0,20).map(function(x,i){return lbRow(x[0],i,x[1]+' request'+(x[1]===1?'':'s'))})},
+  comments:function(){return ps.map(function(p){return[p,byUid(COMS,p.uid)]}).filter(function(x){return x[1]>0}).sort(function(a,b){return b[1]-a[1]}).slice(0,20).map(function(x,i){return lbRow(x[0],i,x[1]+' comment'+(x[1]===1?'':'s'))})}};
+ var rows=(boards[lbBoardSel]||boards.rep)();
+ document.getElementById('tr-lb2').innerHTML=rows.length?'<div class="panel">'+rows.join('')+'</div>':'<div class="empty">Nothing on this board yet. Post, comment and report to climb.</div>'}
+function renderStats(){
+ var named=PROFILES.filter(function(p){return p.name}),cutoff=Date.now()-7*86400000;
+ var fixedB=BUGS.filter(function(b){return bugStatusOf(b)==='fixed'}).length;
+ var impl=REQS.filter(function(r){return reqStatusOf(r)==='implemented'}).length;
+ var stats=[['Members',named.length],['Posts total',BUGS.length+REQS.length+DISC.length],['Comments',COMS.length],['Chat messages',CHAT.length],['Bugs',BUGS.length],['Fixed bugs',fixedB],['Fix rate',BUGS.length?Math.round(100*fixedB/BUGS.length)+'%':'—'],['Requests',REQS.length],['Implemented',impl],['Activity (7d)',ACT.filter(function(a){return new Date(a.when).getTime()>cutoff}).length]];
+ var top=REQS.filter(function(r){return !r.hidden}).slice().sort(function(a,b){return(b.votes||0)-(a.votes||0)})[0];
+ var talked=DISC.filter(function(d){return !d.hidden}).slice().sort(function(a,b){return commentCount('discussion',b.id)-commentCount('discussion',a.id)})[0];
+ function badgeN(p){return computeBadges(p).filter(function(x){return x.got}).length}
+ var decorated=named.slice().sort(function(a,b){return badgeN(b)-badgeN(a)}).filter(function(p){return badgeN(p)>0})[0];
+ var newest=named.slice().sort(function(a,b){return String(b.joined||'').localeCompare(String(a.joined||''))})[0];
+ var h='<div class="statrow">'+stats.map(function(s){return '<div class="stat"><b>'+s[1]+'</b><span>'+s[0]+'</span></div>'}).join('')+'</div>';
+ h+='<div class="grid2" style="margin-top:16px"><div><h3 class="sect">Highlights</h3><div class="panel">'
+  +(top?'<div class="feeditem"><div class="fi-ic">⬆️</div><div class="fi-tx"><b>Most wanted:</b> '+esc(top.title)+' — '+(top.votes||0)+' votes</div></div>':'')
+  +(talked?'<div class="feeditem"><div class="fi-ic">💬</div><div class="fi-tx"><b>Most discussed:</b> '+esc(talked.title)+' — '+commentCount('discussion',talked.id)+' comments</div></div>':'')
+  +(decorated?'<div class="feeditem"><div class="fi-ic">🏅</div><div class="fi-tx"><b>Most decorated:</b> '+esc(decorated.name)+' — '+badgeN(decorated)+' badges</div></div>':'')
+  +(newest?'<div class="feeditem"><div class="fi-ic">🌱</div><div class="fi-tx"><b>Newest member:</b> '+esc(newest.name)+'</div></div>':'')
+  +(!top&&!talked&&!decorated&&!newest?'<div class="empty">Nothing to highlight yet.</div>':'')+'</div></div>';
+ h+='<div><h3 class="sect">Community health</h3><div class="panel">'
+  +'<div class="feeditem"><div class="fi-ic">🛡️</div><div class="fi-tx"><b>Removed content:</b> '+BUGS.concat(REQS).concat(DISC).concat(ANNS).concat(COMS).filter(function(x){return x.hidden}).length+' item(s)</div></div>'
+  +(isOwner()?'<div class="feeditem"><div class="fi-ic">📬</div><div class="fi-tx"><b>Open reports:</b> '+REPORTS.filter(function(r){return r.status==='open'}).length+'</div></div>':'')
+  +'<div class="feeditem"><div class="fi-ic">🕰️</div><div class="fi-tx"><b>Active this week:</b> '+named.filter(function(p){return ACT.some(function(a){return a.uid===p.uid&&new Date(a.when).getTime()>cutoff})}).length+' member(s)</div></div>'
+  +'</div></div></div>';
+ document.getElementById('tr-statbody').innerHTML=h}
+/* ---------- admin users + comments moderation ---------- */
+function adminUsersRender(){var box=document.getElementById('admurows');if(!box)return;var si=document.getElementById('admusearch');var q=norm(si?si.value:'');
+ var list=PROFILES.filter(function(p){return p.name&&(!q||norm(p.name+' '+(p.bio||'')).indexOf(q)>=0)});
+ box.innerHTML=list.length?list.map(function(p){var mut=p.mutedUntil&&new Date(p.mutedUntil)>new Date();
+  return '<div class="lbrow"><span class="avatar">'+avInner(p.avatar)+'</span><span class="who-name" onclick="openProfile(\''+p.uid+'\')">'+esc(p.name)+'</span><span class="lbstat">'+(p.rep||0)+' rep · '+totalPosts(p)+' posts'+(mut?' · MUTED':'')+(p.warnings&&p.warnings.length?' · '+p.warnings.length+' warning(s)':'')+'</span><span style="display:flex;gap:6px;margin-left:10px;flex-wrap:wrap"><button class="up" onclick="adminUser(\''+p.uid+'\',\'warn\')">Warn</button><button class="up" onclick="adminUser(\''+p.uid+'\',\'mute\')">Mute 24h</button><button class="up" onclick="adminUser(\''+p.uid+'\',\'mute7\')">Mute 7d</button>'+(mut?'<button class="up" onclick="adminUser(\''+p.uid+'\',\'unmute\')">Unmute</button>':'')+'<button class="up" onclick="adminUser(\''+p.uid+'\',\'mod\')">'+(p.moderator?'Unmod':'Mod')+'</button></span></div>'}).join(''):'<div class="empty">No members match.</div>'}
+function seed410(){if(!isOwner())return;var mark='The Complete Clan Overhaul';
+ if(ANNS.some(function(a){return (a.title||'').indexOf(mark)>=0})){toast('The 4.1.0 patch note is already published.');return}
+ var B="Version 4.1.0. The clan system is rebuilt from the ground up. Seven rarity tiers: common, uncommon, rare, epic, legendary, mythical, and two secret clans that cannot appear in normal rolls at all. A full roster of 45 clans, adding the Otsutsuki, Hagoromo, Chinoike, Jugo, Iburi, Tsuchigumo, Onikuma, Hoki, Kohaku, Izuno, Lee and Ryu bloodlines, with Uzumaki now correctly Legendary. Every clan carries a real, named passive that touches actual math: stats, training speed, technique mastery, exams, missions, recovery, reputation, bond growth, tracking, evasion and resistances. Bonuses are derived live from your clan, so they can never stack or duplicate across refreshes, saves or age-ups. Weighted clan rolls now run at 48 / 27 / 15 / 7 / 2.5 / 0.5 percent, shifted by luck and owner controls, with clan roll history kept on your record. Twelve new clan techniques to unlock, from the Adamantine Sealing Chains to the Sixty-Four Palms. The clan tab is a new collection: search, rarity filters, full clan cards with passives and abilities, and a Forbidden Registry where the secret clans can be found at one in two million. Existing saves migrate safely: your clan stays yours, only its rarity label updates to the new scale.";
+ db.collection('community_announcements').add({type:'Patch notes',game:'unbound',title:'The Complete Clan Overhaul — Version 4.1.0',body:B,author:'Developer',uid:UID,when:new Date().toISOString()}).then(function(){pushActivity('announcement','unbound','posted patch notes: The Complete Clan Overhaul 4.1.0','The Complete Clan Overhaul — Version 4.1.0');pushMod('posted patch note','The Complete Clan Overhaul 4.1.0','');toast('4.1.0 patch note published.')}).catch(function(e){toast('Seed blocked. Check the rules.')})}
 function totalPosts(p){var c=p.counts||{};return(c.bugs||0)+(c.features||0)+(c.discussions||0)+(c.comments||0)+(c.chats||0)}
 function renderMembers(){var q=norm(document.getElementById('memsearch').value);
  var list=PROFILES.filter(function(p){return p.name&&(!q||norm(p.name+' '+(p.bio||'')).indexOf(q)>=0)}).sort(function(a,b){return(b.rep||0)-(a.rep||0)});
@@ -805,7 +873,7 @@ document.querySelectorAll('#admintabs button').forEach(function(b){b.onclick=fun
 function renderAdmin(){
  ownerUI();if(!isOwner()){document.getElementById('adminbody').innerHTML='<div class="empty">Owner access only.</div>';return}
  var el=document.getElementById('adminbody');
- if(adminTab==='compose'){el.innerHTML='<button class="btn" onclick="openModal(\'annmodal\')">Post New Announcement</button><h3 class="sect">Published</h3>'+(ANNS.length?ANNS.map(function(a){return '<div class="card ann"><div class="top"><h4>'+esc(a.title)+'</h4><div><span class="badge meta">'+esc(a.type||'Announcement')+'</span> <span class="badge meta">'+esc(gameName(a.game))+'</span></div></div><div class="foot"><span class="who">'+ago(a.when)+'</span><button class="up" onclick="hideDoc(\'announcement\',\''+a.id+'\',\'true\')">Remove</button></div></div>'}).join(''):'<div class="empty">Nothing published yet.</div>');
+ if(adminTab==='compose'){el.innerHTML='<button class="btn" onclick="openModal(\'annmodal\')">Post New Announcement</button><button class="btn" style="margin-left:8px" onclick="seed410()">Re-seed 4.1.0 patch note</button><h3 class="sect">Published</h3>'+(ANNS.length?ANNS.map(function(a){return '<div class="card ann"><div class="top"><h4>'+esc(a.title)+'</h4><div><span class="badge meta">'+esc(a.type||'Announcement')+'</span> <span class="badge meta">'+esc(gameName(a.game))+'</span></div></div><div class="foot"><span class="who">'+ago(a.when)+'</span><button class="up" onclick="hideDoc(\'announcement\',\''+a.id+'\',\'true\')">Remove</button></div></div>'}).join(''):'<div class="empty">Nothing published yet.</div>');
   document.getElementById('newann').style.display='';return}
  if(adminTab==='features'){el.innerHTML='<h3 class="sect">Feature requests — set status and reply as the developer</h3>'+(REQS.length?REQS.map(function(r){var st=reqStatusOf(r);
   return '<div class="card fq"><div class="top"><h4>'+esc(r.title)+'</h4><div><span class="badge meta">'+esc(gameName(r.game))+'</span> <span class="who">'+esc(r.author||'anonymous')+'</span></div></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><select id="fs-'+r.id+'">'+REQSTATUSES.map(function(s){return '<option value="'+s[0]+'"'+(s[0]===st?' selected':'')+'>'+s[1]+'</option>'}).join('')+'</select><input id="fr-'+r.id+'" placeholder="Developer response (optional)" value="'+esc(r.devReply||'')+'" style="flex:1;min-width:200px;background:#0f0a0c;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px;font-size:13px"><button class="btn mini" onclick="saveStatus(\'feature\',\''+r.id+'\')">Save</button></div></div>'}).join(''):'<div class="empty">No requests yet.</div>');return}
@@ -816,7 +884,8 @@ function renderAdmin(){
   scan(BUGS,'bug');scan(REQS,'feature');scan(DISC,'discussion');scan(ANNS,'announcement');scan(COMS,'comment');
   el.innerHTML='<h3 class="sect">Open reports ('+open.length+')</h3>'+(open.length?open.map(function(r){return '<div class="card"><div class="top"><h4>'+esc(r.reason)+' — '+esc(r.snippet||'')+'</h4><div><span class="badge meta">'+esc(r.ptype)+'</span></div></div>'+(r.detail?'<p>'+esc(r.detail)+'</p>':'')+'<div class="foot"><span class="who">reported by '+esc(r.by||'anonymous')+' · '+ago(r.when)+'</span><span style="display:flex;gap:6px"><button class="up" onclick="resolveReport(\''+r.id+'\')">Dismiss</button><button class="up danger" onclick="removeReported(\''+r.id+'\')">Remove Content</button></span></div></div>'}).join(''):'<div class="empty">No open reports.</div>')
   +'<h3 class="sect">Removed content ('+hid.length+')</h3>'+(hid.length?hid.map(function(x){return '<div class="card hidden"><div class="top"><h4>'+esc(x.d.title||x.d.text||'(comment)')+'</h4><div><span class="badge meta">'+esc(x.ptype)+'</span></div></div><div class="foot"><span class="who">'+esc(x.d.author||'anonymous')+'</span><button class="up" onclick="hideDoc(\''+x.ptype+'\',\''+x.d.id+'\',\'false\')">Restore</button></div></div>'}).join(''):'<div class="empty">Nothing removed.</div>');return}
- if(adminTab==='users'){el.innerHTML='<h3 class="sect">Members</h3>'+(PROFILES.length?PROFILES.map(function(p){return '<div class="lbrow"><span class="avatar">'+avInner(p.avatar)+'</span><span class="who-name" onclick="openProfile(\''+p.uid+'\')">'+esc(p.name||'(no name)')+'</span><span class="lbstat">'+(p.rep||0)+' rep · '+totalPosts(p)+' posts'+(p.mutedUntil&&new Date(p.mutedUntil)>new Date()?' · MUTED':'')+'</span><span style="display:flex;gap:6px;margin-left:10px;flex-wrap:wrap"><button class="up" onclick="adminUser(\''+p.uid+'\',\'warn\')">Warn</button><button class="up" onclick="adminUser(\''+p.uid+'\',\'mute\')">Mute 24h</button><button class="up" onclick="adminUser(\''+p.uid+'\',\'mod\')">'+(p.moderator?'Unmod':'Mod')+'</button></span></div>'}).join(''):'<div class="empty">No profiles yet.</div>');return}
+ if(adminTab==='users'){el.innerHTML='<h3 class="sect">Members</h3><input id="admusearch" placeholder="Search members..." oninput="adminUsersRender()" style="width:100%;background:#0f0a0c;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px;font-size:13px;margin-bottom:10px"><div id="admurows"></div>';adminUsersRender();return}
+ if(adminTab==='comments'){el.innerHTML='<h3 class="sect">Recent comments — hide or restore</h3>'+(COMS.length?COMS.slice(0,150).map(function(c){return '<div class="card'+(c.hidden?' hidden':'')+'"><div class="top"><h4>'+esc((c.text||'(comment)').slice(0,140))+'</h4><div><span class="badge meta">'+esc(c.ptype||'comment')+'</span></div></div><div class="foot"><span class="who">'+esc(c.author||'anonymous')+' · '+ago(c.when)+'</span><button class="up" onclick="hideDoc(\'comment\',\''+c.id+'\',\''+(c.hidden?'false':'true')+'\')">'+(c.hidden?'Restore':'Hide')+'</button></div></div>'}).join(''):'<div class="empty">No comments yet.</div>');return}
  if(adminTab==='log'){el.innerHTML='<h3 class="sect">Action log</h3>'+(MODLOG.length?MODLOG.map(function(m){return '<div class="feeditem"><div class="fi-ic">🛠️</div><div class="fi-tx"><b>'+esc(m.action)+'</b> — '+esc(m.target)+(m.detail?' · '+esc(m.detail):'')+'<span class="when">'+ago(m.when)+'</span></div></div>'}).join(''):'<div class="empty">No actions logged yet.</div>');return}
  if(adminTab==='stats'){el.innerHTML='<h3 class="sect">Live statistics</h3><div class="statrow">'+[['Members',PROFILES.filter(function(p){return p.name}).length],['Bugs',BUGS.length],['Open bugs',BUGS.filter(function(b){return['new','confirmed','investigating','fixing'].indexOf(bugStatusOf(b))>=0}).length],['Fixed bugs',BUGS.filter(function(b){return bugStatusOf(b)==='fixed'}).length],['Requests',REQS.length],['Implemented',REQS.filter(function(r){return reqStatusOf(r)==='implemented'}).length],['Discussions',DISC.length],['Comments',COMS.length],['Chat messages','live'],['Total votes',REQS.reduce(function(n,r){return n+(r.votes||0)},0)]].map(function(s){return '<div class="stat"><b>'+s[1]+'</b><span>'+s[0]+'</span></div>'}).join('')+'</div>';return}}
 function resolveReport(id){db.collection('community_reports').doc(id).update({status:'resolved'}).then(function(){pushMod('dismissed report','report '+id,'');toast('Report dismissed.')}).catch(function(){toast('Could not update.')})}
@@ -827,6 +896,8 @@ function adminUser(uid,action){var p=profOf(uid);var nm=p&&p.name||'this member'
   db.collection('community_profiles').doc(uid).update({warnings:firebase.firestore.FieldValue.arrayUnion({when:new Date().toISOString(),by:'Developer'})}).then(function(){notify(uid,'mod','You received a warning from the moderators. Please review the community rules.');pushMod('warned user',nm,'')}).catch(function(){toast('Could not warn. Check rules.')})}
  else if(action==='mute'){if(!confirm('Mute '+nm+' for 24 hours?'))return;
   db.collection('community_profiles').doc(uid).update({mutedUntil:new Date(Date.now()+86400000).toISOString()}).then(function(){notify(uid,'mod','You are muted for 24 hours.');pushMod('muted user 24h',nm,'');toast('Muted.')}).catch(function(){toast('Could not mute. Check rules.')})}
+ else if(action==='mute7'){if(!confirm('Mute '+nm+' for 7 days?'))return;db.collection('community_profiles').doc(uid).update({mutedUntil:new Date(Date.now()+7*86400000).toISOString()}).then(function(){notify(uid,'mod','You are muted for 7 days.');pushMod('muted user 7d',nm,'');toast('Muted for 7 days.')}).catch(function(){toast('Could not mute. Check rules.')})}
+ else if(action==='unmute'){db.collection('community_profiles').doc(uid).update({mutedUntil:''}).then(function(){pushMod('unmuted user',nm,'');toast('Unmuted.')}).catch(function(){toast('Could not unmute. Check rules.')})}
  else if(action==='mod'){var cur=p&&p.moderator;db.collection('community_profiles').doc(uid).update({moderator:!cur}).then(function(){pushMod(cur?'removed moderator':'granted moderator',nm,'');toast(cur?'Moderator removed.':'Moderator granted.')}).catch(function(){toast('Could not update. Check rules.')})}}
 /* ---------- announcements composer ---------- */
 document.getElementById('an-post').onclick=function(){
@@ -837,8 +908,8 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.0.2';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderMembers();renderMe();renderSearch()}
-window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.1.0';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 </body>
 </html>
