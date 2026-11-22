@@ -246,7 +246,7 @@ h1,h2,h3{margin:0;line-height:1.2}
 .notif{display:flex;gap:9px;align-items:flex-start;padding:7px 2px;font-size:13px;color:#cfc9bd}
 .notif .star{color:var(--gold)}
 /* age up */
-.ageupwrap{position:sticky;top:0;z-index:40;display:grid;place-items:center;margin:0 0 8px;padding:6px 0 10px;background:linear-gradient(180deg,rgba(12,12,16,.98) 82%,rgba(12,12,16,0))}
+.ageupwrap{position:sticky;top:var(--au-top,48px);z-index:39;display:grid;place-items:center;margin:0 0 8px;padding:6px 0 10px;background:linear-gradient(180deg,rgba(12,12,16,.98) 82%,rgba(12,12,16,0))}
 .ageup{background:radial-gradient(circle at 50% 40%,#a92335,var(--crimson-deep) 70%);color:#fff;
   font-weight:900;font-size:21px;letter-spacing:.14em;padding:16px 58px;border-radius:999px;
   border:2px solid rgba(255,255,255,.18);box-shadow:0 12px 34px rgba(194,42,62,.4);transition:transform .1s,filter .2s}
@@ -573,6 +573,7 @@ h1,h2,h3{margin:0;line-height:1.2}
     <button class="icobtn" id="btn-bell">🔔<span class="dot" id="bellDot" style="display:none">0</span></button>
     <button class="icobtn" id="btn-gear">⚙️</button>
   </div>
+  <div class="ageupwrap"><button class="ageup" id="btn-ageup">AGE UP<small>(1 Year)</small></button></div>
   <div class="dash">
     <div class="col-left" id="charCard"></div>
     <div class="col-mid">
@@ -581,7 +582,6 @@ h1,h2,h3{margin:0;line-height:1.2}
         <div class="eventcard" id="eventCard" style="display:none"></div>
       </div>
       <div class="view on" id="view-home">
-      <div class="ageupwrap"><button class="ageup" id="btn-ageup">AGE UP<small>(1 Year)</small></button></div>
         <div class="vtabs" id="vtabs"></div>
         <div id="vpane"></div>
       </div>
