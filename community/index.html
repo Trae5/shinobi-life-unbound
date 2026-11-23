@@ -1909,6 +1909,310 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
 })();
 </script>
 
+<script>
+(function () {
+  'use strict';
+
+  /* Paste after the existing page. No stored XP, reputation, level, or badge
+     totals are read. Existing reaction and status changes have no history,
+     so their award dates are unknown. Undated XP shares one capped bucket. */
+  function install() {
+    var nav = document.querySelector('.navrow');
+    if (!nav) return;
+    var COLORS = {Common:'#9ca3af', Uncommon:'#22c55e', Rare:'#3b82f6', Epic:'#a855f7', Legendary:'#eab308', Mythic:'#dc2626'};
+    var BADGES = [
+      ['first-words','First Words','Common','posts',1,'Make 1 post'],
+      ['conversationalist','Conversationalist','Uncommon','replies',10,'Make 10 replies'],
+      ['social-shinobi','Social Shinobi','Rare','repliesReceived',25,'Receive 25 replies'],
+      ['voice-village','Voice of the Village','Rare','likesReceived',100,'Receive 100 likes'],
+      ['community-pillar','Community Pillar','Epic','contributions',25,'Make 25 contributions'],
+      ['helpful-shinobi','Helpful Shinobi','Epic','helpfulMarks',10,'Receive 10 helpful marks'],
+      ['idea-machine','Idea Machine','Uncommon','features',5,'Suggest 5 features'],
+      ['visionary','Visionary','Rare','acceptedFeatures',3,'Have 3 features accepted'],
+      ['innovator','Innovator','Epic','acceptedFeatures',10,'Have 10 features accepted'],
+      ['bug-hunter','Bug Hunter','Rare','verifiedBugs',5,'Have 5 bugs verified'],
+      ['bug-slayer','Bug Slayer','Epic','resolvedBugs',10,'Have 10 bugs resolved'],
+      ['quality-tester','Quality Tester','Rare','testReports',10,'Submit 10 test reports'],
+      ['game-changer','Game Changer','Legendary','gameChanger',1,'Receive the Game Changer flag'],
+      ['rising-shinobi','Rising Shinobi','Common','level',5,'Reach level 5'],
+      ['elite-shinobi','Elite Shinobi','Rare','level',10,'Reach level 10'],
+      ['legend','Legend','Epic','level',25,'Reach level 25'],
+      ['loyal-shinobi','Loyal Shinobi','Uncommon','activeDays',30,'Be active on 30 different days'],
+      ['veteran','Veteran','Rare','activeDays',90,'Be active on 90 different days'],
+      ['og','OG','Uncommon','og',1,'Join by December 6, 2026, 11:59:59 PM CT'],
+      ['unbreakable-loyalty','Unbreakable Loyalty','Legendary','activeDays',365,'Be active on 365 different days'],
+      ['founder','Founder','Legendary','role:founder',1,'Hold the Founder role'],
+      ['developer','Developer','Rare','role:developer',1,'Hold the Developer role'],
+      ['moderator','Moderator','Rare','role:moderator',1,'Hold the Moderator role'],
+      ['tester','Tester','Rare','role:tester',1,'Hold the Tester role'],
+      ['artist','Artist','Rare','role:artist',1,'Hold the Artist role'],
+      ['creator','Creator','Rare','role:creator',1,'Hold the Creator role'],
+      ['event-champion','Event Champion','Mythic','role:eventchampion',1,'Hold the Event Champion role',true],
+      ['tournament-champion','Tournament Champion','Mythic','role:tournamentchampion',1,'Hold the Tournament Champion role',true]
+    ];
+    var TITLES = [
+      ['Academy Student',null],['Rising Shinobi','rising-shinobi'],
+      ['Known Shinobi','coming-soon'],['Veteran','coming-soon'],
+      ['Elite Contributor','coming-soon'],['Bug Hunter','bug-hunter'],
+      ['Idea Machine','idea-machine'],['Visionary','visionary'],
+      ['Innovator','innovator'],['Shadow Walker','coming-soon'],
+      ['Community Pillar','community-pillar'],['First Generation','og'],
+      ['Shinobi Legend','coming-soon'],['The Founder','founder']
+    ];
+    var state = {tab:'Overview', uid:null, role:{}, unsubscribe:null, draft:null, message:'', busy:false};
+    var tabs = ['Overview','Achievements','Badge Collection','Activity','Posts','Contributions'];
+    var style = document.createElement('style');
+    style.textContent = '@keyframes hub2glow{0%,100%{box-shadow:0 0 4px #dc262655}50%{box-shadow:0 0 15px #dc2626aa}}';
+    document.head.appendChild(style);
+
+    function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+    function time(v) {
+      if (!v) return null;
+      try {
+        if (typeof v.toDate === 'function') v = v.toDate();
+        else if (typeof v.seconds === 'number') v = v.seconds * 1000;
+        var n = new Date(v).getTime();
+        return Number.isFinite(n) ? n : null;
+      } catch (_) { return null; }
+    }
+    function date(v) { var n = time(v); return n === null ? 'date unknown' : new Date(n).toLocaleDateString(); }
+    function stamp(d) { return time(d && (d.when || d.createdAt || d.timestamp)); }
+    function uniq(a) {
+      var seen = new Set();
+      return (Array.isArray(a) ? a : []).filter(function(d){
+        if (!d || d.id == null || d.id === '') return false;
+        var id = String(d.id); if (seen.has(id)) return false; seen.add(id); return true;
+      });
+    }
+    function globals() {
+      return {
+        uid: typeof UID === 'undefined' ? null : UID,
+        profile: typeof ME === 'undefined' || !ME ? {} : ME,
+        chat: uniq(typeof CHAT === 'undefined' ? [] : CHAT),
+        bugs: uniq(typeof BUGS === 'undefined' ? [] : BUGS),
+        features: uniq(typeof REQS === 'undefined' ? [] : REQS),
+        discussions: uniq(typeof DISC === 'undefined' ? [] : DISC),
+        comments: uniq(typeof COMS === 'undefined' ? [] : COMS)
+      };
+    }
+    function own(d, uid) { return !!uid && String(d.uid || '') === String(uid); }
+    function status(d) { return String(d.status || '').trim().toLowerCase(); }
+    function normalized(v) { return String(v || '').toLowerCase().replace(/[^a-z0-9]/g,''); }
+    function roles(obj) {
+      var out = new Set();
+      function add(v) { if (typeof v === 'string') out.add(normalized(v)); }
+      if (!obj || typeof obj !== 'object') return out;
+      add(obj.role);
+      if (Array.isArray(obj.roles)) obj.roles.forEach(add);
+      if (obj.roles && !Array.isArray(obj.roles) && typeof obj.roles === 'object')
+        Object.keys(obj.roles).forEach(function(k){if (obj.roles[k] === true) add(k);});
+      Object.keys(obj).forEach(function(k){if (obj[k] === true) add(k);});
+      return out;
+    }
+    function thresholdDate(values, goal) {
+      if (values.length < goal || values.some(function(v){return v === null;})) return null;
+      return values.slice().sort(function(a,b){return a-b;})[goal-1];
+    }
+    function reactUsers(d, kind, uid) {
+      var result = new Set(), r = d.reactions || {};
+      if (r && typeof r === 'object' && !Array.isArray(r)) Object.keys(r).forEach(function(who){
+        if (String(who) === String(uid)) return;
+        var emojis = r[who];
+        if (!emojis || typeof emojis !== 'object') return;
+        var match = kind === 'like' ? (emojis['👍'] === true || emojis.like === true) : emojis.helpful === true;
+        if (match) result.add(who);
+      });
+      if (kind === 'helpful' && d.helpfulMarks && typeof d.helpfulMarks === 'object' && !Array.isArray(d.helpfulMarks))
+        Object.keys(d.helpfulMarks).forEach(function(who){if (String(who) !== String(uid) && d.helpfulMarks[who] === true) result.add(who);});
+      return result;
+    }
+    function derive(g) {
+      var uid = g.uid, p = g.profile, rs = roles(state.role);
+      var ownChat = g.chat.filter(function(d){return own(d,uid);});
+      var ownDisc = g.discussions.filter(function(d){return own(d,uid);});
+      var ownBugs = g.bugs.filter(function(d){return own(d,uid);});
+      var ownFeatures = g.features.filter(function(d){return own(d,uid);});
+      var ownComments = g.comments.filter(function(d){return own(d,uid);});
+      var posts = ownDisc.concat(ownChat), authored = posts.concat(ownBugs,ownFeatures,ownComments);
+      var parentIds = new Set(posts.concat(ownBugs,ownFeatures).map(function(d){return String(d.id);}));
+      var repliesReceived = g.comments.filter(function(d){return !own(d,uid) && d.parent != null && parentIds.has(String(d.parent));});
+      var liked = [], distinctLikers = new Set(), helpfulMarks = 0, helpfulReplies = 0;
+      authored.forEach(function(d){
+        reactUsers(d,'like',uid).forEach(function(who){liked.push({doc:d,who:who}); distinctLikers.add(who);});
+        var count = reactUsers(d,'helpful',uid).size;
+        helpfulMarks += count;
+        if (ownComments.indexOf(d) !== -1 && (count > 0 || d.helpful === true)) helpfulReplies++;
+      });
+      var accepted = ownFeatures.filter(function(d){return status(d) === 'accepted';});
+      var verified = ownBugs.filter(function(d){return status(d) === 'verified';});
+      var resolved = ownBugs.filter(function(d){return status(d) === 'resolved';});
+      var tests = authored.filter(function(d){return d.testReport === true || normalized(d.type) === 'testreport';});
+      var feedback = authored.filter(function(d){return d.helpfulFeedback === true;});
+      var days = new Map();
+      authored.forEach(function(d){var t=stamp(d); if(t !== null){var day=new Date(t).toISOString().slice(0,10); if(!days.has(day) || t<days.get(day)) days.set(day,t);}});
+      /* Event/challenge records count only explicit completed objects with IDs. */
+      function completed(list) {
+        var seen = new Set();
+        return (Array.isArray(list) ? list : []).filter(function(x){
+          if (!x || typeof x !== 'object' || x.completed !== true || x.id == null) return false;
+          var id=String(x.id); if(seen.has(id)) return false; seen.add(id); return true;
+        });
+      }
+      var events=completed(p.events), challenges=completed(p.challenges), awards=[];
+      function add(kind, arr, amount, dated) {
+        arr.forEach(function(d,i){awards.push({key:kind+':'+String(d.id == null ? i : d.id), amount:amount, at:dated ? stamp(d) : null});});
+      }
+      add('chat',ownChat,25,true); add('discussion',ownDisc,25,true); add('reply',ownComments,10,true);
+      add('accepted',accepted,75,false); add('verified',verified,40,false); add('resolved',resolved,60,false);
+      add('event',events,50,true); add('challenge',challenges,100,true);
+      liked.forEach(function(x){awards.push({key:'like:'+String(x.doc.id)+':'+x.who,amount:5,at:null});});
+      awards.sort(function(a,b){return (a.at === null ? Infinity : a.at)-(b.at === null ? Infinity : b.at) || a.key.localeCompare(b.key);});
+      var buckets={}, xp=0;
+      awards.forEach(function(a){
+        var day=a.at === null ? 'unknown' : new Date(a.at).toISOString().slice(0,10);
+        var granted=Math.max(0,Math.min(a.amount,500-(buckets[day] || 0)));
+        buckets[day]=(buckets[day] || 0)+granted; xp+=granted;
+      });
+      function xpForLevel(l){return Math.round(100*Math.pow(l,1.6));}
+      var level=1; while(xp>=xpForLevel(level+1)) level++;
+      var tier=level<=5?'Academy Student':level<=10?'Genin':level<=15?'Chunin':level<=20?'Jonin':level<=30?'Elite Shinobi':level<=40?'ANBU':level<=50?'Kage':'Legendary Shinobi';
+      var breakdown={helpfulReplies:helpfulReplies*2, distinctLikers:distinctLikers.size*3, verifiedBugs:verified.length*10, acceptedFeatures:accepted.length*15, helpfulFeedback:feedback.length*8, events:events.length*5};
+      var reputation=Object.keys(breakdown).reduce(function(n,k){return n+breakdown[k];},0);
+      var joined=time(p.joinedAt || p.createdAt), cutoff=Date.parse('2026-12-06T23:59:59-06:00');
+      var m={posts:posts.length,replies:ownComments.length,repliesReceived:repliesReceived.length,likesReceived:liked.length,contributions:authored.length,helpfulMarks:helpfulMarks,features:ownFeatures.length,acceptedFeatures:accepted.length,verifiedBugs:verified.length,resolvedBugs:resolved.length,testReports:tests.length,level:level,activeDays:days.size,og:joined !== null && joined <= cutoff ? 1 : 0,gameChanger:(p.gameChanger === true || !!(p.flags && p.flags.gameChanger === true)) ? 1 : 0};
+      rs.forEach(function(r){m['role:'+r]=1;});
+      var dates={posts:posts.map(stamp),replies:ownComments.map(stamp),repliesReceived:repliesReceived.map(stamp),contributions:authored.map(stamp),features:ownFeatures.map(stamp),testReports:tests.map(stamp),activeDays:Array.from(days.values())};
+      var badges=BADGES.map(function(b){
+        var current=Number(m[b[3]] || 0), earned=current>=b[4], when=null;
+        if (earned && dates[b[3]]) when=thresholdDate(dates[b[3]],b[4]);
+        if (earned && b[3] === 'og') when=joined;
+        return {id:b[0],name:b[1],rarity:b[2],metric:b[3],goal:b[4],requirement:b[5],limited:!!b[6],current:current,earned:earned,when:when,progress:Math.max(0,Math.min(100,current/b[4]*100))};
+      });
+      var unlocked=new Set(badges.filter(function(b){return b.earned;}).map(function(b){return b.id;}));
+      var latest=time(p.lastActive || p.lastActiveAt || p.lastSeenAt);
+      authored.forEach(function(d){var t=stamp(d); if(t !== null && (latest === null || t>latest)) latest=t;});
+      return {profile:p,uid:uid,posts:posts,authored:authored,badges:badges,unlocked:unlocked,metrics:m,xp:xp,level:level,tier:tier,xpStart:level===1?0:xpForLevel(level),xpNext:xpForLevel(level+1),reputation:reputation,breakdown:breakdown,joined:joined,latest:latest};
+    }
+    function existingTitles() {
+      var select=document.querySelector('#ep-title');
+      if (!select || !select.options) return [];
+      return Array.from(select.options).filter(function(o){return !o.disabled && o.value && o.textContent.trim();}).map(function(o){return {value:o.value,label:o.textContent.trim()};});
+    }
+    function availableTitles(data) {
+      var seen=new Set(), out=[];
+      existingTitles().forEach(function(t){if(!seen.has(t.value)){seen.add(t.value);out.push(t);}});
+      TITLES.forEach(function(t){if(t[1] !== 'coming-soon' && (t[1] === null || data.unlocked.has(t[1])) && !seen.has(t[0])){seen.add(t[0]);out.push({value:t[0],label:t[0]});}});
+      return out;
+    }
+    function card(b) {
+      var color=COLORS[b.rarity], background=b.limited?'linear-gradient(135deg,#7f1d1d,#5b21b6)':'#17141d';
+      return '<div style="border:1px solid '+color+';background:'+background+';border-radius:10px;padding:12px;opacity:'+(b.earned?'1':'.65')+';'+(b.rarity==='Mythic'?'animation:hub2glow 2s infinite;':'')+'">'+
+        '<strong style="color:'+color+'">'+(b.earned?'✓ ':'🔒 ')+esc(b.name)+'</strong><div style="font-size:.8em;color:'+color+'">'+esc(b.rarity)+(b.limited?' · Limited':'')+'</div><div>'+esc(b.requirement)+'</div>'+
+        (b.earned?'<div>Unlocked: '+date(b.when)+'</div>':'<div>'+Math.min(b.current,b.goal)+' / '+b.goal+'</div><div style="height:6px;background:#333;border-radius:6px;overflow:hidden"><div style="height:100%;width:'+b.progress+'%;background:'+color+'"></div></div>')+'</div>';
+    }
+    function cards(items) { return items.length?'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'+items.map(card).join('')+'</div>':'<p>None yet.</p>'; }
+    function list(items) {
+      if(!items.length) return '<p>Nothing yet.</p>';
+      return items.slice().sort(function(a,b){return (stamp(b)||0)-(stamp(a)||0);}).map(function(d){
+        var text=d.title || d.text || d.body || d.content || 'Contribution';
+        return '<div style="padding:10px 0;border-bottom:1px solid #444;overflow-wrap:anywhere">'+esc(text)+'<div style="opacity:.7;font-size:.85em">'+date(stamp(d))+'</div></div>';
+      }).join('');
+    }
+    function avatar(p) {
+      var a=String(p.avatar || '👤');
+      if (/^https?:\/\//i.test(a) || /^data:image\/(png|jpeg|gif|webp);base64,/i.test(a)) return '<img alt="" src="'+esc(a)+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover">';
+      return '<span style="font-size:42px">'+esc(a)+'</span>';
+    }
+    function render() {
+      var panel=document.querySelector('#mepanel');
+      if(!panel) return;
+      var g=globals(), data=derive(g), p=data.profile, earned=data.badges.filter(function(b){return b.earned;});
+      var saved=Array.isArray(p.showcase)?p.showcase:[];
+      saved=Array.from(new Set(saved.map(String))).filter(function(id){return data.unlocked.has(id);}).slice(0,3);
+      if(state.draft === null) state.draft=saved.slice();
+      state.draft=state.draft.filter(function(id){return data.unlocked.has(id);}).slice(0,3);
+      var titles=availableTitles(data), titleSet=new Set(titles.map(function(t){return t.value;}));
+      var equipped=String(p.equippedTitle || p.title || ''); if(!titleSet.has(equipped)) equipped='';
+      var shown=saved.map(function(id){return data.badges.find(function(b){return b.id===id;});}).filter(Boolean);
+      var pct=Math.max(0,Math.min(100,(data.xp-data.xpStart)/(data.xpNext-data.xpStart)*100));
+      var header='<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'+avatar(p)+'<div><h2 style="margin:0">'+esc(p.name || p.displayName || 'Community member')+'</h2><div>@'+esc(p.username || p.handle || 'not set')+'</div><div>'+esc(equipped || 'No title equipped')+'</div><div>'+esc(p.bio || 'No bio yet.')+'</div></div></div>'+
+        '<p>Level '+data.level+' · '+esc(data.tier)+' · '+data.xp+' XP / '+data.xpNext+' XP</p><div style="height:8px;background:#333;border-radius:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#eab308"></div></div>'+
+        '<p>Reputation: '+data.reputation+' · Badges: '+earned.length+' / '+data.badges.length+'<br>Joined: '+date(data.joined)+' · Last active: '+date(data.latest)+'</p>'+
+        '<div>Showcase: '+(shown.length?shown.map(function(b){return '<span style="color:'+COLORS[b.rarity]+'">'+esc(b.name)+'</span>';}).join(' · '):'None')+'</div>';
+      var body='';
+      if(state.tab==='Overview') {
+        body='<h3>Reputation breakdown</h3><p>Helpful replies: '+data.breakdown.helpfulReplies+' · Distinct likers: '+data.breakdown.distinctLikers+' · Verified bugs: '+data.breakdown.verifiedBugs+' · Accepted features: '+data.breakdown.acceptedFeatures+' · Helpful feedback: '+data.breakdown.helpfulFeedback+' · Events: '+data.breakdown.events+'</p>'+
+          '<h3>Equipped title</h3><select data-hub2-title><option value="">No title</option>'+titles.map(function(t){return '<option value="'+esc(t.value)+'"'+(t.value===equipped?' selected':'')+'>'+esc(t.label)+'</option>';}).join('')+'</select> <button class="btn" data-hub2-action="save-title"'+(state.busy?' disabled':'')+'>Save title</button>'+
+          '<p>Other collectible titles with unspecified unlock conditions are locked until their conditions are defined.</p><h3>Choose up to 3 showcased badges</h3>'+
+          (earned.length?earned.map(function(b){return '<label style="display:inline-block;margin:4px 12px 4px 0"><input type="checkbox" data-hub2-badge="'+esc(b.id)+'"'+(state.draft.indexOf(b.id)>=0?' checked':'')+'> '+esc(b.name)+'</label>';}).join(''):'<p>Earn a badge to showcase it.</p>')+
+          '<p><button class="btn" data-hub2-action="save-showcase"'+(state.busy?' disabled':'')+'>Save showcase</button></p>';
+      } else if(state.tab==='Achievements') {
+        body='<h3>Achievements</h3><p>Posts '+data.metrics.posts+' · Replies '+data.metrics.replies+' · Contributions '+data.metrics.contributions+' · Active days '+data.metrics.activeDays+'</p><p>Active days use dates of loaded authored documents and are approximate.</p>'+cards(earned);
+      } else if(state.tab==='Badge Collection') {
+        var near=data.badges.filter(function(b){return !b.earned && b.progress>0 && b.progress<100;}).sort(function(a,b){return b.progress-a.progress || a.name.localeCompare(b.name);}).slice(0,6);
+        body='<h3>In reach</h3>'+cards(near)+'<h3>Earned</h3>'+cards(earned)+'<details><summary>Locked ('+data.badges.filter(function(b){return !b.earned;}).length+')</summary>'+cards(data.badges.filter(function(b){return !b.earned;}))+'</details>';
+      } else if(state.tab==='Activity') body='<h3>Activity</h3>'+list(data.authored);
+      else if(state.tab==='Posts') body='<h3>Posts</h3>'+list(data.posts);
+      else body='<h3>Contributions</h3>'+list(data.authored);
+      panel.innerHTML='<div data-hub2-root style="padding:16px;border-radius:12px;background:#111018;color:#eee">'+header+'<div style="display:flex;gap:6px;flex-wrap:wrap;margin:18px 0">'+tabs.map(function(t){return '<button class="btn'+(state.tab===t?'':' ghost')+'" data-hub2-tab="'+esc(t)+'" aria-selected="'+(state.tab===t)+'">'+esc(t)+'</button>';}).join('')+'</div><div aria-live="polite">'+esc(state.message)+'</div>'+body+'</div>';
+    }
+    function updateRole() {
+      var g=globals(), uid=g.uid;
+      if(uid !== state.uid) {
+        if(state.unsubscribe) state.unsubscribe();
+        state.uid=uid; state.unsubscribe=null; state.role={}; state.draft=null;
+      }
+      if(!uid || state.unsubscribe || typeof db === 'undefined' || !db) return;
+      try {
+        state.unsubscribe=db.collection('community_roles').doc(String(uid)).onSnapshot(function(s){state.role=s.exists?s.data()||{}:{};render();},function(){state.role={};render();});
+      } catch (_) { state.role={}; }
+    }
+    function save(field,value) {
+      var g=globals();
+      if(!g.uid || typeof db === 'undefined' || !db){state.message='Sign in is required to save.';render();return;}
+      state.busy=true; state.message='Saving…'; render();
+      var change={}; change[field]=value;
+      db.collection('community_profiles').doc(String(g.uid)).set(change,{merge:true}).then(function(){
+        if(typeof ME !== 'undefined' && ME) ME[field]=value;
+        state.busy=false; state.message='Saved.'; render();
+      }).catch(function(){state.busy=false;state.message='Could not save. Please try again.';render();});
+    }
+    document.addEventListener('click',function(e){
+      var navButton=e.target.closest && e.target.closest('.navrow [data-v]');
+      if(navButton && navButton.getAttribute('data-v')==='me'){state.draft=null;setTimeout(function(){updateRole();render();},0);}
+      var root=e.target.closest && e.target.closest('[data-hub2-root]'); if(!root) return;
+      var tab=e.target.closest('[data-hub2-tab]');
+      if(tab){state.tab=tab.getAttribute('data-hub2-tab');state.message='';render();return;}
+      var action=e.target.closest('[data-hub2-action]'); if(!action || state.busy) return;
+      var data=derive(globals());
+      if(action.getAttribute('data-hub2-action')==='save-title'){
+        var sel=root.querySelector('[data-hub2-title]'), value=sel?sel.value:'';
+        if(value && !availableTitles(data).some(function(t){return t.value===value;})){state.message='That title is not unlocked.';render();return;}
+        save('equippedTitle',value);
+      } else if(action.getAttribute('data-hub2-action')==='save-showcase') {
+        var chosen=state.draft.filter(function(id){return data.unlocked.has(id);});
+        if(chosen.length>3){state.message='Choose no more than 3 badges.';render();return;}
+        save('showcase',chosen);
+      }
+    });
+    document.addEventListener('change',function(e){
+      var box=e.target;
+      if(!box.matches || !box.matches('[data-hub2-badge]')) return;
+      var id=box.getAttribute('data-hub2-badge');
+      state.draft=state.draft.filter(function(x){return x!==id;});
+      if(box.checked){if(state.draft.length>=3){box.checked=false;state.message='Choose no more than 3 badges.';render();return;}state.draft.push(id);}
+    });
+    var panel=document.querySelector('#mepanel');
+    if(panel){
+      new MutationObserver(function(){if(!panel.querySelector('[data-hub2-root]')) render();}).observe(panel,{childList:true});
+      updateRole(); render();
+      setInterval(function(){updateRole();if(document.querySelector('#view-me') && document.querySelector('#view-me').offsetParent !== null) render();},30000);
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true});
+  else install();
+})();
+</script>
 </body>
 </html>
 
