@@ -908,7 +908,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.3.0';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.3.1';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -1913,8 +1913,9 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
   'use strict';
 
   /* YouTube tab. Adds a YouTube button to the hub nav. Paste a YouTube link
-     or video ID to watch it embedded right in the hub (youtube-nocookie embed
-     player). Search opens youtube.com in a new tab, since YouTube blocks its
+     or video ID to watch it embedded right in the hub (YouTube embed
+     player; falls back to opening YouTube directly when a network
+     blocks the embed).. Search opens youtube.com in a new tab, since YouTube blocks its
      search pages from being framed. No APIs, no keys, nothing stored. */
   function install() {
     var nav = document.querySelector('.navrow');
@@ -1959,6 +1960,7 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
       '<p style="color:var(--dim,#889)">Watch videos right here in the hub, or hop out to search.</p>' +
       '<div class="yt-in"><input id="ytq" type="text" placeholder="paste a YouTube link or video ID" aria-label="YouTube link or video ID"><button class="btn" id="ytgo" type="button">Watch</button><button class="btn" id="ytsearch" type="button">Search YouTube</button></div>' +
       '<div id="ytplayer"><div class="yt-empty">Paste a YouTube link or video ID above, then hit Watch.</div></div>' +
+      '<div id="ytfallback" class="yt-note" style="display:none"></div>' +
       '<div class="yt-note">Paste any youtube.com or youtu.be link to watch it embedded here. Search opens YouTube in a new tab, because YouTube blocks its search pages from being embedded. Nothing is tracked or stored by the hub.</div>';
     var footer = document.querySelector('footer');
     if (footer && footer.parentNode) footer.parentNode.insertBefore(sec, footer); else document.body.appendChild(sec);
@@ -1973,8 +1975,12 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
     }
     function watch() {
       var id = vid(q.value);
-      if (!id) { holder.innerHTML = '<div class="yt-empty">That one didn\'t look like a YouTube link or video ID. Paste a full link or the 11-character ID.</div>'; return; }
-      holder.innerHTML = '<div class="yt-frame"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>';
+      if (!id) { var fb=sec.querySelector('#ytfallback'); if (fb) fb.style.display='none'; holder.innerHTML = '<div class="yt-empty">That one didn\'t look like a YouTube link or video ID. Paste a full link or the 11-character ID.</div>'; return; }
+      var fb=sec.querySelector('#ytfallback');
+      var src='https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
+      holder.innerHTML = '<div class="yt-frame"><iframe src="' + src + '" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>';
+      fb.innerHTML = "Some networks block embedded videos. If it stays black, <a href='https://www.youtube.com/watch?v=" + id + "' target='_blank' rel='noopener'>open it on YouTube here</a>.";
+      fb.style.display='block';
     }
     sec.querySelector('#ytgo').addEventListener('click', watch);
     q.addEventListener('keydown', function (e) { if (e.key === 'Enter') watch(); });
