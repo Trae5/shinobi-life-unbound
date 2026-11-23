@@ -908,7 +908,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.0';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.1';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -2212,6 +2212,33 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true});
   else install();
 })();
+</script>
+
+<script>
+/* Corner chat notification — isolated from the community hub. Pops a corner notice when a new chat message lands while you are not on the Chat tab. */
+(function(){try{
+var box=null,hideT=null,notified=0,primed=false;
+function chatOn(){var b=document.querySelector('nav button[data-v="chat"]');return !!(b&&b.classList.contains('on'))}
+box=document.createElement('div');box.id='chat-corner-notif';
+box.style.cssText='position:fixed;right:14px;bottom:14px;z-index:300;display:none;max-width:300px;background:var(--panel);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.55);opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s';
+box.innerHTML='<div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)">New chat message</div><div id="ccn-text" style="font-size:13px;color:var(--ink);margin-top:3px;overflow-wrap:anywhere"></div>';
+document.body.appendChild(box);
+function hide(){box.style.opacity='0';box.style.transform='translateY(8px)';setTimeout(function(){box.style.display='none'},260)}
+function show(nm,tx){var t=document.getElementById('ccn-text');if(t)t.textContent=nm+': '+tx;box.style.display='block';requestAnimationFrame(function(){box.style.opacity='1';box.style.transform='translateY(0)'});if(hideT)clearTimeout(hideT);hideT=setTimeout(hide,7000)}
+box.addEventListener('click',function(){var b=document.querySelector('nav button[data-v="chat"]');if(b)b.click();hide()});
+if(typeof db==='undefined'||!db)return;
+db.collection('community_chat').orderBy('when','desc').limit(40).onSnapshot(function(s){
+ if(!UID)return;
+ var best=null,bestMs=0;
+ s.docs.forEach(function(d){var v=d.data();if(!v||v.uid===UID)return;var ms=typeof v.when==='string'?Date.parse(v.when):0;if(!ms||isNaN(ms))return;if(!best||ms>bestMs){best=v;bestMs=ms}});
+ if(!best)return;
+ notified=Math.max(notified,bestMs);
+ if(!primed){primed=true;return}
+ if(chatOn())return;
+ if(Date.now()-bestMs>120000)return;
+ show(String(best.name||'Someone'),String(best.text||'').slice(0,90));
+},function(){});
+}catch(e){console.warn('chat corner notification unavailable',e)}})();
 </script>
 </body>
 </html>
