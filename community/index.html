@@ -908,7 +908,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.3.1';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.3.2';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -1973,14 +1973,36 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
       if (/^[A-Za-z0-9_-]{11}$/.test(v)) return v;
       return '';
     }
+    var apiAsked=false, apiQueue=null, player=null;
+    function loadApi() {
+      if (apiAsked) return; apiAsked=true;
+      window.onYouTubeIframeAPIReady = function () { if (apiQueue) { var f=apiQueue; apiQueue=null; f(); } };
+      var t=document.createElement('script'); t.src='https://www.youtube.com/iframe_api'; document.head.appendChild(t);
+    }
+    function showFallback(id, why) {
+      holder.innerHTML='<div class="yt-empty">'+why+'<br><a class="btn" style="display:inline-block;margin-top:12px;padding:10px 18px" href="https://www.youtube.com/watch?v='+id+'" target="_blank" rel="noopener">Watch on YouTube</a></div>';
+      var fb=sec.querySelector('#ytfallback'); if (fb) fb.style.display='none';
+    }
     function watch() {
       var id = vid(q.value);
-      if (!id) { var fb=sec.querySelector('#ytfallback'); if (fb) fb.style.display='none'; holder.innerHTML = '<div class="yt-empty">That one didn\'t look like a YouTube link or video ID. Paste a full link or the 11-character ID.</div>'; return; }
-      var fb=sec.querySelector('#ytfallback');
-      var src='https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
-      holder.innerHTML = '<div class="yt-frame"><iframe src="' + src + '" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>';
-      fb.innerHTML = "Some networks block embedded videos. If it stays black, <a href='https://www.youtube.com/watch?v=" + id + "' target='_blank' rel='noopener'>open it on YouTube here</a>.";
-      fb.style.display='block';
+      var fb=sec.querySelector('#ytfallback'); if (fb) fb.style.display='none';
+      if (!id) { holder.innerHTML = '<div class="yt-empty">That one didn\'t look like a YouTube link or video ID. Paste a full link or the 11-character ID.</div>'; return; }
+      loadApi();
+      var go=function(){
+        try { if (player && player.destroy) player.destroy(); } catch(e){}
+        holder.innerHTML='<div class="yt-frame"><div id="ytembed"></div></div>';
+        var settled=false;
+        var to=setTimeout(function(){ if(!settled) showFallback(id,"This video didn't start playing here. Your network may block embedded videos."); }, 9000);
+        player=new YT.Player('ytembed',{videoId:id,playerVars:{autoplay:1,rel:0},events:{
+          onReady:function(){ settled=true; clearTimeout(to); },
+          onStateChange:function(e){ if(e.data===1){ settled=true; clearTimeout(to); } },
+          onError:function(e){ settled=true; clearTimeout(to);
+            if(e.data===101||e.data===150) showFallback(id,"The uploader doesn't allow this video to be embedded.");
+            else showFallback(id,"YouTube couldn't play this one here.");
+          }
+        }});
+      };
+      if (window.YT && window.YT.Player) go(); else { apiQueue=go; }
     }
     sec.querySelector('#ytgo').addEventListener('click', watch);
     q.addEventListener('keydown', function (e) { if (e.key === 'Enter') watch(); });
