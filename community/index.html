@@ -908,7 +908,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.2';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.3';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -2218,6 +2218,11 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
 /* Corner chat notification — isolated from the community hub. Pops a corner notice when a new chat message lands while you are not on the Chat tab. */
 (function(){try{
 var box=null,hideT=null,notified=0,primed=false;
+var baseTitle=document.title,unreadN=0,favImg=null;
+function drawFavicon(){try{var c=document.createElement('canvas');c.width=64;c.height=64;var x=c.getContext('2d');if(favImg&&favImg.width){x.drawImage(favImg,0,0,64,64)}else{x.fillStyle='#15171c';x.fillRect(0,0,64,64);x.strokeStyle='#b8963e';x.lineWidth=4;x.strokeRect(2,2,60,60)}if(unreadN>0){x.fillStyle='#e0344b';x.beginPath();x.arc(50,14,11,0,6.3);x.fill()}var l=document.querySelector('link[rel="icon"]');if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l)}l.href=c.toDataURL('image/png')}catch(e){}}
+function refreshBadge(){try{document.title=unreadN>0?((unreadN>9?'\ud83d\udcac 9':'\ud83d\udcac '+unreadN)+' \u2014 '+baseTitle):baseTitle;if(unreadN>0&&!favImg){favImg=new Image();favImg.onload=drawFavicon;favImg.onerror=function(){favImg=null;drawFavicon()};var fl=document.querySelector('link[rel="icon"]');favImg.src=fl&&fl.href?fl.href:'/favicon.ico'}drawFavicon()}catch(e){}}
+function clearBadge(){if(unreadN){unreadN=0;refreshBadge()}}
+
 function chatOn(){var b=document.querySelector('nav button[data-v="chat"]');return !!(b&&b.classList.contains('on'))}
 box=document.createElement('div');box.id='chat-corner-notif';
 box.style.cssText='position:fixed;right:14px;bottom:14px;z-index:300;display:none;max-width:300px;background:var(--panel);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.55);opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s';
@@ -2226,8 +2231,8 @@ document.body.appendChild(box);
 function hide(){box.style.opacity='0';box.style.transform='translateY(8px)';setTimeout(function(){box.style.display='none'},260)}
 function show(nm,tx){var t=document.getElementById('ccn-text');if(t)t.textContent=nm+': '+tx;box.style.display='block';requestAnimationFrame(function(){box.style.opacity='1';box.style.transform='translateY(0)'});if(hideT)clearTimeout(hideT);hideT=setTimeout(hide,7000)}
 function askNotif(){try{if(window.Notification&&Notification.permission==='default')Notification.requestPermission()}catch(e){}}
-function notify(nm,tx){var hidden=document.visibilityState==='hidden';if(hidden&&window.Notification&&Notification.permission==='granted'){try{var n=new Notification('Shinobi hub \u2014 new chat message',{body:nm+': '+tx,tag:'shinobi-chat-notif'});n.onclick=function(){try{window.focus();var b=document.querySelector('nav button[data-v="chat"]');if(b)b.click()}catch(e){}try{n.close()}catch(e){}};return}catch(e){}}if(!hidden)show(nm,tx)}
-var cbtn=document.querySelector('nav button[data-v="chat"]');if(cbtn)cbtn.addEventListener('click',askNotif);
+function notify(nm,tx){unreadN=Math.min(unreadN+1,99);refreshBadge();var hidden=document.visibilityState==='hidden';if(hidden&&window.Notification&&Notification.permission==='granted'){try{var n=new Notification('Shinobi hub \u2014 new chat message',{body:nm+': '+tx,tag:'shinobi-chat-notif'});n.onclick=function(){try{window.focus();var b=document.querySelector('nav button[data-v="chat"]');if(b)b.click()}catch(e){}try{n.close()}catch(e){}};return}catch(e){}}if(!hidden)show(nm,tx)}
+var cbtn=document.querySelector('nav button[data-v="chat"]');if(cbtn)cbtn.addEventListener('click',function(){askNotif();clearBadge()});
 box.addEventListener('click',function(){var b=document.querySelector('nav button[data-v="chat"]');if(b)b.click();hide()});
 if(typeof db==='undefined'||!db)return;
 db.collection('community_chat').orderBy('when','desc').limit(40).onSnapshot(function(s){
