@@ -908,7 +908,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.1.1';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.2.0';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -1335,6 +1335,570 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true});
   else install();
+})();
+</script>
+<style>
+/* Game Info: the dev bible + update logs moved in from the Google doc */
+.gd-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.gd-tabs button{background:#16141e;border:1px solid #3a2a2a;color:#ddd;border-radius:8px;padding:8px 14px;cursor:pointer;font:inherit}
+.gd-tabs button.on{background:#eab308;color:#191410;border-color:#eab308;font-weight:700}
+.gd-panel{display:none;background:#111018;border:1px solid #2c2433;border-radius:12px;padding:18px;color:#e6e2ef}
+.gd-panel.on{display:block}
+.gd-title{color:#eab308;font-size:1.35em;margin:14px 0 6px;letter-spacing:.02em}
+.gd-panel>.gd-title:first-child{margin-top:0}
+.gd-h1{color:#f2d668;font-size:1.15em;margin:18px 0 8px;border-bottom:1px solid #2c2433;padding-bottom:5px}
+.gd-h2{color:#d9d2e6;font-size:1em;margin:12px 0 6px;text-transform:none}
+.gd-p{margin:7px 0;line-height:1.55;overflow-wrap:anywhere}
+.gd-list{margin:7px 0 7px 20px;line-height:1.55}
+.gd-list li{margin:4px 0;overflow-wrap:anywhere}
+.gd-table{border-collapse:collapse;margin:10px 0;width:100%;font-size:.92em}
+.gd-table th,.gd-table td{border:1px solid #3a2a2a;padding:6px 9px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.gd-table th{background:#1c1826;color:#eab308}
+.gd-panel a{color:#eab308}
+.gd-meta{opacity:.7;font-size:.88em;margin-top:14px}
+</style>
+<section class="view" id="view-gamedocs">
+<h2>Game Info</h2>
+<p class="lead">The full development bible and every update log for both games, moved in from the doc so the hub is the one home. Newest entries first.</p>
+<div class="gd-tabs" id="gdtabs">
+<button class="on" data-gd="logs">Update logs</button>
+<button data-gd="legacy">Shinobi Legacy bible</button>
+<button data-gd="unbound">Life Unbound</button>
+</div>
+<div class="gd-panel on" id="gd-logs">
+<h2 class="gd-title">Update Logs —</h2>
+<h2 class="gd-title">Every update for both games, one home. Newest entries first. A new entry goes here for every push to either game.</h2>
+<h2 class="gd-title">Last updated: Nov 22, 2026 (live)</h2>
+<h2 class="gd-title">SHINOBI: LIFE UNBOUND — UPDATE LOG</h2>
+<h2 class="gd-title">Nov 22, 2026</h2>
+<h2 class="gd-title">Version 4.1.0 (Nov 22): The Complete Clan Overhaul — seven rarity tiers (common 48%, uncommon 27%, rare 15%, epic 7%, legendary 2.5%, mythical 0.5%), plus two secret clans (Vex and Rin) that never appear in normal rolls and are found only through the Forbidden Registry divination at 1 in 2,000,000. Full 45-clan roster: Uzumaki moved to Legendary as intended, and the Otsutsuki, Hagoromo, Chinoike, Jugo, Iburi, Tsuchigumo, Onikuma, Hoki, Kohaku, Izuno, Lee and Ryu bloodlines joined. Every clan now carries a real, named passive wired into actual math, derived live so bonuses never stack or duplicate. Twelve new clan techniques unlock through play, from the Adamantine Sealing Chains to the Sixty-Four Palms. The clan tab is a new collection: search, rarity filters, full clan cards, roll history, and the Forbidden Registry. Existing saves migrate safely: your clan stays yours, only its rarity label updates to the new scale. The owner console gained full clan controls: individual odds, enable/disable, grant clan, free rerolls, forced rolls with extendable windows, a probability tester, roll history and secret-odds boosts. Verified live end to end in the browser.</h2>
+<h2 class="gd-title">Version 4.0.6 (Nov 22): Pinned Age-Up &amp; Save Protection — the AGE UP button is now a true pinned header that never scrolls away: it stays fixed at the top of the game screen right under the topbar while you scroll the home feed. Saves also got a protection layer: a local recovery copy snapshots all six slots on every save, deletion and cloud sync, and a new Save protection panel in Settings adds Export backup and Import backup (JSON) so a full save backup can be carried across browsers or restored after clearing site data. Verified live end to end in a fresh run.</h2>
+<h2 class="gd-title">Version 4.0.5 (Nov 22): Talks Fix &amp; Scene Continue — three QA bugs fixed: People-tab conversations were completely silent (a missing name helper crashed every talk before it opened); the Age 2 event summary's Continue button would not dismiss and froze the year; and the intro now hands off on its own after about six seconds instead of hanging. All three verified live end to end in a fresh run.</h2>
+<h2 class="gd-title">Version 4.0.4 (Nov 22): Mission Board Fix &amp; Save Restore — fixed the bug where running missions never updated the record: mission results were not reaching the stats the Record tab reads, so wins, losses, streaks and pay now count the moment a mission ends. Also fixed saved lives reloading as clanless: the clan you kept now restores from the save. Saves untouched.</h2>
+<h2 class="gd-title">Version 4.0.3 (Nov 22): Home Screen Fix — the AGE UP button moved from the bottom of the page to the top of the home screen so it is always in reach, no more scrolling for it; the Latest Update chip on the title screen is now clickable and opens the full update log.</h2>
+<h2 class="gd-title">Version 4.0.2 (Nov 22): Bridge Fix Round Two — more strands of the same wiring bug: a second batch of game-core functions (year events, ranks, bonds, academy, the fate system) were still out of reach for the new Life, People and Fate layers, so age up could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every core connection is exposed to those layers now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched.</h2>
+<h2 class="gd-title">Version 4.0.1 (Nov 22): Age-Up Fix &amp; The People Tab — fixed the bug that made AGE UP do nothing when clicked: the new Hearts &amp; Voices systems could not reach the game core, so the click died silently before a single year passed. Age-up now works every time, runs the year's events, and closes with the Year Summary. The People tab and the Record tab are really on the bottom bar now (and the Character tab opens again), and enrolling in the Academy fills your classroom with people to talk to.</h2>
+<h2 class="gd-title">Version 4.0.0 (Nov 22): Hearts &amp; Voices — the sim becomes a social one. A new People tab puts everyone in this life on one screen with bond meters and what each person remembers about you, and Spend time opens real conversations where your answers branch and every reply is shaped by who they are. Six voices (bold, steady, sharp, warm, distant, easygoing) speak and remember differently. Choices leave seeds: keep the pouch you found, spread a friend's secret, give your word as a child, and the consequences come back years later. Personality deepens through play: your dominant traits unlock new dialogue options and decide who you are becoming, from The Shield to The Storm. New life events (first words, the new kid, a dinner with edges, the lantern stranger) and bond and feud milestones now fire on their own. Existing saves, menus, systems and progression are untouched.</h2>
+<h2 class="gd-title">Version 3.2.0 (Nov 22): Roll Your Own Clan — the bloodline is yours to roll now. After the dice of birth forge your origin and trait, the clan step hands you three spins: each one rolls a real clan from your village's bloodline pool at full rarity odds; keep the one you want or spin again, and the clan you keep becomes your surname. Used all three? You keep the last roll. Rather walk alone? A quiet option lets you stay clanless, a civilian with nothing but your own name. Village pools still respect their lands, rare and mythical clans stay rare, and existing saves are untouched.</h2>
+<h2 class="gd-title">Version 3.1.4 (Nov 22): Choose Your Gender — the creator asks one more question before the dice roll: a new step between your name and your village, CHOOSE YOUR BODY. Pick a boy, pick a girl, or let fate decide between them. Your choice shapes the first name fate rolls for you and the life the engine builds; letting fate decide keeps it a true coin flip. Existing saves are untouched.</h2>
+<h2 class="gd-title">Version 3.1.3 (Nov 22): Narrator Voice Removed — the intro no longer has a spoken narrator voice. The opening lines still play as subtitles over the visuals, wind and score, and Skip Intro works the same as before.</h2>
+<h2 class="gd-title">Version 3.1.2 (Nov 22): Update Chip Fix — fixed the Latest Update chip and the top of the update log: the newest entries were collapsing into one record, so the chip kept showing an older update. The chip and log now open with the newest entry, one record per update.</h2>
+<h2 class="gd-title">Version 3.1.1 (Nov 22): Status Indicators — the title screen now shows a live status pill under the logo: green "Online · Version" normally, amber "Updating · new version live" when the version watch catches a new build (it feeds the same 30-second auto-refresh countdown). The official website's Life Unbound tab got a matching indicator that reads the game's version file directly, so both show the same state. The website was bumped to v2.3.</h2>
+<h2 class="gd-title">Version 3.1.0 (Nov 22): Village Passives &amp; Fates — every village now grants a permanent birth passive that touches real math: the Leaf learns 10% faster and bonds easier, the Sand survives danger that kills others and finds Wind affinity more often, the Mist hits harder and reads water, the Cloud grows speed and taijutsu, the Stone endures and loses less to failure, and two new birthplaces join the dice: the Hidden Rain (adaptability, intelligence, rare encounters) and the Hidden Sound (jutsu growth, unusual abilities). After the clan reveals, the creator asks CHOOSE YOUR FATE: pick a handicap, roll a random one at weighted rarity (common, uncommon, rare, legendary), or walk away whole. Eight fates total, from Fragile Constitution up.</h2>
+<h2 class="gd-title">Version 3.0.0 (Nov 22): The Life Simulator Overhaul — Phase 2 — every year of a life can now unfold as real story scenes: a dynamic event engine reads your age, village, clan, family, personality, reputation, relationships, rank, and everything that happened before, then builds events that remember you, across 20+ categories from family and academy life to rivalries, tragedies, celebrations, romance, betrayals, political moves, war years, legendary meetings and genuinely rare secret events. Each scene is a full screen: title, category, rarity, age and location, narration, dialogue with named NPCs, and choices that actually change your life, some consequences landing immediately and others waiting years in your future.</h2>
+<h2 class="gd-title">Version 2.2.1 (Nov 22): Narrator Fix — the intro narrator now speaks one consistent English voice at a deep, calm pitch for the whole intro instead of a random voice per line, and the wind in the mix is softer.</h2>
+<h2 class="gd-title">Version 2.2.0 (Nov 22): The Cinematic Opening — starting a new life now opens a cinematic intro: black screen fading into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while the narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. Random narrator voice per line where the browser supports it, subtitles always on, Skip Intro always on screen, Replay Intro in settings. Plays for new lives only: loading a save or continuing goes straight in. About 50 seconds.</h2>
+<h2 class="gd-title">Version 2.1.0 (Nov 22): Specializations &amp; Sharper Missions (Living World Phase 2) — after graduation, the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays.</h2>
+<h2 class="gd-title">Version 2.0.0 (Nov 22): The Living World Update — Phase 1. Age-gated childhood (0-4 early years, 5-7 first chakra awareness), quiet years, family and village event pools. Real households at birth (orphans, guardians, grandparents, small, large, prestigious families) that shape your start. Academy subjects tracked per class; graduation is now a real assessment with early graduation and special recognition possible. Training gains have diminishing returns and cost fatigue; conditioning and meditation added. Friends, rivals, teammates, and students age, train and earn promotions on their own. Hidden achievements added. Update countdown: when a new version goes live, the game counts down 30 seconds and refreshes itself.</h2>
+<h2 class="gd-title">Version 1.2.0 (Nov 22): Pickable Era &amp; Fate Rolls — the creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life.</h2>
+<h2 class="gd-title">Version 1.1.0 (Nov 22): Version numbering is in effect — the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones; today's batch puts the game at 1.1.0.</h2>
+<h2 class="gd-title">Opening day batch (Nov 22): Intro Every Load (the opening title sequence now plays on every visit and refresh; SKIP and Begin your story still get you straight in) · New Name (Shinobi Sprint is now SHINOBI: LIFE UNBOUND; the new name is on the intro, title screen, in-game brand, page title, and credits) · Opening Title Sequence (drifting embers, the title build-in, a tagline, and Begin your story; skippable) · Character Creation Overhaul (you pick name + village only; gender, era, surname, and clan auto-roll from the rarity pool with a reveal animation; name rules enforced; character ID and birth stamp saved in saves) · Clan Surnames (a picked clan always sticks and the last name auto-fills with it; random clan births take the clan surname; relocated families get a bio line) · Main Menu Rework (rebuilt to match Ricky's mockups, red moon layout; achievements, settings, credits, exit, and back to menu re-wired and verified) · Life &amp; Legacy (birth, family, school, career, missions, jutsu training, narrative missions, bloodline awakening, eras, descendants, aging, death, and the Legacy Hall; dashboard-style game screen) · Cross Links (the title footer has a direct link to Shinobi Legacy)</h2>
+<h2 class="gd-title">SHINOBI LEGACY — UPDATE LOG</h2>
+<h2 class="gd-title">Live build: v1.122.0 · updates paused while the Story Mode rebuild is up (a full save reset rides the next version, v1.121.0+)</h2>
+<h2 class="gd-title">Recent updates (newest first; the full write-up for each lives in its numbered section of the Shinobi Legacy tab)</h2>
+<h2 class="gd-title">Nov 12, 2026</h2>
+<h2 class="gd-title">v1.120.25 · Quests, trackers &amp; waypoints: the sealing quest tracker and map pin point at the real shrine in the Sealing Crater, every quest marker points at the right spot, elements only come from the spin (new characters spin first, no free Fireball/Wind Blade), and Uchiha with Fire get +15% Fire damage</h2>
+<h2 class="gd-title">v1.120.25 · Tracker fixes: clan/beast/Goku goals only get a marker when picked, titles wrap, the waypoint arrow hides in menus, untracking clears the arrow, Renji's light is wider, training logs stay in place when hit, and the tracker + inner realms load on the live site</h2>
+<h2 class="gd-title">v1.120.24i · Quest trackers + waypoints: every quest and bounty has a HUD tracker under the minimap, an edge arrow with the distance, and a minimap pin; tap the tracker to pick one. Borrowed Light: Renji's violet light is now huge and shows through fog, and the tracker points to the Hollow Ruins. Rin's last scroll is fixed: records read before accepting Ancient Records now count, and stuck saves finish on load</h2>
+<h2 class="gd-title">v1.120.24e · New intro voices + final clash, Goku power-up screams: the intro is re-voiced so both rivals sound natural the whole way, the final beams now meet head-on and knock both fighters out of their forms, and every Goku Clan form has power-up screams, grunts, sound effects and aura sounds</h2>
+<h2 class="gd-title">v1.120.24c · Voiced intro dialogue: Crimson and Violet now talk during the intro, fully voiced and subtitled; new Settings → Intro subtitles On/Off (default On); the intro is about 56 s with every sword clash kept</h2>
+<h2 class="gd-title">v1.120.23b · Intro polish: real katanas, spark bursts and a metal clang on all 13 sword clashes, and layered fire on the battlefield</h2>
+<h2 class="gd-title">v1.120.21 · Brand-new intro cinematic: plays once per session; Settings → Play intro On/Off; skip with the Skip button, any key, or a tap</h2>
+<h2 class="gd-title">v1.120.20 · Luck Boost: the owner sets any luck multiplier up to x1,000,000 with a timer (15 min, 30 min, 1 h, 2 h, or until off), for the whole server or one device; everyone sees the banner and a toast; boosts clan spins and element rolls; the secret Goku clan odds are never affected</h2>
+<h2 class="gd-title">v1.120.20 · Hidden event drops: a crate dropped anywhere other than Near me is hidden (no light beam, ring, or glow; visible only within 25 m), and the announcement names only the region; new Random spot option</h2>
+<h2 class="gd-title">v1.120.20 · Admin from the main menu: God Mode now opens on the main menu too (on phones, from the Owner Panel); with no character loaded, only the Luck, Server, Online, Events and Keshav tabs show</h2>
+<h2 class="gd-title">v1.120.17 · Retired items cleanup: 35 icon-only items removed with ryo refunds (Academy Kunai swapped for the 3D Field Kunai); the 26 pieces of Trae's 3D gear, the Toad Sage Cloak and the Inverted Spear of Heaven stay</h2>
+<h2 class="gd-title">v1.120.14 · Trae's own 3D gear joins the game</h2>
+<h2 class="gd-title">v1.120.13 · New UI look: a crimson + charcoal Settings panel with tabs on the left, the same panel on the main menu and in-game; restyled HUD (portrait frame, red/blue/gold bars, compass ring on the minimap, red-framed hotbar slots, quest card); Exit to Main Menu button in the game menu (saves first)</h2>
+<h2 class="gd-title">v1.120.12 · Enterable village buildings in all 5 villages</h2>
+<h2 class="gd-title">v1.120.11 · Bosses actually fight</h2>
+<h2 class="gd-title">v1.120.10 · VFX + SFX on every move</h2>
+<h2 class="gd-title">v1.120.9 · Performance: new Auto graphics quality in Settings → Video (Auto / Low / Medium / High) plus an FPS display; Auto starts MacBooks on Medium and phones on Low, then adjusts to keep FPS smooth; grass behind the camera isn't drawn, shaders are precompiled, and off-screen characters skip animation on Medium/Low</h2>
+<h2 class="gd-title">v1.120.8 · Going Rogue: leave your village from its Village tab; a cinematic plays as you slash your band, a Rogue tag shows over your name for everyone, rogues lose the home discount and villagers react; come home after 10 min for 1,000 ryo</h2>
+<h2 class="gd-title">v1.120.7 · Clan bar on Shift+1 to Shift+4, Mac-friendly</h2>
+<h2 class="gd-title">v1.120.3 · New character creator</h2>
+<h2 class="gd-title">10 ability slots: keys 1-9 and 0; phones get a ⇆ flip button for slots 6-10; cooldowns are synced</h2>
+<h2 class="gd-title">Upcoming</h2>
+<h2 class="gd-title">v1.121.0 — Rimuru Quest 5 plus Gojo and Toji clans, with a FULL SAVE RESET for everyone. See the Shinobi Legacy tab, 09 — In development.</h2>
+</div>
+<div class="gd-panel" id="gd-legacy">
+<h2 class="gd-title">Shinobi Legacy —</h2>
+<p class="gd-p"><em>Official development bible · status, systems, world, roadmap, and changelog</em></p>
+<p class="gd-p"><strong>Last updated: Nov 20, 2026 (updates paused)</strong></p>
+<h3 class="gd-h1">00 — Master index</h3>
+<h4 class="gd-h2">Project overview</h4>
+<p class="gd-p">Shinobi Legacy is a browser-based 3D ninja MMORPG built on Three.js / WebGL. Players create a shinobi, roll a clan, and fight across five enterable villages — Leaf, Sand, Mist, Cloud and Stone — with quests, bosses, PvP and a rogue path. The current live build is v1.122.0.</p>
+<h4 class="gd-h2">Current development status</h4>
+<p class="gd-p">The Shinobi Legacy website is currently down (the new Story Mode build is huge and still being worked on). While the site is down, there can be NO new updates, patches, or bug fixes pushed to the game. Everything below is the last known state before the pause. This lifts once the site is back up and Tab is available again.</p>
+<p class="gd-p">🟢 Main game: OPEN · build v1.122.0 (updated Nov 12, ~10:35 AM CT)</p>
+<p class="gd-p">Live build: v1.122.0</p>
+<p class="gd-p">PC only: mobile lock on (phones still locked)</p>
+<p class="gd-p">The Bleach world is in the build but locked for players (coming soon)</p>
+<p class="gd-p">🟢 Test server: OPEN · build v1.122.0</p>
+<p class="gd-p">Everything on main plus the Bleach world unlocked (Soul Society, Karakura, Hueco Mundo, Soul Reaper path, 20 Soul Clans)</p>
+<p class="gd-p">⚠ v1.121 is coming with a FULL SAVE WIPE: a fresh start for everyone</p>
+<h4 class="gd-h2">Quick navigation</h4>
+<p class="gd-p">00 — Master index · status, links, quick nav</p>
+<p class="gd-p">01 — Core game · combat fundamentals and design philosophy</p>
+<p class="gd-p">02 — Character &amp; progression · creation, gear, stats</p>
+<p class="gd-p">03 — Clans &amp; bloodlines · eye lines, clan arts table, Goku Clan</p>
+<p class="gd-p">04 — Jutsu, elements &amp; abilities · elements, dojutsu, tailed beasts</p>
+<p class="gd-p">05 — World &amp; villages · enterable buildings, map</p>
+<p class="gd-p">06 — Missions, NPCs &amp; bosses · boss AI, quest trackers</p>
+<p class="gd-p">07 — UI, menus &amp; HUD · settings, controls, intro cinematics</p>
+<p class="gd-p">08 — Game systems · rogue path, luck boost, event drops, saving</p>
+<p class="gd-p">09 — Future content &amp; ideas · live / in development / planned / ideas</p>
+<p class="gd-p">10 — Roadmap · implementation stages and priorities</p>
+<p class="gd-p">11 — Version history &amp; changelog · every shipped version</p>
+<p class="gd-p">12 — Technical documentation · engine, performance, standards, known issues</p>
+<p class="gd-p">13 — Archive · retired items and historical records</p>
+<h4 class="gd-h2">Links</h4>
+<p class="gd-p">All game and website links now live in the new "Games &amp; Website Links" tab, each with a live status dot (green online · yellow updating · red down).</p>
+<h4 class="gd-h2">Recently updated systems</h4>
+<p class="gd-p">Newest shipped work runs v1.120.25 through v1.122.0, the current main build — see 11 — Version history. What is being built right now is in 09 under In development.</p>
+<h3 class="gd-h1">01 — Core game</h3>
+<p class="gd-p"><em>Core gameplay loop, game modes, exploration rules, player interaction and multiplayer systems are not separately documented in this file yet. Add them here as they are designed. Combat below comes from the shipped changelog.</em></p>
+<h4 class="gd-h2">Combat fundamentals — VFX and sound</h4>
+<p class="gd-p">v1.120.10 · VFX + SFX on every move: element-colored cast flashes and rings, trails on projectiles, dashes and swings, and impact sparks per element (fire embers, water splash, lightning crackle with branching sparks, wind swirl, earth debris)</p>
+<p class="gd-p">Scales with your graphics quality (Low ≈ 1/4 of the sparks, no shake), so it won't bring the lag back. Bosses get the cast flashes too.</p>
+<h4 class="gd-h2">Game design philosophy (from the master plan)</h4>
+<p class="gd-p">Shinobi Legacy should become a living shinobi world rather than a level-grinding loop. Players begin as Academy students, discover their chakra, graduate, build relationships with a persistent AI squad, complete missions, rise through ranks, explore forgotten places, forge and bond with legendary weapons, master summons and elements, build homes and organizations, compete with other players, and uncover hidden stories. A player's identity should come from choices, skill, exploration, relationships, and accomplishments, not rarity alone.</p>
+<h3 class="gd-h1">02 — Character &amp; progression</h3>
+<h4 class="gd-h2">Character creation</h4>
+<p class="gd-p">New character creator: tabs at the bottom, live 3D hair previews, randomize + undo, name check (v1.120.3)</p>
+<p class="gd-p">Hair no longer clips through the head</p>
+<p class="gd-p">Your clan surname shows in gold on the menu</p>
+<p class="gd-p">No more farming free rolls by making new slots</p>
+<h4 class="gd-h2">Gear, armor &amp; appearance</h4>
+<p class="gd-p">v1.120.14 · Trae's own 3D gear: made by Trae; you can see it on your shinobi, other players see it too, and armor pieces really cut the damage you take</p>
+<p class="gd-p">Pack 1 (16 items): crimson scale chest, shoulder / forearm / shin guards, sovereign hat, rogue wide-brim hat, shadow cowl hood, jade knot headband, ember fox / sentinel half / dune wrap masks, dusk katana, crimson short sword, field kunai, dual-edge kunai, wayfarer staff</p>
+<p class="gd-p">Shadowguard pack (10 items): crimson travel cloak, long / short / hooded cloaks, shoulder mantle, chestplate, reinforced chestplate, fox / raven / wolf masks</p>
+<p class="gd-p">New Face, Shoulder, Arms, and Back (cloak) gear slots. To try it: open Inventory and equip armor, a mask, a hat, a cloak, or a weapon</p>
+<p class="gd-p">v1.120.22 · Gear polish: hair tucks under hats, the headband sits above the eyes, the Ember Fox Mask has a snout, ears, and a back strap, and the Crimson Scale Cuirass is crimson on the front too</p>
+<h4 class="gd-h2">Stats</h4>
+<p class="gd-p">v1.120.24h · Stat points fix: no more black screen when spending points, and you can spend any amount at once (+1 / +5 / +10 / Max)</p>
+<h4 class="gd-h2">Leveling &amp; ranks</h4>
+<p class="gd-p"><em>Live rank names and requirements are not documented in this file yet. The planned Academy-to-Kage rank path is in 09 — Future content.</em></p>
+<h3 class="gd-h1">03 — Clans &amp; bloodlines</h3>
+<p class="gd-p"><em>Clan rarities, roll probabilities and unlock odds are not recorded in this document yet — flagged for review so this stays accurate when the numbers are added.</em></p>
+<h4 class="gd-h2">Eye lines (clan eyes)</h4>
+<p class="gd-p">Clan eyes: each eye is locked to its home clan. Your clan's eye quest line shows at the top of the eye panel with an Awaken button</p>
+<p class="gd-p">Uchiha: Sharingan → Mangekyo → Eternal (Eternal is the top Uchiha stage)</p>
+<p class="gd-p">Otsutsuki: Rinnegan → Rinne Sharingan; Jougan → Dimension Sight. Rinnegan is Otsutsuki only</p>
+<p class="gd-p">Hyuga + Otsutsuki: Byakugan → Far Sight → Perfect Sight → Tenseigan</p>
+<p class="gd-p">Ketsuryu: Ketsuryugan → Blood Bloom</p>
+<p class="gd-p">Rin: Rinshōgan stages</p>
+<p class="gd-p">Ryukami: Eyes of Creation</p>
+<p class="gd-p">Gojo: Six Eyes → Azure Clarity (new, unlocks Azure Pulse) → Boundless Horizon (new)</p>
+<p class="gd-p">Custom eye → Tempered (new, unlocks Gaze Flare)</p>
+<p class="gd-p">Eyes you own from other clans still work, but their evolution is locked</p>
+<h4 class="gd-h2">Every clan's four clan arts (Shift+1–4)</h4>
+<p class="gd-p">v1.120.7 · Clan bar on Shift+1 to Shift+4, Mac-friendly: EVERY clan has its own 4 clan arts, unlocked at clan mastery 1 / 3 / 5 / 7 (full list in the Clan Bar section below). Tapping Shift alone still dodges; it fires when you let go of the key, so it doesn't clash with Shift+1</p>
+<table class="gd-table"><tr><th>Clan</th><th>Clan arts (Shift+1 / Shift+2 / Shift+3 / Shift+4)</th></tr><tr><td>Uchiha</td><td>Ember Talon / Crimson Gaze Lock / Phoenix Wing Sweep / Inferno Crown</td></tr><tr><td>Hyuga</td><td>Air Palm Shot / Vein Seal / Hundred-Point Rush / Clear Sky Dome</td></tr><tr><td>Uzumaki</td><td>Seal Chain Lash / Spiral Lance / Whirl Seal / Whirlpool Heart</td></tr><tr><td>Nara</td><td>Shade Needle / Dusk Snare / Long Shadow Cut / Nightfall Field</td></tr><tr><td>Senju</td><td>Rootspear / Thorn Cage / Verdant Mend / Forest Wall</td></tr><tr><td>Kaguya</td><td>Marrow Bullet / Spine Lance / Ivory Thicket / Bone Shell</td></tr><tr><td>Kaze</td><td>Gale Cutter / Wind Step / Cyclone Ring / Sky Splitter</td></tr><tr><td>Mori</td><td>Leaf Dart / Moss Bind / Grove Bloom / Old Oak Guard</td></tr><tr><td>Tetsu</td><td>Iron Fist Rush / Chain Hook / Steel Skin / Anvil Drop</td></tr><tr><td>Hoshino</td><td>Star Shot / Comet Dash / Constellation Rain / Nova Heart</td></tr><tr><td>Raiko</td><td>Spark Bolt / Static Net / Arc Lance / Thunderhead</td></tr><tr><td>Kuro</td><td>Night Fang / Ink Blade / Shade Clones / Black Mist</td></tr><tr><td>Shirogane</td><td>Frost Shard / Rime Snare / Silver Gale / Glacier Heart</td></tr><tr><td>Arashi</td><td>Squall Bolt / Gust Shield / Tempest Dash / Hurricane Eye</td></tr><tr><td>Tsukino</td><td>Moonbeam / Lunar Veil / Tide Pull / Crescent Rain</td></tr><tr><td>Ryujin</td><td>Wyrm Fire / Dragon Claw / Scale Guard / Sky Dragon Roar</td></tr><tr><td>Amateru</td><td>Sunspear / Dawn Mend / Solar Wheel / Noon Blaze</td></tr><tr><td>Ketsuryu</td><td>Blood Needle / Crimson Chain / Vein Burst / Red Tide</td></tr><tr><td>Patel</td><td>Thorn Petal / Rose Ward / Petal Twins / Garden Gale</td></tr><tr><td>Ventura</td><td>Fold Shot / Gravity Lock / Phase Clones / Rift Rain</td></tr><tr><td>Akimichi</td><td>Rolling Boulder / Iron Belly / Feast Recovery / Giant Palm</td></tr><tr><td>Inuzuka</td><td>Claw Rush / Scent Snare / Hound Clones / Pack Howl</td></tr><tr><td>Aburame</td><td>Beetle Shot / Carapace / Swarm Clones / Hive Cloud</td></tr><tr><td>Sarutobi</td><td>Flame Shuriken / Smoke Ring / Staff Sweep / Hearth Fire</td></tr><tr><td>Hozuki</td><td>Tide Bullet / Liquid Body / Riptide / Wave Crash</td></tr><tr><td>Yuki</td><td>Snow Dart / Mirror Twins / Blizzard Ring / Ice Bloom</td></tr><tr><td>Fuma</td><td>Spinning Star / Blade Wire / Steel Twins / Kunai Rain</td></tr><tr><td>Otsutsuki</td><td>Moon Orb / Heavenly Seal / Void Pull / Celestial Palm</td></tr><tr><td>Karma</td><td>Seal Spike / Mark of Ruin / Portal Strike / Karma Flare</td></tr><tr><td>Shiba</td><td>Spirit Rocket / Festival Ward / Spark Shower / Lantern Burst</td></tr><tr><td>Kuchiki</td><td>Blossom Blade / Noble Step / Petal Veil / Sakura Gale</td></tr><tr><td>Shihōin</td><td>Flash Kick / Storm Mantle / Swift Clones / Thunder Palm</td></tr><tr><td>Shihōin Royal</td><td>Royal Spark / Crown Step / Sovereign Mantle / Throne Thunder</td></tr><tr><td>Kurosaki</td><td>Crescent Edge / Void Burst / Twin Soul / Black Edge Nova</td></tr><tr><td>Ishida</td><td>Light Arrow / Spirit Snare / Silver Vein / Arrow Storm</td></tr><tr><td>Royal Soul</td><td>Soul Lance / Crown Pressure / Regal Mend / Royal Decree</td></tr><tr><td>Vex</td><td>Void Shard / Null Snare / Void Twins / Collapse</td></tr><tr><td>Ryukami</td><td>Star Dragon Fang / Heaven Ward / Celestial Rain / Dragon Sun</td></tr></table>
+<h4 class="gd-h2">Secret Mythic Goku Clan</h4>
+<p class="gd-p">v1.120.23 · Secret Mythic Goku Clan: hidden in the world, never rollable; 7 forms (Base, Super Saiyan, SS2, SS3, SS God, SS Blue, Ultra Instinct), each with a full transformation cinematic and its own moves; Goku Clan panel</p>
+<p class="gd-p">v1.120.23c · Goku Clan fixes: power down from Ultra Instinct back to Base with T, owner Grant asks for the owner code instead of failing, apples sit on the ground and are easier to pick up, and Goku's hair fits the head</p>
+<p class="gd-p">v1.120.25 · Goku Clan moved off the Naruto world: free clan reroll if you had it, Goku data kept</p>
+<h4 class="gd-h2">Clan quests</h4>
+<p class="gd-p">v1.120.24 · Clan quests + more quest XP: the Clan button opens Uchiha's Eye Awakening quests (Vex: Mission Board; other clans: Clan missions), about 2.5–4x more XP from every kind of quest, XP added to quests that had none (Bond of Loss +4,000, Borrowed Light +8,000), and fixed quest directions</p>
+<h3 class="gd-h1">04 — Jutsu, elements &amp; abilities</h3>
+<h4 class="gd-h2">Elements</h4>
+<p class="gd-p">Elements come only from the character spin — no free starter jutsu for new characters, and Fire-natured Uchiha get +15% Fire damage (v1.120.25, full entry in 06).</p>
+<h4 class="gd-h2">Dojutsu &amp; eye abilities</h4>
+<p class="gd-p">v1.120.22 · Real eye abilities: Sharingan Copy/Predict path, Byakugan X-ray chakra vision, and a signature power for every eye. Toggle your eye with O: abilities only work while it's on, and chakra drains while it's on</p>
+<p class="gd-p">Eye evolution lines per clan: see 03 — Clans &amp; bloodlines.</p>
+<h4 class="gd-h2">Tailed beasts &amp; inner realms</h4>
+<p class="gd-p">Tailed beast sync now cuts beast cooldowns 5% per level, up to 45%. At sync 8: beast bomb 14 s → 9.1 s, full transform 90 s → 58.5 s</p>
+<p class="gd-p">v1.120.24f · Inner Realm upgrade: a unique mindscape for every tailed beast, with its own sky, fog, water or ground, a seal gate that burns open, the full beast, and ambient sound</p>
+<h4 class="gd-h2">Transformations</h4>
+<p class="gd-p">The Goku Clan's seven forms, each with a full transformation cinematic: see 03 — Secret Mythic Goku Clan.</p>
+<p class="gd-p"><em>The full jutsu list is not documented in this file yet.</em></p>
+<h3 class="gd-h1">05 — World &amp; villages</h3>
+<h4 class="gd-h2">Enterable buildings (all five villages)</h4>
+<p class="gd-p">v1.120.12 · Enterable village buildings in all 5 villages: Walk up to a door and press E (or tap the button) to go in. On test since v1.120.17b.</p>
+<p class="gd-p">Academy: way bigger; new players start here and take their exams with an instructor</p>
+<p class="gd-p">Kage office: a “become Kage” path with requirements and progress bars, a ceremony, a Kage title/cosmetic, and perks</p>
+<p class="gd-p">Armory: buy armor and gear</p>
+<p class="gd-p">Hospital: you respawn here after you die, and a medic heals you for a small fee</p>
+<h4 class="gd-h2">Map &amp; terrain</h4>
+<p class="gd-p">Map fix: training dummies moved off the roads (now inside the training fence), finer grass, and the training fence/logs sit on the ground</p>
+<h4 class="gd-h2">Village reference</h4>
+<p class="gd-p"><em>Village-by-village location, NPC and facility lists are not documented in this file yet.</em></p>
+<p class="gd-p">The Bleach world (Soul Society, Karakura, Hueco Mundo) is in the build but locked for players — see 09 under In development.</p>
+<h3 class="gd-h1">06 — Missions, NPCs &amp; bosses</h3>
+<h4 class="gd-h2">Boss encounters</h4>
+<p class="gd-p">v1.120.11 · Bosses actually fight: 2–3 hit swing combos with a visible wind-up you can dodge, ranged jutsu, a ground slam with a red warning circle 0.8 s before it hits, dash strikes, and beam attacks on big bosses</p>
+<p class="gd-p">Land a big hit during their wind-up to stagger them</p>
+<p class="gd-p">Phase 2 under 50% HP: they get 15% faster</p>
+<p class="gd-p">Boss fix (on test at 1:27 PM): wind-ups and slashes now swing back and across the body (they were mirrored), the red beam/dash warning strip points toward you instead of behind the boss, red warning circles no longer flicker under roads/plazas, and swing arcs no longer vanish early</p>
+<h4 class="gd-h2">Quests, trackers &amp; waypoints</h4>
+<p class="gd-p">v1.120.25 · Sealing pin, quest markers, elements from the spin: the sealing quest tracker and map pin point at the real shrine in the Sealing Crater, every quest marker (including the Mist/Stone/Sand course rings) points at the right spot, elements only come from the spin (new characters spin first, no free Fireball/Wind Blade), and Uchiha with Fire get +15% Fire damage</p>
+<p class="gd-p">v1.120.24i · Quest trackers + waypoints: every quest and bounty has a HUD tracker under the minimap, an edge arrow with the distance, and a minimap pin; tap the tracker to pick one. Borrowed Light: Renji's violet light is now huge and shows through fog, and the tracker points to the Hollow Ruins in northwest Emberwood. Rin's last scroll is fixed: records read before accepting Ancient Records now count, and stuck saves finish on load</p>
+<p class="gd-p">v1.120.25 · Tracker fixes: clan/beast/Goku goals only get a marker when picked, titles wrap, the waypoint arrow hides in menus, untracking clears the arrow, Renji's light is wider, training logs stay in place when hit, and the tracker + inner realms now load on the live site</p>
+<p class="gd-p"><em>A full mission table (name, location, requirements, objectives, rewards, status) is not in this file yet. Live quests referenced in this document: the five village Trial quests (Trial of the Hokage, Kazekage, Mizukage, Raikage, Tsuchikage), the Sealing quest, Borrowed Light, and Ancient Records.</em></p>
+<h3 class="gd-h1">07 — UI, menus &amp; HUD</h3>
+<p class="gd-p"><em>Only shipped interfaces are documented here. The planned Shinobi System main-menu redesign is in 09 — Planned.</em></p>
+<h4 class="gd-h2">Settings &amp; menus</h4>
+<p class="gd-p">v1.120.13 · New UI look: a crimson + charcoal Settings panel with tabs on the left, the same panel on the main menu and in-game</p>
+<p class="gd-p">Restyled HUD: portrait frame, red/blue/gold bars, a compass ring on the minimap, red-framed hotbar slots, and a quest card</p>
+<p class="gd-p">Exit to Main Menu button in the game menu (themed confirm; it saves first)</p>
+<p class="gd-p">v1.120.20 · Admin from the main menu: God Mode now opens on the main menu too (on phones, the God Mode button in the Owner Panel). With no character loaded, only the Luck, Server, Online, Events, and Keshav tabs show</p>
+<h4 class="gd-h2">Controls &amp; ability slots</h4>
+<p class="gd-p">10 ability slots: keys 1–9 and 0. Phones get a ⇆ flip button for slots 6–10. Cooldowns are synced. The clan bar is now on Shift+1–4</p>
+<h4 class="gd-h2">Intro &amp; presentation</h4>
+<p class="gd-p">v1.120.24e · New intro voices + final clash, Goku power-up screams: the intro is re-voiced so both rivals sound natural the whole way, the final beams now meet head-on and knock both fighters out of their forms onto their backs, and every Goku Clan form has power-up screams, grunts, sound effects and aura sounds (no spoken lines)</p>
+<p class="gd-p">v1.120.24c · Voiced intro dialogue: Crimson and Violet now talk during the intro, fully voiced and subtitled (speaker names tinted orange and purple); new Settings → Intro subtitles On/Off (default On); the intro is now about 56 s, with every sword clash kept</p>
+<p class="gd-p">v1.120.23b · Intro polish: real katanas, spark bursts and a metal clang on all 13 sword clashes, and layered fire on the battlefield</p>
+<p class="gd-p">v1.120.21 · Brand-new intro cinematic: plays once per session; Settings → Play intro On/Off; skip with the Skip button, any key, or a tap</p>
+<h3 class="gd-h1">08 — Game systems</h3>
+<h4 class="gd-h2">Going rogue</h4>
+<p class="gd-p"><strong>Status: </strong><strong>LIVE — v1.120.8; v2 polish on test since v1.120.17b</strong></p>
+<p class="gd-p">Cut ties with your village and play as a rogue shinobi, in front of everyone.</p>
+<p class="gd-p">v1.120.8 · Going Rogue: leave your village from its Village tab (Menu → Village). A short cinematic plays as you slash your band, and the cut stays on it</p>
+<p class="gd-p">A Rogue tag shows over your name for everyone. Rogues lose the home discount, and villagers react</p>
+<p class="gd-p">Come home after 10 min for 1,000 ryo</p>
+<p class="gd-p">Additional notes: v2 on test since v1.120.17b: one straight cut across the band, a slower and smoother animation, and your character walks out of the village before the ROGUE NINJA title</p>
+<h4 class="gd-h2">Luck Boost</h4>
+<p class="gd-p"><strong>Status: </strong><strong>LIVE — v1.120.20</strong></p>
+<p class="gd-p">An owner-set luck multiplier on a timer, for the whole server or one device.</p>
+<p class="gd-p">v1.120.20 · Luck Boost: the owner sets any luck multiplier up to x1,000,000, typed in (quick picks x2 to x500, plus x1000 and x10K since v1.120.20b) with a timer (15 min, 30 min, 1 h, 2 h, or until off), for the whole server or just his own device. Everyone sees a “ LUCK BOOST x__ · mm:ss left” banner (in game and on the main menu) and a toast when it starts. Boosts clan spins and element rolls. The secret Goku clan odds are never affected.</p>
+<h4 class="gd-h2">Hidden event drops</h4>
+<p class="gd-p">v1.120.20 · Hidden event drops: a crate dropped anywhere other than “ Near me” is hidden (no light beam, ring, or glow; visible only within 25 m), and the announcement names only the region. New “ Random spot” option</p>
+<h4 class="gd-h2">Saving &amp; sessions</h4>
+<p class="gd-p">In-game Save/Quit removed; new Main menu button in Settings</p>
+<h4 class="gd-h2">Performance</h4>
+<p class="gd-p">See 12 — Technical documentation.</p>
+<h3 class="gd-h1">09 — Future content &amp; ideas</h3>
+<h4 class="gd-h2">Live</h4>
+<p class="gd-p">Everything documented as live and shipped is in 01–08 and 11.</p>
+<h4 class="gd-h2">In development</h4>
+<p class="gd-p">Being built right now: the Bleach world and the Soul Reaper race (pictures in Sneaks)</p>
+<p class="gd-p">New boy and girl body models made by Trae: a new “Model” option in the character creator. They use all the existing animations, and hair hides under hats and hoods</p>
+<p class="gd-p">Busier villages: more NPCs in all 5 villages doing real activities (eating at the ramen counter, smiths at the forge, shopkeepers, sparring, kids)</p>
+<p class="gd-p">Rimuru Quest 5 “The Ultimate Existence”: a 3-phase guardian boss (Vael), a mastery checklist, an awakening, and an ultimate form</p>
+<p class="gd-p">Gojo + Toji clans coming to the build</p>
+<p class="gd-p">⚠ Rimuru Quest 5 + Gojo/Toji drop together in v1.121.0 with a FULL SAVE RESET for everyone (a fresh start)</p>
+<h4 class="gd-h2">Planned</h4>
+<p class="gd-p">Engine: Three.js / WebGL · Platform: browser-based 3D game · Status: planned future development. This is the consolidated plan of everything Shinobi Legacy is building toward; nothing in this section is in the game yet.</p>
+<p class="gd-p">The one rule: build on what exists</p>
+<p class="gd-p">Inspect the code before changing it.</p>
+<p class="gd-p">Preserve existing saves and working systems.</p>
+<p class="gd-p">Reuse architecture wherever possible, and implement in tested stages.</p>
+<p class="gd-p">Do not create a separate game or replace existing mechanics unnecessarily.</p>
+<p class="gd-p">1. Academy, AI squad &amp; shinobi progression</p>
+<p class="gd-p">Core objective: redesign the new-player journey. Every first-time character begins as an Academy Student, discovers chakra natures, graduates, receives a persistent AI squad, and rises through the shinobi ranks.</p>
+<p class="gd-p"><em>1.1 First-time Academy experience</em></p>
+<p class="gd-p">Spawn new characters inside the Ninja Academy of their selected village instead of directly into the open world.</p>
+<p class="gd-p">Build explorable interiors and exteriors: classrooms, training grounds, instructor offices, practice areas, and hallways.</p>
+<p class="gd-p">Populate the Academy with AI students, instructors, and NPCs. Academy uniforms, interactive dialogue, tutorials, and activities.</p>
+<p class="gd-p">Introduce the player to their instructor through a cinematic opening interaction.</p>
+<p class="gd-p">Returning players bypass the Academy introduction and never repeat it.</p>
+<p class="gd-p"><em>1.2 Five-stage graduation examination</em></p>
+<p class="gd-p">Written exam: shinobi history, chakra fundamentals, combat knowledge, village knowledge, and tactical decision-making.</p>
+<p class="gd-p">Chakra control exam: balance, precision, designated surfaces, and a visible chakra meter.</p>
+<p class="gd-p">Clone exam: perform the required clone technique and meet the clone-count and execution requirements.</p>
+<p class="gd-p">Practical exam: playable obstacle course, movement, combat practice, and training targets.</p>
+<p class="gd-p">Final evaluation: controlled fight against an Academy instructor, then a performance evaluation.</p>
+<p class="gd-p">Passing promotes the player to Genin with a graduation cutscene, announcement, profile update, and rank display. Players who fail can retake it. Every stage must be playable, not merely a cutscene.</p>
+<p class="gd-p"><em>1.3 Chakra nature discovery and mastery</em></p>
+<p class="gd-p">Remove the paid/spin/roll/reroll element system from character creation and inventory.</p>
+<p class="gd-p">During the Academy chakra demonstration, an assessment object reacts, and the game assigns TWO different basic natures at equal odds, without duplicates: Fire, Water, Wind, Lightning, and Earth Release.</p>
+<p class="gd-p">Save both natures permanently and show them on the player profile and chakra information screen.</p>
+<p class="gd-p">Each nature has independent mastery: Beginner, Intermediate, Advanced, Expert, Master. Mastery unlocks techniques progressively; owning a nature does not grant every related technique.</p>
+<p class="gd-p">Clan abilities, bloodlines, and special transformations stay separate from ordinary nature discovery.</p>
+<p class="gd-p"><em>1.4 AI-generated three-person squad and Sensei</em></p>
+<p class="gd-p">After graduation, generate one squad with the player, two AI teammates, and one AI Sensei, plus a squad identity and number.</p>
+<p class="gd-p">Each teammate has a unique name, appearance, hairstyle, outfit, clan, two chakra natures, combat specialization, personality, strengths, weaknesses, backstory, dialogue, and relationship state.</p>
+<p class="gd-p">Personality archetypes: Prodigy, Strategist, Quiet One, Reckless One, Support, Rival. Personality affects dialogue, choices, relationships, and combat decisions.</p>
+<p class="gd-p">Generate the squad only once; persist names, appearance, personalities, clan, natures, relationships, progression, and squad number across sessions.</p>
+<p class="gd-p">Each Sensei has a unique appearance, name, personality, rank, combat style, special abilities, dialogue, and backstory. The Sensei introduces the squad, assigns missions, teaches techniques, organizes training, evaluates performance, reacts to decisions, advises, joins selected missions, and tracks progress.</p>
+<p class="gd-p"><em>1.5 Squad bonding and combat AI</em></p>
+<p class="gd-p">Conversations, friendship progression, rivalries, training interactions, shared mission memories, reactions to decisions, combination attacks, personal storylines, and relationship-based dialogue.</p>
+<p class="gd-p">NPCs remember important events and reference earlier interactions.</p>
+<p class="gd-p">Teammates follow the player, fight independently, target enemies, use their own jutsu, dodge, block, support, protect, and coordinate attacks.</p>
+<p class="gd-p">Combat decisions weigh enemy position, health, chakra, distance, and current battle conditions. Roles: Offensive, Defensive, Support, Tactical.</p>
+<p class="gd-p">Coordinated squad attacks with synchronized animations and effects.</p>
+<p class="gd-p"><em>1.6 Missions, Chunin Selection, and Rank Progression</em></p>
+<p class="gd-p">Mission tiers: D-Rank village activities; C-Rank low-risk field missions; B-Rank advanced operations; A-Rank high-level assignments; S-Rank elite missions.</p>
+<p class="gd-p">Mission types: escort, reconnaissance, tracking, enemy encounters, protection, retrieval, investigation, and boss encounters. AI teammates participate. Rewards: experience, reputation, mission rewards, and rank eligibility.</p>
+<p class="gd-p">Chunin Selection stages: written examination; survival examination in a large objective-based environment; preliminary matches against AI candidates; final tournament in an arena with spectators, village leaders, announcers, and cinematic introductions; leadership evaluation.</p>
+<p class="gd-p">Promotion depends on rank, missions, teamwork, combat, decision-making, and leadership. Not every candidate passes; failed candidates can try again.</p>
+<p class="gd-p">Rank path: Academy Student → Genin → Chunin → Jonin → Special Jonin → ANBU → Kage-Level. Every rank has unique requirements, missions, unlocks, responsibilities, profile updates, and NPC interactions. High-ranking players may lead AI squads, train Academy students, and join advanced village operations.</p>
+<p class="gd-p"><em>1.7 Living Academy and rank-aware world</em></p>
+<p class="gd-p">Academy schedules, NPC daily routines, courtyard training, classroom instruction, graduation ceremonies, squad introductions, village announcements, exam events, and mission-board interactions.</p>
+<p class="gd-p">Academy students recognize graduates; village residents acknowledge Genin and Chunin; high-ranking players get special recognition.</p>
+<p class="gd-p"><em>1.8 New UI panels</em></p>
+<p class="gd-p">Academy Progress; Examination Results; Chakra Natures; Chakra Mastery; Squad Information; Teammate Profiles; Sensei Information; Squad Relationships; Mission Assignments; Rank Progression.</p>
+<p class="gd-p">Cinematic transitions for chakra discovery, graduation, squad assignment, Chunin promotion, and major examination results. Match the existing Shinobi Legacy identity and avoid clutter.</p>
+<p class="gd-p">2. Ultimate world expansion</p>
+<p class="gd-p">Core objective: build a connected shinobi MMORPG with deeper activities, exploration, crafting, factions, multiplayer, and legendary discoveries.</p>
+<p class="gd-p"><em>2.1 Summoning contracts</em></p>
+<p class="gd-p">Species: snakes, toads, slugs, wolves, hawks, dragons, foxes, ancient mythical creatures, and original legendary species, each with unique models, animations, personality, summoning sequence, combat/passive abilities, rarity, and progression.</p>
+<p class="gd-p">Discover contracts through scrolls, quests, trials, guardians, and compatibility tests.</p>
+<p class="gd-p">Mastery unlocks stronger summons, commands, transformations, combined attacks, and larger summons. Summons follow and fight alongside owners. Dedicated interface.</p>
+<p class="gd-p"><em>2.2 Stealth and infiltration</em></p>
+<p class="gd-p">Crouching, cover, sneaking, disguises, distractions, and stealth objectives.</p>
+<p class="gd-p">NPC detection weighs distance, visibility, movement, noise, disguise, and suspicious behavior. Detection states: Unaware, Suspicious, Investigating, Alerted, Combat.</p>
+<p class="gd-p">Missions: document recovery, prisoner rescue, scroll recovery, intelligence gathering, facility entry, and undetected escapes. Include alarms, guard communication, patrol routes, and multiple completion paths.</p>
+<p class="gd-p"><em>2.3 Advanced training simulator</em></p>
+<p class="gd-p">Skill-based chakra control, speed/reaction, obstacle, weapon, projectile, sword, combat, blocking, dodging, counter, combo, and hand-sign challenges.</p>
+<p class="gd-p">Facilities: academies, private rooms, village grounds, advanced mastery spaces, and multiplayer arenas. Reward demonstrated mastery, not button clicks.</p>
+<p class="gd-p"><em>2.4 Weapon forging and customization</em></p>
+<p class="gd-p">Craft katanas, swords, spears, scythes, daggers, staffs, specialized shinobi weapons, and legendary weapons.</p>
+<p class="gd-p">Gather ores, ancient materials, boss drops, fragments, and elemental materials. Use blacksmith NPCs or crafting stations.</p>
+<p class="gd-p">Customize colors, handles, blades, decorations, effects, engravings, and names. Attributes may include durability, elemental affinity, chakra efficiency, attack specialization, and passives.</p>
+<p class="gd-p">Legendary weapons have histories, compatibility quests, awakenings, abilities, models, and cinematics.</p>
+<p class="gd-p"><em>2.5 Secret organizations</em></p>
+<p class="gd-p">Underground groups with identities, symbols, uniforms, hideouts, leaders, members, rank structures, exclusive missions, and rewards.</p>
+<p class="gd-p">Recruitment may require reputation, achievements, clan requirements, hidden quests, or trials. Members gain ranks, techniques, secret access, and faction operations.</p>
+<p class="gd-p">Organizations compete over resources, territories, information, and influence.</p>
+<p class="gd-p"><em>2.6 Player-owned properties</em></p>
+<p class="gd-p">Buy village homes, residences, estates, clan compounds, private training facilities, and hidden hideouts.</p>
+<p class="gd-p">Customize interiors, furniture, weapon/trophy displays, guest access, training areas, and upgrades. Clan compounds include meeting rooms, training, storage, symbols, and private entrances.</p>
+<p class="gd-p">Persist ownership and customization; prevent duplication and unauthorized access.</p>
+<p class="gd-p"><em>2.7 Chakra and elemental mastery</em></p>
+<p class="gd-p">Expand the existing six-element ecosystem (Fire, Water, Wind, Earth, Lightning, Yin) while preserving existing jutsu and compatibility.</p>
+<p class="gd-p">Train through technique use, challenges, quests, trials, and scrolls. Compatible advanced combinations may include Ice, Lava, Storm, Wood, Magnetism, Scorch, Steam, Crystal, and original combinations.</p>
+<p class="gd-p">Require eligibility and mastery; unlock effects, jutsu, control, transformations, and animations. Do not grant every combination automatically.</p>
+<p class="gd-p"><em>2.8 Traveling merchants</em></p>
+<p class="gd-p">Merchants travel between villages, marketplaces, remote routes, and hidden locations on schedules.</p>
+<p class="gd-p">Inventory: scrolls, materials, cosmetics, consumables, summoning items, crafting resources, and limited collectibles. Secret merchants appear during weather/celestial events, in abandoned settlements, or underground. Rotate stock without deleting purchased items.</p>
+<p class="gd-p"><em>2.9 Prison and captivity</em></p>
+<p class="gd-p">Capture connects to village security and rogue-shinobi gameplay: capture/transport events, notifications, records, security NPCs, prison quests, prisoner interactions, escape opportunities, recovery, and release.</p>
+<p class="gd-p">Escapes use puzzles, teamwork, abilities, passages, or timed events. Prevent endless imprisonment, spawn camping, repeated targeting, and abusive capture loops.</p>
+<p class="gd-p"><em>2.10 Dynamic mission generator</em></p>
+<p class="gd-p">Expand escort, investigation, NPC combat, rescue, defense, exploration, intelligence, rogue shinobi, boss hunt, and emergency village missions.</p>
+<p class="gd-p">Randomize locations, enemy formations, objectives, optional challenges, completion methods, and branching outcomes. Scale by rank, progression, group size, category, and enemy difficulty.</p>
+<p class="gd-p">Outcomes may affect reputation, relationships, world events, quests, and organizations.</p>
+<p class="gd-p"><em>2.11 Multiplayer and competitive play</em></p>
+<p class="gd-p">Clan wars: registration, declarations, battle sites, teams, scoring, victory conditions, rewards.</p>
+<p class="gd-p">Permanent player squads: names, leaders, invitations, shared missions, progression, records, emblems.</p>
+<p class="gd-p">Ranked tournaments: registration, brackets, matchmaking, spectators, history, rewards, seasons.</p>
+<p class="gd-p">Territory control: ownership, points, scheduled battles, rewards, records, announcements.</p>
+<p class="gd-p">Friendly duels: standard, restricted, no-transformations, ranked sparring, team rules.</p>
+<p class="gd-p">Server-verified leaderboards: strength, rank, duels, clans, missions, bosses, exploration.</p>
+<p class="gd-p"><em>2.12 Secret bloodline awakening</em></p>
+<p class="gd-p">Dormant potential discovered through NPCs, scrolls, secret places, clan quests, world events, and hidden requirements.</p>
+<p class="gd-p">Awakenings have cinematics, visuals, abilities, mastery, and lore. They are earned, never random free power-ups.</p>
+<p class="gd-p"><em>2.13 The world's unknown strongest</em></p>
+<p class="gd-p">A mysterious original, extremely powerful NPC travels the world, appears unexpectedly, avoids ordinary markers, observes players, interacts with NPCs, and disappears after encounters.</p>
+<p class="gd-p">Discovery leads to dialogue and a difficult multi-phase challenge with attack patterns. Rewards may include a title, cosmetic, weapon material, technique scroll, and achievement.</p>
+<p class="gd-p"><em>2.14 Legendary weapon recognition</em></p>
+<p class="gd-p">Weapons have personality, history, and compatibility. A weapon may accept or reject a player or test mastery. Trials can involve guardians, combat, history, and style mastery.</p>
+<p class="gd-p">Bonding unlocks weapon abilities, animations, mastery, lore, and transformations.</p>
+<p class="gd-p"><em>2.15 Lost villages</em></p>
+<p class="gd-p">Abandoned villages, destroyed clan settlements, forgotten fortresses, underground communities, and ancient training grounds.</p>
+<p class="gd-p">Environmental storytelling, records, hidden NPCs, passages, lost equipment, techniques, enemies, histories, disappearance causes, and exploration rewards. Discoveries unlock quests and main-lore reveals.</p>
+<p class="gd-p"><em>2.16 Natural and legendary progression</em></p>
+<p class="gd-p">Common-clan players can become elite through combat, training, missions, exploration, bosses, weapon mastery, elemental mastery, and competition.</p>
+<p class="gd-p">Paths: legendary swordsman, master tactician, elemental specialist, summoning master, hand-to-hand specialist, forbidden-technique specialist. Accomplishments earn titles, achievements, dialogue, and recognition.</p>
+<p class="gd-p">Rare clans keep unique advantages without making rarity the only path to strength.</p>
+<p class="gd-p"><em>2.17 Connected world systems</em></p>
+<p class="gd-p">Systems affect one another: merchants appear in lost villages; organizations offer infiltration; contracts require hidden bosses; weather reveals weapons; rivals appear at world events; leaders organize clan wars; mastery earns titles; bloodlines require exploration; NPCs recognize legendary accomplishments.</p>
+<p class="gd-p">3. Main menu redesign — Shinobi System</p>
+<p class="gd-p">Visual inspiration: the futuristic holographic interface feel of Sword Art Online, translated into an original Shinobi Legacy identity. No SAO logos, characters, or exact interface assets.</p>
+<p class="gd-p"><em>3.1 Environment and visual language</em></p>
+<p class="gd-p">Cinematic 3D backdrop: expansive shinobi world, floating islands, distant villages, mountains, clouds, particles, atmospheric lighting, slow camera rotation, and subtle holographic effects.</p>
+<p class="gd-p">Transparent glass panels, thin borders, dark navy/black/white with cyan and electric-blue accents, restrained glow, clean typography, floating elements, and subtle animations.</p>
+<p class="gd-p">Avoid generic Roblox styling, excessive gradients, oversized buttons, clutter, and heavy overlays.</p>
+<p class="gd-p"><em>3.2 Navigation and profile</em></p>
+<p class="gd-p">Left navigation: Enter World, Character, Clan, Inventory, Abilities, Missions, Stats, Settings.</p>
+<p class="gd-p">Each item gets a custom icon, hover animation, subtle highlight, holographic selection indicator, and smooth transition.</p>
+<p class="gd-p">Profile panel: portrait, username, level, rank, village, clan, title, combat power, and progression. Portrait aura reflects equipped clan or transformation.</p>
+<p class="gd-p"><em>3.3 Menu destinations and entry flow</em></p>
+<p class="gd-p">Enter World: panels disappear, camera moves toward the environment, interface fades, character appears, loading tips display, and gameplay begins smoothly.</p>
+<p class="gd-p">Character: rotatable 3D preview, outfit, weapons, clan, Dojutsu, customization, and injury status.</p>
+<p class="gd-p">Settings: Video, Graphics, Audio, Controls, Gameplay, Performance, Accessibility; adjustable quality, resolution scaling, sound, camera sensitivity, and controls.</p>
+<p class="gd-p"><em>3.4 Interaction, responsive layout, and implementation</em></p>
+<p class="gd-p">Smooth panel transitions, holographic loading, animated selection, floating UI, subtle scanning, hover effects, camera movement, and loading progress.</p>
+<p class="gd-p">Support desktop, laptop, and mobile browsers. Reorganize mobile panels to preserve readability and usability.</p>
+<p class="gd-p">Use the existing Three.js/WebGL architecture and UI framework. Preserve account and character data. Connect every option to a real system. Optimize effects and ensure reliable loading.</p>
+<p class="gd-p">4. Permanent injury &amp; sacrifice system</p>
+<p class="gd-p">Planned / future update. Combat, character progression, and permanent consequences. The intent is meaningful non-cosmetic consequences without graphic presentation.</p>
+<p class="gd-p"><em>4.1 Body-part loss and persistence</em></p>
+<p class="gd-p">Eligible characters may permanently lose the left arm, right arm, left eye, or right eye. Maximum: one arm and one eye.</p>
+<p class="gd-p">The player may choose which side is lost where the game rules allow. Injuries persist across sessions and are stored in character data.</p>
+<p class="gd-p">Integrate with combat, animation, abilities, character models, customization, and multiplayer.</p>
+<p class="gd-p"><em>4.2 Cinematic presentation</em></p>
+<p class="gd-p">Distinct non-graphic cinematics for left/right arm loss, left/right eye loss, and combined arm-and-eye loss.</p>
+<p class="gd-p">Temporary camera transitions, character reactions, aura/effect changes, dramatic sound, an injury notification, and a smooth return to gameplay.</p>
+<p class="gd-p"><em>4.3 Eye and ability consequences</em></p>
+<p class="gd-p">Track each eye independently so losing one eye removes only abilities tied to that eye.</p>
+<p class="gd-p">Rinnegan: disable abilities assigned to the lost eye and dependent techniques where appropriate. Sharingan: reduce advanced visual prediction and tracking.</p>
+<p class="gd-p">Mangekyo / Eternal Mangekyo: remove the lost eye's unique abilities. Byakugan: remove enhanced vision and chakra-point perception. Tenseigan: remove abilities and transformations dependent on the lost eye. Ketsuryugan: remove ocular techniques associated with the lost eye.</p>
+<p class="gd-p"><em>4.4 Arm consequences and alternate paths</em></p>
+<p class="gd-p">Losing the left arm disables techniques requiring it, modifies two-handed weapon animations, and restricts certain hand-sign combinations.</p>
+<p class="gd-p">Losing the right arm disables techniques requiring it, modifies sword stances, and restricts dual-wielding techniques.</p>
+<p class="gd-p">One-handed combat animations, modified stances, and alternative hand-sign animations where possible; disable only abilities that genuinely require the missing arm.</p>
+<p class="gd-p">Alternative mastery paths: One-Handed Mastery (stances, combos, attacks); Blind Warrior (alternative perception and defense); Broken Limit (temporary amplification with cooldowns/drawbacks); Sacrifice Awakening (earned progression that does not fully replace sacrificed abilities).</p>
+<p class="gd-p"><em>4.5 Rare restoration and injury records</em></p>
+<p class="gd-p">Rare restoration may come from legendary medical techniques, forbidden regeneration, mythical clan abilities, or difficult world quests. It must carry meaningful costs and preserve records and progression.</p>
+<p class="gd-p">Injury History on profiles: body part, event date, disabled abilities, unlocked mastery, and restoration status.</p>
+<p class="gd-p">Models, animations, and stances show injuries. NPCs recognize visible injuries and react through dialogue.</p>
+<p class="gd-p"><em>4.6 Technical integration</em></p>
+<p class="gd-p">Persistent character data and modular per-body-part systems.</p>
+<p class="gd-p">Connect restrictions to clan, Dojutsu, combat, and jutsu systems. Compatibility with existing character rigs and multiplayer.</p>
+<p class="gd-p">Prevent exploits involving restoration, duplicate states, or bypassing ability restrictions.</p>
+<p class="gd-p">5. Cross-system UI &amp; presentation</p>
+<p class="gd-p">World expansion interfaces: Summoning, Stealth Missions, Training, Weapon Crafting, Organizations, Properties, Elemental Mastery, Traveling Merchants, Prison Records, Dynamic Missions, Squads, Tournaments, Clan Wars, Territory Control, World Rankings, Bloodline Discoveries, Legendary Weapon Trials, and Exploration Records.</p>
+<p class="gd-p">Clean futuristic holographic UI consistent with the planned Shinobi System menu. Every panel must work on mobile and desktop and connect to the real gameplay state.</p>
+<p class="gd-p">Cinematic transitions for major discoveries, promotions, awakenings, weapon bonds, and injury events. Avoid clutter, placeholder buttons, and cosmetic-only systems.</p>
+<h4 class="gd-h2">Ideas (not finalized)</h4>
+<p class="gd-p">Chakra consistency: the Academy plan assigns two of five basic natures (Fire, Water, Wind, Lightning, Earth), while the world-expansion plan preserves an existing six-element system including Yin. Decide whether Yin remains a legacy element, a separate affinity, or a later unlock. Do not silently overwrite existing character data.</p>
+<p class="gd-p">Rank terminology: the Academy plan includes ANBU and Kage-Level. Confirm whether these stay final rank names or get renamed to match Shinobi Legacy's original terminology.</p>
+<p class="gd-p">Permanent injury fairness: define whether injury is opt-in, tied to specific story/boss events, or governed by competitive rules. Clearly communicate permanent consequences before a player enters a risk event.</p>
+<p class="gd-p">Multiplayer scope: confirm which systems are online multiplayer versus solo/AI-supported, especially AI squads, housing, prison, tournaments, and territory control.</p>
+<p class="gd-p">Release sequencing: these are planned systems, not commitments to one immediate update. Avoid overloading a single version.</p>
+<h3 class="gd-h1">10 — Roadmap</h3>
+<p class="gd-p">Priority order for the planned work. Detail for each system is in 09 — Planned. Nothing here is marked done unless it shipped (see 11 — Version history).</p>
+<h4 class="gd-h2">Implementation stages</h4>
+<table class="gd-table"><tr><th>Stage</th><th>What it covers</th></tr><tr><td>Foundation / audit</td><td>Inspect architecture, saves, combat, movement, UI, NPCs, missions, and multiplayer boundaries. Document integration points and migration risks before coding.</td></tr><tr><td>Phase 1 — Core gameplay</td><td>Summoning contracts; chakra mastery; advanced training; weapon forging.</td></tr><tr><td>Phase 2 — Living world</td><td>NPC AI integration; traveling merchants; lost villages; exploration discoveries; dynamic missions.</td></tr><tr><td>Phase 3 — Player activities</td><td>Housing; secret organizations; stealth missions; prison system.</td></tr><tr><td>Phase 4 — Multiplayer</td><td>Player squads; clan wars; tournaments; territory control; server-verified world rankings.</td></tr><tr><td>Phase 5 — Legendary progression</td><td>Secret bloodlines; legendary weapon recognition; hidden strongest NPC; individual mastery progression.</td></tr></table>
+<p class="gd-p">Academy progression track: Academy onboarding, five-stage graduation, two-nature discovery, persistent AI squad/Sensei, Chunin Selection, and the rank-aware world as a foundational progression track.</p>
+<p class="gd-p">Menu and injury tracks: redesign the main menu as a connected UI track. Implement permanent injury and sacrifice only after ability, rig, save, and combat dependencies are mapped.</p>
+<h4 class="gd-h2">Completed features</h4>
+<p class="gd-p">Shipped work is tracked version by version in 11 — Version history; the newest live systems are summarized in 00 — Master index.</p>
+<h3 class="gd-h1">11 — Version history &amp; changelog</h3>
+<p class="gd-p">Newest first. Each entry carries its full notes in the section shown; nothing here is invented. Every entry below shipped unless marked otherwise.</p>
+<h4 class="gd-h2">v1.122.0 (current)</h4>
+<p class="gd-p">v1.122.0 — current main build, updated Nov 12, ~10:35 AM CT; last live run Nov 11, ~10:21 PM CT. The tab website is down for an update while the new Story Mode build finishes — see 00 — Current development status.</p>
+<h4 class="gd-h2">v1.120.6 → v1.120.25</h4>
+<p class="gd-p"><strong>v1.120.25 — </strong>Sealing pin, quest markers, elements from the spin  → 06 quests &amp; 04 elements</p>
+<p class="gd-p"><strong>v1.120.25 — </strong>Goku Clan moved off the Naruto world  → 03 clans</p>
+<p class="gd-p"><strong>v1.120.25 — </strong>Tracker fixes  → 06 quests</p>
+<p class="gd-p"><strong>v1.120.24i — </strong>Quest trackers + waypoints  → 06 quests</p>
+<p class="gd-p"><strong>v1.120.24h — </strong>Stat points fix  → 02 stats</p>
+<p class="gd-p"><strong>v1.120.24f — </strong>Inner Realm upgrade  → 04 tailed beasts</p>
+<p class="gd-p"><strong>v1.120.24e — </strong>New intro voices + final clash, Goku power-up screams  → 07 intro</p>
+<p class="gd-p"><strong>v1.120.24c — </strong>Voiced intro dialogue  → 07 intro</p>
+<p class="gd-p"><strong>v1.120.24 — </strong>Clan quests + more quest XP  → 03 clan quests</p>
+<p class="gd-p"><strong>v1.120.23c — </strong>Goku Clan fixes  → 03 Goku Clan</p>
+<p class="gd-p"><strong>v1.120.23b — </strong>Intro polish  → 07 intro</p>
+<p class="gd-p"><strong>v1.120.23 — </strong>Secret Mythic Goku Clan  → 03 Goku Clan</p>
+<p class="gd-p"><strong>v1.120.22 — </strong>Real eye abilities  → 04 dojutsu</p>
+<p class="gd-p"><strong>v1.120.22 — </strong>Gear polish  → 02 gear</p>
+<p class="gd-p"><strong>v1.120.21 — </strong>Brand-new intro cinematic  → 07 intro</p>
+<p class="gd-p"><strong>v1.120.20 — </strong>Luck Boost  → 08 systems</p>
+<p class="gd-p"><strong>v1.120.20 — </strong>Admin from the main menu: God Mode opens on the main menu too  → 07 settings</p>
+<p class="gd-p"><strong>v1.120.20 — </strong>Hidden event drops  → 08 systems</p>
+<p class="gd-p"><strong>v1.120.17 — </strong>Retired items cleanup (35 icon-only items removed with ryo refunds)  → 13 archive</p>
+<p class="gd-p"><strong>v1.120.14 — </strong>Trae's own 3D gear  → 02 gear</p>
+<p class="gd-p"><strong>v1.120.13 — </strong>New UI look  → 07 UI &amp; 03 clan eyes</p>
+<p class="gd-p"><strong>v1.120.12 — </strong>Enterable village buildings in all 5 villages  → 05 world</p>
+<p class="gd-p"><strong>v1.120.11 — </strong>Bosses actually fight  → 06 bosses</p>
+<p class="gd-p"><strong>v1.120.10 — </strong>VFX + SFX on every move  → 01 combat</p>
+<p class="gd-p"><strong>v1.120.9 — </strong>Performance  → 12 performance</p>
+<p class="gd-p"><strong>v1.120.8 — </strong>Going Rogue: cut your headband and walk out a rogue  → 08 systems</p>
+<p class="gd-p"><strong>v1.120.7 — </strong>Clan bar on Shift+1 to Shift+4, Mac-friendly  → 03 clan arts</p>
+<p class="gd-p">New character creator  → 02 character creation (v1.120.3)</p>
+<h4 class="gd-h2">Upcoming</h4>
+<p class="gd-p">v1.121.0 — Rimuru Quest 5 plus Gojo and Toji clans, with a FULL SAVE RESET for everyone. See 09 under In development.</p>
+<h3 class="gd-h1">12 — Technical documentation</h3>
+<h4 class="gd-h2">Engine &amp; platform</h4>
+<p class="gd-p">Engine: Three.js / WebGL. Platform: browser-based 3D game. Current build: v1.122.0. Main game and test build links live in the Games &amp; Website Links tab.</p>
+<h4 class="gd-h2">Performance</h4>
+<p class="gd-p">v1.120.9 · Performance: new Auto graphics quality in Settings → Video (Auto / Low / Medium / High), plus an FPS display. Auto starts MacBooks on Medium and phones on Low, then adjusts to keep FPS smooth</p>
+<p class="gd-p">Grass behind the camera isn't drawn anymore, shaders are precompiled (fewer stutters), and off-screen characters skip animation on Medium/Low</p>
+<h4 class="gd-h2">Technical standards &amp; save compatibility (master plan)</h4>
+<p class="gd-p">Keep the existing Three.js/WebGL browser-game architecture. Inspect the current codebase before implementation and map each feature to existing systems.</p>
+<p class="gd-p">Preserve existing character saves, clan assignments, abilities, villages, open-world functionality, combat, movement, missions, inventory, and progression.</p>
+<p class="gd-p">Reuse existing systems; avoid duplicate implementations and unnecessary replacements.</p>
+<p class="gd-p">Persist Academy completion, exam results, chakra natures and mastery, squad identity and relationships, Sensei, missions, contracts, properties, inventory, injuries, and achievements.</p>
+<p class="gd-p">Optimize AI updates, NPC counts, world events, particles, and large environments. Provide graphics quality settings.</p>
+<p class="gd-p">For multiplayer, use server-authoritative and validated data for inventory, ownership, currency, rewards, rankings, tournament results, and progression. Prevent duplication, unauthorized access, exploit loops, and invalid reward claims.</p>
+<p class="gd-p">Support desktop and mobile browsers, reliable loading, responsive UI, and existing save compatibility.</p>
+<p class="gd-p">No fake interactions: every examination, NPC interaction, squad behavior, menu action, and progression mechanic must function.</p>
+<h4 class="gd-h2">Known issues being tracked</h4>
+<p class="gd-p">A grey band shows on the gorge walls</p>
+<p class="gd-p">Mist and Cloud still look generic (first pass)</p>
+<p class="gd-p">You can't land on roofs</p>
+<h3 class="gd-h1">13 — Archive</h3>
+<p class="gd-p">Out-of-game items and historical records kept for reference. Not current gameplay.</p>
+<h4 class="gd-h2">Retired items (v1.120.17)</h4>
+<p class="gd-p">These 35 weapons and accessories show nothing on your shinobi (just an icon and stats), so they're leaving the game. Anyone who already owns one gets it taken off and refunded in ryo (the Academy Kunai is swapped for the 3D Field Kunai). Quests that gave one now give a 3D piece instead.</p>
+<table class="gd-table"><tr><th>Item</th><th>Type</th><th>Where it came from</th></tr><tr><td>Academy Kunai</td><td>Weapon</td><td>Starter weapon + Mist/Sand shops</td></tr><tr><td>Tempered Kunai</td><td>Weapon</td><td>Main shop + crafting</td></tr><tr><td>Flak Vest</td><td>Armor</td><td>Main shop + crafting</td></tr><tr><td>Swift Sandals</td><td>Feet</td><td>Main shop</td></tr><tr><td>Kusanagi Blade</td><td>Weapon</td><td>Owner spawn only</td></tr><tr><td>Samehada</td><td>Weapon</td><td>Owner spawn only</td></tr><tr><td>Executioner's Blade</td><td>Weapon</td><td>Owner spawn only</td></tr><tr><td>Twin Fang Blades</td><td>Weapon</td><td>Owner spawn only</td></tr><tr><td>Twin Sword Hiramekarei</td><td>Weapon</td><td>Owner spawn only</td></tr><tr><td>Sage's Battle Robe</td><td>Armor</td><td>Owner spawn only</td></tr><tr><td>Crimson Samurai Armor</td><td>Armor</td><td>Owner spawn only</td></tr><tr><td>Kage's Crown Hat</td><td>Head</td><td>Owner spawn only</td></tr><tr><td>Wind-Step Sandals</td><td>Feet</td><td>Crafting</td></tr><tr><td>Fangblade</td><td>Weapon</td><td>Crafting</td></tr><tr><td>Severed Headband</td><td>Head</td><td>Rogue Jonin boss loot</td></tr><tr><td>Leaf Flak Vest</td><td>Armor</td><td>Leaf Armory</td></tr><tr><td>Will of Fire Headband</td><td>Head</td><td>Leaf Armory</td></tr><tr><td>Leafsteel Blade</td><td>Weapon</td><td>Leaf quest "Hiroshi's Steel"</td></tr><tr><td>Hokage's Seal</td><td>Head</td><td>Leaf "Trial of the Hokage"</td></tr><tr><td>Sand Veil Cloak</td><td>Armor</td><td>Sand Bazaar</td></tr><tr><td>Wind Scroll Fan</td><td>Weapon</td><td>Sand Bazaar</td></tr><tr><td>Battle Puppet Charm</td><td>Head</td><td>Sand quest "Strings of Jin"</td></tr><tr><td>Kazekage's Veil</td><td>Armor</td><td>Sand "Trial of the Kazekage"</td></tr><tr><td>Water-Walk Sandals</td><td>Feet</td><td>Mist Docks</td></tr><tr><td>Mist Kunai</td><td>Weapon</td><td>Mist Forge</td></tr><tr><td>Tide Edge</td><td>Weapon</td><td>Mist Forge</td></tr><tr><td>Mistcutter</td><td>Weapon</td><td>Mist quest "Kenji's Edge"</td></tr><tr><td>Mizukage's Coat</td><td>Armor</td><td>Mist "Trial of the Mizukage"</td></tr><tr><td>Thunder Gauntlets</td><td>Weapon</td><td>Cloud Forge</td></tr><tr><td>Storm Plate</td><td>Armor</td><td>Cloud Forge</td></tr><tr><td>Raijin Knuckles</td><td>Weapon</td><td>Cloud quest "Denki's Lightning Steel"</td></tr><tr><td>Raikage's Mantle</td><td>Armor</td><td>Cloud "Trial of the Raikage"</td></tr><tr><td>Granite Armor</td><td>Armor</td><td>Stone Outfitters</td></tr><tr><td>Earthshaker Hammer</td><td>Weapon</td><td>Stone quest "Ishiko's Masterwork"</td></tr><tr><td>Tsuchikage's Crest</td><td>Head</td><td>Stone "Trial of the Tsuchikage"</td></tr></table>
+<p class="gd-p">Kept (has a real design)</p>
+<p class="gd-p">All 26 pieces of Trae's 3D gear: masks, hats, hoods, cloaks, armor, and weapons</p>
+<p class="gd-p">Toad Sage Cloak (its sage coat shows on your shinobi)</p>
+<p class="gd-p">Inverted Spear of Heaven (the Toji clan spear)</p>
+</div>
+<div class="gd-panel" id="gd-unbound">
+<h3 class="gd-h1">Shinobi: Life Unbound —</h3>
+<p class="gd-p"><em>Official dev log · status, links, systems, and changelog</em></p>
+<p class="gd-p"><strong>Last updated: Nov 22, 2026 (live)</strong></p>
+<h3 class="gd-h1">00 — Game status</h3>
+<h4 class="gd-h2">Project overview</h4>
+<p class="gd-p">Shinobi: Life Unbound is a single-player, Naruto-inspired life sim that runs entirely in the browser. You pick a name, a body, and a village; everything else (era, surname, clan) auto-rolls, and the clan comes from three spins you roll yourself, and the game plays out a whole life: birth, family, school, career, missions, jutsu training, bloodline awakening, eras, descendants, aging and death, with the Legacy Hall keeping your line's story.</p>
+<h4 class="gd-h2">Current development status</h4>
+<p class="gd-p">🟢 Game: OPEN · playable now (single-player, any device)</p>
+<p class="gd-p">Live build: Version 4.0.6 · link in Games &amp; Website Links</p>
+<p class="gd-p">Cross-game: the main game, Shinobi Legacy · link in Games &amp; Website Links. In-game update log: every push gets an entry, shown on the title-screen chip</p>
+<h3 class="gd-h1">01 — Update log</h3>
+<h4 class="gd-h2">Nov 22, 2026</h4>
+<p class="gd-p">Intro Every Load: the opening title sequence now plays on every visit and refresh; SKIP and Begin your story still get you straight in</p>
+<p class="gd-p">New Name: Shinobi Sprint is now SHINOBI: LIFE UNBOUND; the new name is on the intro, title screen, in-game brand, page title, and credits</p>
+<p class="gd-p">Opening Title Sequence: drifting embers, the title build-in, a tagline, and Begin your story; skippable</p>
+<p class="gd-p">Character Creation Overhaul: you pick name + village only; gender, era, surname, and clan auto-roll from the rarity pool (mythical/legendary/rare/uncommon/common) with a reveal animation; name rules enforced (2-16 letters, nothing rude); character ID and birth stamp saved in saves</p>
+<p class="gd-p">Clan Surnames: a picked clan always sticks and the last name auto-fills with it; random clan births take the clan surname; relocated families get a bio line</p>
+<p class="gd-p">Main Menu Rework: rebuilt to match Ricky's mockups (red moon layout); achievements, settings, credits, exit, and back to menu re-wired and verified</p>
+<p class="gd-p">Life &amp; Legacy: birth, family, school, career, missions, jutsu training, narrative missions, bloodline awakening, eras, descendants, aging, death, and the Legacy Hall; dashboard-style game screen</p>
+<p class="gd-p">Cross Links: the title footer has a direct link to Shinobi Legacy</p>
+<p class="gd-p">Version 1.1.0: version numbering is in effect — the last number bumps for small updates, the middle one for kinda big updates, the first one for huge ones; today's batch puts the game at 1.1.0</p>
+<p class="gd-p">Version 1.2.0 (Nov 22): Pickable Era &amp; Fate Rolls — the creator now asks which era you are born into (or let the dice decide), and the dice of birth roll a family origin and a personality trait into every life.</p>
+<p class="gd-p">Version 2.0.0 (Nov 22): The Living World Update — Phase 1. Age-gated childhood (0-4 early years, 5-7 first chakra awareness), quiet years, family and village event pools. Real households at birth (orphans, guardians, grandparents, small, large, prestigious families) that shape your start. Academy subjects tracked per class; graduation is now a real assessment with early graduation and special recognition possible. Training gains have diminishing returns and cost fatigue; conditioning and meditation added. Friends, rivals, teammates, and students age, train and earn promotions on their own. Hidden achievements added. Update countdown: when a new version goes live, the game counts down 30 seconds and refreshes itself.</p>
+<p class="gd-p">Version 2.1.0 (Nov 22): Specializations &amp; Sharper Missions (Living World Phase 2) — after graduation, the assignment desk asks your specialization: Combat, Tracking, Medical, Intelligence, Support or Instructor Track. It goes in your file, shows on your record, and changes how missions play out: medical shinobi heal through injuries, combat and intelligence sharpen mission rolls, and going in exhausted costs you. Mission briefings now show your specialization and condition. New story events across childhood, academy, squad life and the world, including rare ones: a wandering sage, a temple scroll, a five-village summit, and a stray pup that stays.</p>
+<p class="gd-p">Version 2.2.0 (Nov 22): The Cinematic Opening — starting a new life now opens a cinematic intro: black screen fading into animated shots of the world (mountains under the moon, village rooftops with lanterns, a forest patrol) while the narrator speaks the opening lines one at a time, with wind, distant bells, a slow-building score, and a heartbeat before the scroll opens. Random narrator voice per line where the browser supports it, subtitles always on, Skip Intro always on screen, Replay Intro in settings. Plays for new lives only: loading a save or continuing goes straight in. About 50 seconds.</p>
+<p class="gd-p">Version 2.2.1 (Nov 22): Narrator Fix — the intro narrator now speaks one consistent English voice at a deep, calm pitch for the whole intro instead of a random voice per line, and the wind in the mix is softer.</p>
+<p class="gd-p">Version 3.0.0 (Nov 22): The Life Simulator Overhaul — Phase 2 — every year of a life can now unfold as real story scenes: a dynamic event engine reads your age, village, clan, family, personality, reputation, relationships, rank, and everything that happened before, then builds events that remember you, across 20+ categories from family and academy life to rivalries, tragedies, celebrations, romance, betrayals, political moves, war years, legendary meetings and genuinely rare secret events. Each scene is a full screen: title, category, rarity, age and location, narration, dialogue with named NPCs, and choices that actually change your life, some consequences landing immediately and others waiting years in your future.</p>
+<p class="gd-p">Version 3.1.0 (Nov 22): Village Passives &amp; Fates — every village now grants a permanent birth passive that touches real math: the Leaf learns 10% faster and bonds easier, the Sand survives danger that kills others and finds Wind affinity more often, the Mist hits harder and reads water, the Cloud grows speed and taijutsu, the Stone endures and loses less to failure, and two new birthplaces join the dice: the Hidden Rain (adaptability, intelligence, rare encounters) and the Hidden Sound (jutsu growth, unusual abilities). After the clan reveals, the creator asks CHOOSE YOUR FATE: pick a handicap, roll a random one at weighted rarity (common, uncommon, rare, legendary), or walk away whole. Eight fates total, from Fragile Constitution up.</p>
+<p class="gd-p">Version 3.1.1 (Nov 22): Status Indicators — the title screen now shows a live status pill under the logo: green "Online · Version" normally, amber "Updating · new version live" when the version watch catches a new build (it feeds the same 30-second auto-refresh countdown). The official website's Life Unbound tab got a matching indicator that reads the game's version file directly, so both show the same state. The website was bumped to v2.3.</p>
+<p class="gd-p">Version 3.1.2 (Nov 22): Update Chip Fix — fixed the Latest Update chip and the top of the update log: the newest entries were collapsing into one record, so the chip kept showing an older update. The chip and log now open with the newest entry, one record per update.</p>
+<p class="gd-p">Version 3.1.3 (Nov 22): Narrator Voice Removed — the intro no longer has a spoken narrator voice. The opening lines still play as subtitles over the visuals, wind and score, and Skip Intro works the same as before.</p>
+<p class="gd-p">Version 3.1.4 (Nov 22): Choose Your Gender — the creator asks one more question before the dice roll: a new step between your name and your village, CHOOSE YOUR BODY. Pick a boy, pick a girl, or let fate decide between them. Your choice shapes the first name fate rolls for you and the life the engine builds; letting fate decide keeps it a true coin flip. Existing saves are untouched.</p>
+<p class="gd-p">Version 3.2.0 (Nov 22): Roll Your Own Clan — the bloodline is yours to roll now. After the dice of birth forge your origin and trait, the clan step hands you three spins: each one rolls a real clan from your village's bloodline pool at full rarity odds; keep the one you want or spin again, and the clan you keep becomes your surname. Used all three? You keep the last roll. Rather walk alone? A quiet option lets you stay clanless, a civilian with nothing but your own name. Village pools still respect their lands, rare and mythical clans stay rare, and existing saves are untouched.</p>
+<p class="gd-p">Version 4.0.0 (Nov 22): Hearts &amp; Voices — the sim becomes a social one. A new People tab puts everyone in this life on one screen with bond meters and what each person remembers about you, and Spend time opens real conversations where your answers branch and every reply is shaped by who they are. Six voices (bold, steady, sharp, warm, distant, easygoing) speak and remember differently. Choices leave seeds: keep the pouch you found, spread a friend's secret, give your word as a child, and the consequences come back years later. Personality deepens through play: your dominant traits unlock new dialogue options and decide who you are becoming, from The Shield to The Storm. New life events (first words, the new kid, a dinner with edges, the lantern stranger) and bond and feud milestones now fire on their own. Existing saves, menus, systems and progression are untouched.</p>
+<p class="gd-p">Version 4.0.1 (Nov 22): Age-Up Fix &amp; The People Tab — fixed the bug that made AGE UP do nothing when clicked: the new Hearts &amp; Voices systems could not reach the game core, so the click died silently before a single year passed. Age-up now works every time, runs the year's events, and closes with the Year Summary. The People tab and the Record tab are really on the bottom bar now (and the Character tab opens again), and enrolling in the Academy fills your classroom with people to talk to.</p>
+<p class="gd-p">Version 4.0.2 (Nov 22): Bridge Fix Round Two — more strands of the same wiring bug: a second batch of game-core functions (year events, ranks, bonds, academy, the fate system) were still out of reach for the new Life, People and Fate layers, so age up could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every core connection is exposed to those layers now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched.</p>
+<p class="gd-p">Version 4.0.3 (Nov 22): Home Screen Fix — the AGE UP button moved from the bottom of the page to the top of the home screen so it is always in reach, no more scrolling for it; the Latest Update chip on the title screen is now clickable and opens the full update log.</p>
+<p class="gd-p">Version 4.0.4 (Nov 22): Mission Board Fix &amp; Save Restore — fixed the bug where running missions never updated the record: mission results were not reaching the stats the Record tab reads, so wins, losses, streaks and pay now count the moment a mission ends. Also fixed saved lives reloading as clanless: the clan you kept now restores from the save. Saves untouched.</p>
+<p class="gd-p">Version 4.0.5 (Nov 22): Talks Fix &amp; Scene Continue — three QA bugs fixed: People-tab conversations were completely silent (a missing name helper crashed every talk before it opened); the Age 2 event summary's Continue button would not dismiss and froze the year; and the intro now hands off on its own after about six seconds instead of hanging. All three verified live end to end in a fresh run.</p>
+<p class="gd-p">Version 4.0.6 (Nov 22): Pinned Age-Up &amp; Save Protection — the AGE UP button is now a true pinned header that never scrolls away: it stays fixed at the top of the game screen right under the topbar while you scroll the home feed. Saves also got a protection layer: a local recovery copy snapshots all six slots on every save, deletion and cloud sync, and a new Save protection panel in Settings adds Export backup and Import backup (JSON) so a full save backup can be carried across browsers or restored after clearing site data. Verified live end to end in a fresh run.</p>
+<p class="gd-p">Version 4.1.0 (Nov 22): The Complete Clan Overhaul — seven rarity tiers (common 48%, uncommon 27%, rare 15%, epic 7%, legendary 2.5%, mythical 0.5%), plus two secret clans (Vex and Rin) that never appear in normal rolls and are found only through the Forbidden Registry divination at 1 in 2,000,000. Full 45-clan roster: Uzumaki moved to Legendary as intended, and the Otsutsuki, Hagoromo, Chinoike, Jugo, Iburi, Tsuchigumo, Onikuma, Hoki, Kohaku, Izuno, Lee and Ryu bloodlines joined. Every clan now carries a real, named passive wired into actual math (stats, training speed, technique mastery, exams, missions, recovery, reputation, bonds, resistances), derived live so bonuses never stack or duplicate. Twelve new clan techniques unlock through play, from the Adamantine Sealing Chains to the Sixty-Four Palms. The clan tab is a new collection: search, rarity filters, full clan cards, roll history, and the Forbidden Registry. Existing saves migrate safely: your clan stays yours, only its rarity label updates to the new scale. The owner console gained full clan controls: individual odds, enable/disable, grant clan, free rerolls, forced rolls with extendable windows, a probability tester, roll history and secret-odds boosts. Verified live end to end in the browser.</p>
+</div>
+<div class="gd-meta">Migrated from the Shinobi Legacy doc on Nov 22, 2026. Links keep living in the doc's Games &amp; Website Links tab.</div>
+</section>
+<script>
+(function () {
+  'use strict';
+  function install() {
+    var nav = document.querySelector('.navrow');
+    var home = document.querySelector('[data-v="home"]');
+    if (!nav || !home) { setTimeout(install, 400); return; }
+    if (document.querySelector('[data-gi-btn]')) return;
+    var btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.setAttribute('data-v', 'gamedocs');
+    btn.setAttribute('data-gi-btn', '');
+    btn.type = 'button';
+    btn.textContent = 'Game Info';
+    btn.style.order = '3.4';
+    nav.appendChild(btn);
+    var tabs = document.getElementById('gdtabs');
+    if (tabs) {
+      tabs.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-gd]');
+        if (!b) return;
+        var sec = document.getElementById('view-gamedocs');
+        if (!sec) return;
+        Array.prototype.forEach.call(tabs.querySelectorAll('button[data-gd]'), function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        ['logs', 'legacy', 'unbound'].forEach(function (k) {
+          var p = document.getElementById('gd-' + k);
+          if (p) p.classList.toggle('on', k === b.getAttribute('data-gd'));
+        });
+      });
+    }
+  }
+  install();
 })();
 </script>
 </body>
