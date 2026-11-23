@@ -908,7 +908,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.1';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.2';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -2225,6 +2225,9 @@ box.innerHTML='<div style="font-size:10.5px;font-weight:700;letter-spacing:.08em
 document.body.appendChild(box);
 function hide(){box.style.opacity='0';box.style.transform='translateY(8px)';setTimeout(function(){box.style.display='none'},260)}
 function show(nm,tx){var t=document.getElementById('ccn-text');if(t)t.textContent=nm+': '+tx;box.style.display='block';requestAnimationFrame(function(){box.style.opacity='1';box.style.transform='translateY(0)'});if(hideT)clearTimeout(hideT);hideT=setTimeout(hide,7000)}
+function askNotif(){try{if(window.Notification&&Notification.permission==='default')Notification.requestPermission()}catch(e){}}
+function notify(nm,tx){var hidden=document.visibilityState==='hidden';if(hidden&&window.Notification&&Notification.permission==='granted'){try{var n=new Notification('Shinobi hub \u2014 new chat message',{body:nm+': '+tx,tag:'shinobi-chat-notif'});n.onclick=function(){try{window.focus();var b=document.querySelector('nav button[data-v="chat"]');if(b)b.click()}catch(e){}try{n.close()}catch(e){}};return}catch(e){}}if(!hidden)show(nm,tx)}
+var cbtn=document.querySelector('nav button[data-v="chat"]');if(cbtn)cbtn.addEventListener('click',askNotif);
 box.addEventListener('click',function(){var b=document.querySelector('nav button[data-v="chat"]');if(b)b.click();hide()});
 if(typeof db==='undefined'||!db)return;
 db.collection('community_chat').orderBy('when','desc').limit(40).onSnapshot(function(s){
@@ -2236,7 +2239,7 @@ db.collection('community_chat').orderBy('when','desc').limit(40).onSnapshot(func
  if(!primed){primed=true;return}
  if(chatOn())return;
  if(Date.now()-bestMs>120000)return;
- show(String(best.name||'Someone'),String(best.text||'').slice(0,90));
+ notify(String(best.name||'Someone'),String(best.text||'').slice(0,90));
 },function(){});
 }catch(e){console.warn('chat corner notification unavailable',e)}})();
 </script>
