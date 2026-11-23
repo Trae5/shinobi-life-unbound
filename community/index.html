@@ -908,7 +908,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.2.0';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.3.0';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -1882,6 +1882,13 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
     btn.textContent = 'Game Info';
     btn.style.order = '3.4';
     nav.appendChild(btn);
+    btn.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('nav button[data-v]'), function (x) { x.classList.remove('on'); });
+      btn.classList.add('on');
+      Array.prototype.forEach.call(document.querySelectorAll('.view'), function (v) { v.classList.remove('on'); });
+      var sec = document.getElementById('view-gamedocs');
+      if (sec) { sec.classList.add('on'); window.scrollTo({ top: 0 }); }
+    });
     var tabs = document.getElementById('gdtabs');
     if (tabs) {
       tabs.addEventListener('click', function (e) {
@@ -1897,6 +1904,85 @@ window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeM
         });
       });
     }
+  }
+  install();
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+
+  /* YouTube tab. Adds a YouTube button to the hub nav. Paste a YouTube link
+     or video ID to watch it embedded right in the hub (youtube-nocookie embed
+     player). Search opens youtube.com in a new tab, since YouTube blocks its
+     search pages from being framed. No APIs, no keys, nothing stored. */
+  function install() {
+    var nav = document.querySelector('.navrow');
+    if (!nav) { setTimeout(install, 400); return; }
+    if (document.querySelector('[data-yt-btn]')) return;
+
+    var style = document.createElement('style');
+    style.textContent = [
+      '.yt-in{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}',
+      '.yt-in input{flex:1;min-width:220px;padding:11px;border-radius:8px;border:1px solid #444;background:#0c0b12;color:#eee}',
+      '.yt-frame{position:relative;width:100%;max-width:900px;margin:0 auto;padding-top:56.25%;background:#000;border-radius:12px;overflow:hidden;border:1px solid #3a2a2a}',
+      '.yt-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}',
+      '.yt-empty{text-align:center;color:var(--dim,#889);padding:40px 10px}',
+      '.yt-note{color:var(--dim,#889);font-size:12px;margin-top:10px}'
+    ].join('');
+    document.head.appendChild(style);
+
+    var btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.setAttribute('data-v', 'youtube');
+    btn.setAttribute('data-yt-btn', '');
+    btn.type = 'button';
+    btn.textContent = 'YouTube';
+    btn.style.order = '3.45';
+    nav.appendChild(btn);
+
+    function wireNav(b, viewId) {
+      b.addEventListener('click', function () {
+        Array.prototype.forEach.call(document.querySelectorAll('nav button[data-v]'), function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        Array.prototype.forEach.call(document.querySelectorAll('.view'), function (v) { v.classList.remove('on'); });
+        var sec = document.getElementById(viewId);
+        if (sec) { sec.classList.add('on'); window.scrollTo({ top: 0 }); }
+      });
+    }
+    wireNav(btn, 'view-youtube');
+
+    var sec = document.createElement('section');
+    sec.className = 'view';
+    sec.id = 'view-youtube';
+    sec.innerHTML = '<h2>YouTube</h2>' +
+      '<p style="color:var(--dim,#889)">Watch videos right here in the hub, or hop out to search.</p>' +
+      '<div class="yt-in"><input id="ytq" type="text" placeholder="paste a YouTube link or video ID" aria-label="YouTube link or video ID"><button class="btn" id="ytgo" type="button">Watch</button><button class="btn" id="ytsearch" type="button">Search YouTube</button></div>' +
+      '<div id="ytplayer"><div class="yt-empty">Paste a YouTube link or video ID above, then hit Watch.</div></div>' +
+      '<div class="yt-note">Paste any youtube.com or youtu.be link to watch it embedded here. Search opens YouTube in a new tab, because YouTube blocks its search pages from being embedded. Nothing is tracked or stored by the hub.</div>';
+    var footer = document.querySelector('footer');
+    if (footer && footer.parentNode) footer.parentNode.insertBefore(sec, footer); else document.body.appendChild(sec);
+
+    var q = sec.querySelector('#ytq'), holder = sec.querySelector('#ytplayer');
+    function vid(v) {
+      v = String(v || '').trim();
+      var m = v.match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+      if (m) return m[1];
+      if (/^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+      return '';
+    }
+    function watch() {
+      var id = vid(q.value);
+      if (!id) { holder.innerHTML = '<div class="yt-empty">That one didn\'t look like a YouTube link or video ID. Paste a full link or the 11-character ID.</div>'; return; }
+      holder.innerHTML = '<div class="yt-frame"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>';
+    }
+    sec.querySelector('#ytgo').addEventListener('click', watch);
+    q.addEventListener('keydown', function (e) { if (e.key === 'Enter') watch(); });
+    sec.querySelector('#ytsearch').addEventListener('click', function () {
+      var t = String(q.value || '').trim();
+      var url = t ? 'https://www.youtube.com/results?search_query=' + encodeURIComponent(t) : 'https://www.youtube.com/';
+      window.open(url, '_blank', 'noopener');
+    });
   }
   install();
 })();
