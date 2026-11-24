@@ -1,5 +1,5 @@
 /* ============================================================ */
-/* TRAINING OVERHAUL — v1.2.3 "Every Drill Is A Game"            */
+/* TRAINING OVERHAUL — v1.2.4 "Every Drill Is A Game"            */
 /* BitLife-style, text/menu driven. No 3D, no real-time world.   */
 /* Each activity has its own mechanic, grades D-S, mastery,      */
 /* personal records and rank-scaled difficulty tiers.            */
@@ -110,12 +110,13 @@ function shell(title,sub,onBuild){
   var box=document.createElement("div");box.className="mg-box";wrap.appendChild(box);
   box.innerHTML="<div class='mg-title'>"+title+"</div><div class='mg-sub'>"+sub+"</div>";
   var stage=document.createElement("div");box.appendChild(stage);
-  var foot=document.createElement("div");foot.className="mg-tries";box.appendChild(foot);
-  onBuild(stage,foot);
-  return {box:box,stage:stage,foot:foot,
+  var ft=document.createElement("div");ft.className="mg-tries";box.appendChild(ft);
+  st=stage;foot=ft;
+  onBuild(stage,ft);
+  return {box:box,stage:stage,foot:ft,
     end:function(score,res){wrap.style.display="none";finish(ACT_BY_ID[curAct],tierCur,res||{score:score})}};
 }
-var ACT_BY_ID={},curAct=null,tierCur=null;
+var ACT_BY_ID={},curAct=null,tierCur=null,st=null,foot=null; /* current minigame stage/foot: drill helpers declared outside their shell() callback read these */
 function wrapOff(){var d=el("#minigame");if(d)d.style.display="none"}
 function shellEnd(score,res){wrapOff();finish(ACT_BY_ID[curAct],tierCur,res||{score:score})}
 function run(a,tier){
