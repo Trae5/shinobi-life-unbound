@@ -102,7 +102,7 @@ function gn(id,f){var v=parseFloat(g(id));return isNaN(v)?f:v}
 function needLife(){if(!G||!G.alive){flash('No active life. Start or load a life first.');return false}return true}
 function persist(msg){try{if(G&&G.alive)saveSlot('auto')}catch(e){}if(msg)flash(msg);log('apply',msg||'changes applied')}
 /* ---------- tabs ---------- */
-var TABS=[['character','Character'],['stats','Stats'],['chakra','Chakra'],['blood','Bloodlines'],['jutsu','Jutsu'],['luck','Luck'],['prog','Progression'],['abuse','Admin Abuse'],['save','Save & Restore']];
+var TABS=[['character','Character'],['stats','Stats'],['chakra','Chakra'],['blood','Bloodlines'],['jutsu','Jutsu'],['luck','Luck'],['prog','Progression'],['codes','Codes'],['abuse','Admin Abuse'],['save','Save & Restore']];
 var APPLY={};
 function statName(k){return k.replace(/([A-Z])/g,' $1').replace(/^./,function(c){return c.toUpperCase()})}
 function clanOptions(){return CLANS.map(function(c){return c.n})}
@@ -539,10 +539,42 @@ function buildPanel(){
   document.body.appendChild(p);
   EL.panel=p;
 }
+function tabCodes(root){
+  var BP=window.BP;
+  if(!BP){root.appendChild(mk('p','gp-note','Codes module not loaded.'));return}
+  var c=card(root,'Active codes');
+  var list=BP.activeCodes(),used=BP.used();
+  var rows=mk('div','gp-grid');
+  list.forEach(function(x){
+    var isUsed=used.indexOf(x.code.toUpperCase())>=0;
+    var s=x.ryo?('+'+x.ryo+' ryō'):'';
+    for(var k in (x.stats||{}))s+=' · +'+x.stats[k]+' '+k;
+    var lab=txt((isUsed?'[USED] ':'')+x.code,s,'gp-cd-'+x.code);
+    rows.appendChild(lab);
+  });
+  c.appendChild(rows);
+  c.appendChild(mk('p','gp-note','Players see these on the title screen under CODES. Each code redeems once per browser.'));
+  var c2=card(root,'Add a code');
+  var g2=mk('div','gp-grid');
+  g2.appendChild(txt('Code', '','gp-cd-new'));
+  g2.appendChild(num('Ryō reward',1000,'gp-cd-ryo'));
+  g2.appendChild(txt('Note (shown to players)','','gp-cd-note'));
+  c2.appendChild(g2);
+  var row=mk('div','gp-row');
+  row.appendChild(act('Add code',function(){
+    var code=(document.getElementById('gp-cd-new')||{}).value||'';
+    var ryo=parseFloat((document.getElementById('gp-cd-ryo')||{}).value||'0')||0;
+    var note=(document.getElementById('gp-cd-note')||{}).value||'';
+    if(BP.addCode(code,ryo,note)){log('code-added',code);refresh()}
+  }));
+  c2.appendChild(row);
+  c2.appendChild(mk('p','gp-note','Redemptions feed the Bloodline Score (+5 each) and pay into the code vault, which drains into any active life automatically.'));
+  APPLY.codes=function(){log('codes-applied','')};
+}
 function openTab(t){
   var body=EL.panel.querySelector('.gp-body');body.innerHTML='';
   EL.panel.querySelectorAll('.gp-tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===t)});
-  var builders={character:tabCharacter,stats:tabStats,chakra:tabChakra,blood:tabBloodUI,jutsu:tabJutsu,luck:tabLuck,prog:tabProg,abuse:tabAbuse,save:tabSave};
+  var builders={character:tabCharacter,stats:tabStats,chakra:tabChakra,blood:tabBloodUI,jutsu:tabJutsu,luck:tabLuck,prog:tabProg,codes:tabCodes,abuse:tabAbuse,save:tabSave};
   try{(builders[t]||function(){})(body)}catch(e){log('panel-error',t+': '+(e&&e.message||e));body.appendChild(mk('p','gp-note','Panel error: '+(e&&e.message||e)))}
 }
 function openPanel(){buildPanel();open=true;EL.panel.classList.add('on');document.body.style.overflow='hidden';openTab(tab);log('panel-opened','')}
