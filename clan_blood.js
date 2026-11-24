@@ -733,7 +733,7 @@ BL_LADDERS.Tachibana={m:"Endurance and Society",stats:["endurance","willpower"],
  stage("Long Breath",{age:9,endurance:38},"Your family outlasts everyone at anything."),
  stage("Social Spine",{age:14,mastery:34,willpower:55},"You carry a conversation through any room."),
  stage("The Patient Blade",{age:17,rank:2,mastery:58},"Your endurance wins fights before they start."),
- stage("House of Standing",{age:20,rank:3,mastery:76},"The clan's standing opens doors jutsu cannot.")]
+ stage("House of Standing",{age:20,rank:3,mastery:76},"The clan's standing opens doors jutsu cannot.")],
  branch:{n:"The Century Promise",hint:"The clan keeps promises whose due dates are a century out. One is nearly due.",req:{age:18,mastery:88,willpower:85},p:.02},
  ev:[{id:"tc1",t:"The long dinner",d:"A clan engagement dinner runs nine hours. You are the youngest there and the last to be excused.",c:[
   {t:"Last the full nine hours",fx:function(){addStat("endurance",2);mAdd("Endurance and Society",5);hist("You outlasted the adults at their own dinner. They noticed.","event")}},
@@ -742,7 +742,7 @@ BL_LADDERS.Shirakami={m:"Scholarship",stats:["intelligence","chakraControl"],sta
  stage("White-Faced Scholar",{age:9,intelligence:38},"You finish the academy's reading list early and ask for more."),
  stage("Archive Adept",{age:14,mastery:34,intelligence:55},"The clan's private archive admits you."),
  stage("Theory Weaver",{age:17,rank:2,mastery:58},"Your papers circulate beyond the village."),
- stage("The White Library",{age:20,rank:3,mastery:76},"Scholars make pilgrimages to your desk.")]
+ stage("The White Library",{age:20,rank:3,mastery:76},"Scholars make pilgrimages to your desk.")],
  branch:{n:"The Sealed Folio",hint:"The archive's sealed folio is catalogued with a title and no contents. The librarian who last opened it stopped teaching.",req:{age:18,mastery:88,intelligence:90},p:.02},
  ev:[{id:"sh1",t:"The white study",d:"The clan's study is painted white on purpose: no color for the mind to lean on. You are handed your first slate and chalk.",c:[
   {t:"Fill the slate",fx:function(){mAdd("Scholarship",6);hist("You filled a slate a day. The clan counted them.","event")}},
@@ -787,7 +787,7 @@ BL_LADDERS.Rin={m:"Primordial Blood",stats:["chakra","health"],stages:[
  stage("The Old Blood",{age:6,chakra:55},"Your blood remembers something older than chakra."),
  stage("First Ascent",{age:12,mastery:40,chakra:80},"Your body takes a form your ancestors wore."),
  stage("Primordial Adept",{age:16,rank:3,mastery:65},"The forest goes quiet when you are angry."),
- stage("The Returning Tide",{age:20,rank:7,mastery:85},"The age bends around your presence now.")]
+ stage("The Returning Tide",{age:20,rank:7,mastery:85},"The age bends around your presence now.")],
  branch:{n:"The First Shape",hint:"The clan's full form was seen once in recorded history. The record survives. The village that saw it does not.",req:{age:22,mastery:95,pot:99},p:.01},
  ev:[{id:"rn1",t:"The forest's silence",d:"Birds leave a mile radius around you some mornings. Your family calls this 'a quiet morning' and goes back to sleep.",c:[
   {t:"Walk into the silence",fx:function(){potAdd(4);mAdd("Primordial Blood",8);flag("surge");hist("You walked into the quiet and the quiet walked with you.","event")}},
