@@ -110,11 +110,20 @@ function applyCharacter(){
   if(!needLife())return;
   var f=g('gp-c-first'),l=g('gp-c-last'),a=gn('gp-c-age',G.age),r=g('gp-c-rank'),v=g('gp-c-village'),cl=g('gp-c-clan'),p=g('gp-c-pers'),pot=gn('gp-c-pot',G.stats.potential||5);
   if(f)G.first=f;if(l)G.last=l;
+  G.name=[G.first,G.last].filter(Boolean).join(' ');
   if(a&&a>0)G.age=Math.round(a);
   if(r){G.rank=r;G.career=r}
   if(v&&VILLAGES[v])G.village=v;
-  if(cl){var c=CLANS.find(function(x){return x.n===cl});
-    if(c){G.clanName=c.n;G.clan=c;G.clanless=false;if(!includes(G.secretSeen||[],c.n))G.secretSeen.push(c.n);logClanRoll(c,'owner-set',G.clanHistory)}}
+  if(cl!==''){var c=CLANS.find(function(x){return x.n===cl})||CLANS.find(function(x){return String(x.n).toLowerCase()===String(cl).toLowerCase()});
+    if(c){var clanChanged=(!G.clanName||G.clanName!==c.n);
+      G.clanName=c.n;G.clan=c;G.clanless=false;if(!includes(G.secretSeen||[],c.n))G.secretSeen.push(c.n);logClanRoll(c,'owner-set',G.clanHistory);
+      if(clanChanged){G.last=c.n;G.name=[G.first,G.last].filter(Boolean).join(' ');
+        var fam={mother:1,father:1,sibling:1,grandparent:1,child:1,spouse:1},renamed=0;
+        (G.relationships||[]).forEach(function(r){if(r&&r.name&&r.kind&&fam[r.kind]){var w=r.name.trim().split(' ');if(w.length>1){w[w.length-1]=c.n;r.name=w.join(' ');renamed++}}});
+        ((G.family&&G.family.kids)||[]).forEach(function(k){if(k&&k.name&&k.kind&&fam[k.kind]){var w2=k.name.trim().split(' ');if(w2.length>1){w2[w2.length-1]=c.n;k.name=w2.join(' ')}}});
+        try{tl(G.age,'The family line takes the '+c.n+' name.')}catch(e){}
+        log('surname-applied',c.n+' · '+renamed+' relatives renamed')}}}
+  else if(G.clanName){G.clanName='';G.clan=null;G.clanless=true;log('clan-cleared','')}
   if(p)G.personality=p;
   if(G.stats&&pot>0)G.stats.potential=Math.min(11,pot);
   var lv=gn('gp-c-lv',null),xp=gn('gp-c-xp',null),sp=gn('gp-c-sp',null);
@@ -139,12 +148,11 @@ function tabCharacter(root){
   cd.appendChild(num('XP',(G.rpg&&G.rpg.xp)||0,'gp-c-xp'));
   cd.appendChild(num('Skill points',(G.rpg&&G.rpg.skillPts)||0,'gp-c-sp'));
   c.appendChild(cd);
-  var cc=card(root,'Clan (searchable, includes secret clans)');
-  var ci=document.createElement('input');ci.type='text';ci.id='gp-c-clan';ci.setAttribute('list','gp-clanlist');ci.value=G.clanName||'';ci.placeholder='type to search all clans';
-  cc.appendChild(ci);
-  var dl=document.createElement('datalist');dl.id='gp-clanlist';
-  clanOptions().forEach(function(n){var o=document.createElement('option');o.value=n;dl.appendChild(o)});
-  cc.appendChild(dl);cc.appendChild(mk('p','gp-note','Every clan including Vex and Rin. Type part of a name and pick it.'));
+  var cc=card(root,'Clan (pick any clan, includes secret clans)');
+  var cs=document.createElement('select');cs.id='gp-c-clan';
+  var opts=[['','(no clan)']].concat(clanOptions().slice().sort().map(function(n){return [n,n]}));
+  opts.forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];if(String(G.clanName||'')===String(o[0]))op.selected=true;cs.appendChild(op)});
+  cc.appendChild(cs);cc.appendChild(mk('p','gp-note','Pick a clan and hit Apply Changes: you take the clan surname and every relative in the family tab is renamed to match automatically.'));
   APPLY.character=applyCharacter;
 }
 function applyStats(){
