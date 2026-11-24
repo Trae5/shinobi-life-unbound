@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shinobi Saga Hub</title>
+<meta name="description" content="The hub for the Shinobi Saga — bugs, features, discussions, announcements and live chat for Shinobi Legacy and Shinobi: Life Unbound.">
+<meta property="og:title" content="Shinobi Saga Hub">
+<meta property="og:description" content="Bugs, features, discussions, announcements and live chat for Shinobi Legacy and Shinobi: Life Unbound.">
+<meta property="og:site_name" content="Shinobi Saga">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -908,7 +912,7 @@ document.getElementById('an-post').onclick=function(){
  db.collection('community_announcements').add(doc).then(function(){closeModal('annmodal');document.getElementById('an-title').value='';document.getElementById('an-body').value='';document.getElementById('an-img').value='';pushActivity('announcement',doc.game,'posted an announcement: '+t,doc.title);pushMod('posted announcement',t,'');toast('Announcement published.')}).catch(function(e){toast('Could not publish. Check rules.')})};
 /* ---------- announcements type filter chips ---------- */
 /* ---------- render all + init ---------- */
-function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.4';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
+function renderAll(){ownerUI();var hp=document.getElementById('hubstatus');if(hp&&CLOUD){hp.textContent='online · v2.4.5';hp.className='pill2 on'}renderHome();renderActivity();renderDiscussions();renderBugs();renderReqs();renderAnns();renderTrending();renderLeaderboard();renderStats();renderMembers();renderMe();renderSearch()}
 window.openNotifs=openNotifs;window.openModal=openModal;window.closeModal=closeModal;window.go=go;window.openNewDiscussion=openNewDiscussion;window.openDetail=openDetail;window.openProfile=openProfile;window.openEditProfile=openEditProfile;window.addComment=addComment;window.setReply=setReply;window.react=react;window.saveStatus=saveStatus;window.togglePin=togglePin;window.hideDoc=hideDoc;window.resolveReport=resolveReport;window.removeReported=removeReported;window.adminUser=adminUser;window.dupeCheck=dupeCheck;window.renderBugs=renderBugs;window.renderReqs=renderReqs;window.renderDiscussions=renderDiscussions;window.renderMembers=renderMembers;window.renderSearch=renderSearch;window.markAllRead=markAllRead;window.clearNotifs=clearNotifs;window.trTab=trTab;window.seed410=seed410;window.adminUsersRender=adminUsersRender;
 </script>
 <script>
@@ -2251,7 +2255,7 @@ db.collection('community_chat').orderBy('when','desc').limit(40).onSnapshot(func
 <div id="hubgate" style="position:fixed;inset:0;z-index:2147483647;background:#07080a;color:#e8e6e1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:24px"><div style="width:54px;height:54px;border:2px solid rgba(161,38,52,.65);border-radius:50%"></div><div style="font-size:60px;color:#a12634;font-family:Georgia,serif">封</div><div id="hubgate-state" style="font-size:32px;letter-spacing:.35em;font-family:Georgia,serif">UPDATING</div><div id="hubgate-msg" style="color:#9a9891;font-size:14px;max-width:420px"></div><div style="color:#6d6b66;font-size:12px;letter-spacing:.25em;font-family:sans-serif">SHINOBI SAGA · HUB</div></div>
 <script>
 /* GATE - EDIT THIS BLOCK ONLY */
-var GATE={on:false,state:"updating",message:""};
+var GATE={on:true,state:"updating",message:""};
 (function(){try{
 if(location.search.indexOf("dev=1")>-1)return;
 var g=document.getElementById("hubgate");if(!g)return;
