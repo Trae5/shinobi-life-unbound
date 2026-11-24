@@ -535,7 +535,7 @@ function openTab(t){
   var body=EL.panel.querySelector('.gp-body');body.innerHTML='';
   EL.panel.querySelectorAll('.gp-tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===t)});
   var builders={character:tabCharacter,stats:tabStats,chakra:tabChakra,blood:tabBloodUI,jutsu:tabJutsu,luck:tabLuck,prog:tabProg,abuse:tabAbuse,save:tabSave};
-  (builders[t]||function(){})();
+  try{(builders[t]||function(){})(body)}catch(e){log('panel-error',t+': '+(e&&e.message||e));body.appendChild(mk('p','gp-note','Panel error: '+(e&&e.message||e)))}
 }
 function openPanel(){buildPanel();open=true;EL.panel.classList.add('on');document.body.style.overflow='hidden';openTab(tab);log('panel-opened','')}
 function closePanel(){open=false;if(EL.panel)EL.panel.classList.remove('on');document.body.style.overflow='';try{render()}catch(e){}}
