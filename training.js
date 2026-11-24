@@ -48,7 +48,7 @@ function spendSession(a){
   return dim;
 }
 /* ---------- shared reward + result plumbing ---------- */
-function finish(a,act,tier,res){
+function finish(a,tier,res){
   /* res: {score 0..100, acc 0..100, rounds, roundsDone, mistakes, streak, extraLabel, extraVal, recKey, recVal, notes[]} */
   var r=init();
   var dim=Math.max(0.3,1-((r.trainCount[a.n]||1)-1)*0.06);
