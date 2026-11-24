@@ -1,5 +1,5 @@
 /* ============================================================ */
-/* TRAINING OVERHAUL — v1.2.0 "Every Drill Is A Game"            */
+/* TRAINING OVERHAUL — v1.2.2 "Every Drill Is A Game"            */
 /* BitLife-style, text/menu driven. No 3D, no real-time world.   */
 /* Each activity has its own mechanic, grades D-S, mastery,      */
 /* personal records and rank-scaled difficulty tiers.            */
@@ -13,6 +13,7 @@ function init(){
   if(!r.trainRec)r.trainRec={};
   if(!r.trainTier)r.trainTier={};
   if(!r.trainHist)r.trainHist=[];
+  if(!r.trainCount)r.trainCount={};
   return r;
 }
 /* ---------- grades ---------- */
@@ -115,7 +116,10 @@ function shell(title,sub,onBuild){
     end:function(score,res){wrap.style.display="none";finish(ACT_BY_ID[curAct],tierCur,res||{score:score})}};
 }
 var ACT_BY_ID={},curAct=null,tierCur=null;
+function wrapOff(){var d=el("#minigame");if(d)d.style.display="none"}
+function shellEnd(score,res){wrapOff();finish(ACT_BY_ID[curAct],tierCur,res||{score:score})}
 function run(a,tier){
+  if(a.id!=="spar"){var ok=spendSession(a);if(ok===false)return}
   curAct=a.id;tierCur=tier;
   MG[a.mg](a,tier);
 }
@@ -413,6 +417,202 @@ MG.spar=function(a,tier){
     }});
   }
 }
+/* 2. Chakra Control Exercises — stabilize the drifting flow */
+MG.control=function(a,tier){
+  var rounds=tier.rounds,s=[],streak=0,best=0,mist=0;
+  shell("Chakra Control Exercises","The flow drifts. Press STABILIZE while the marker rides the band. Clean holds build a streak bonus.",
+   function(st,foot){round(0,0)});
+  function round(i,streak){
+    st.innerHTML="<div class='mg-bar'><div class='mg-zone'></div><div class='mg-mark'></div></div><button class='mg-btn'>STABILIZE</button><div class='mg-round'>Round "+(i+1)+" / "+rounds+(streak>1?" · steady ×"+streak:"")+"</div>";
+    var zone=st.querySelector(".mg-zone"),mark=st.querySelector(".mg-mark");
+    var zw=Math.max(5,tier.zW*(1-mastery("ctrl")/350)),zl=22+Math.random()*55;
+    zone.style.left=zl+"%";zone.style.width=zw+"%";
+    var pos=0,dir=1,go=true;
+    var iv=setInterval(function(){pos+=dir*(2.6*tier.spd+Math.random()*0.8);if(pos>=100){pos=100;dir=-1}if(pos<=0){pos=0;dir=1}mark.style.left=pos+"%"},16);
+    st.querySelector(".mg-btn").onclick=function(){
+      if(!go)return;go=false;clearInterval(iv);
+      var d=Math.abs(pos-(zl+zw/2));var sc=Math.max(0,Math.round(100-d*(320/zw)));
+      if(sc>=65)streak++;else{streak=0;mist++}
+      best=Math.max(best,streak);s.push(sc);
+      foot.textContent=sc>=85?"Locked steady. "+sc:sc>=60?"Held. "+sc:sc>=35?"Wobbled. "+sc:"The flow spilled. "+sc;
+      setTimeout(function(){
+        if(i+1<rounds)round(i+1,streak);
+        else{
+          var avg=s.reduce(function(x,y){return x+y},0)/s.length;
+          var bonus=Math.min(15,Math.max(0,(Math.max.apply(null,s)>=90?6:0)+(s.filter(function(x){return x>=65}).length>=3?9:0)));
+          shellEnd(Math.min(100,avg+bonus),{score:Math.min(100,avg+bonus),rounds:rounds,roundsDone:rounds,acc:avg,accLabel:"Stability",streak:best,mistakes:mist});
+        }
+      },450);
+    };
+  }
+};
+/* 3. Tree Climbing — checkpoint climb, pick your output */
+MG.tree=function(a,tier){
+  var total=4+tier.rounds,notes=[],chk=0,slips=0,good=0,asked=0;
+  var conds=[
+   ["slick with sap","High","Glue your feet with a strong flow."],
+   ["rough and easy to grip","Low","A light flow is plenty here."],
+   ["wet from the rain","Balanced","Steady middle flow keeps your grip."],
+   ["cracked and crumbling","Low","Push hard and you'll blow chunks loose."],
+   ["sweating with condensation","High","Only a strong flow bites into this."],
+   ["dry and sun-warmed","Balanced","Even output, no surprises."]];
+  shell("Tree Climbing","Read the bark at each checkpoint and pick your chakra output. Wrong output risks a slip: two and the climb is over.",
+   function(st,foot){next()});
+  function next(){
+    if(chk>=total||slips>=2){
+      var sc=Math.max(5,Math.min(100,Math.round(chk/total*78+(asked?good/asked:0)*22)));
+      shellEnd(sc,{score:sc,rounds:total,roundsDone:chk,acc:asked?good/asked*100:0,accLabel:"Reads right",mistakes:slips,extraLabel:"Highest checkpoint",extraVal:chk+" / "+total,recKey:"stage",recVal:chk,notes:notes});
+      return}
+    var c=conds[Math.floor(Math.random()*conds.length)];asked++;
+    st.innerHTML="<div class='mg-q'>Checkpoint "+(chk+1)+" of "+total+": the bark is <b>"+c[0]+"</b>. "+c[2]+"</div><div class='mg-keys'><button class='mg-key'>Low</button><button class='mg-key'>Balanced</button><button class='mg-key'>High</button></div>";
+    foot.textContent="Checkpoint "+(chk+1)+" / "+total+" · slips "+slips+" / 2 · best climb "+(rec("tree").stage||0);
+    st.querySelectorAll(".mg-key").forEach(function(b){
+      b.onclick=function(){
+        var pick=b.textContent;
+        if(pick===c[1]){good++;chk++;foot.textContent="Clean step up. Checkpoint "+chk+".";notes.push("Checkpoint "+chk+": "+pick.toLowerCase()+" output on bark "+c[0]+".")}
+        else{
+          var ctl=rpgStat("chakraControl");var hold=Math.random()<Math.min(0.6,ctl/90);
+          if(hold){notes.push("Checkpoint "+(chk+1)+": wrong output ("+pick.toLowerCase()+"), but control held the grip.");foot.textContent="Wrong output. You hang on by habit."}
+          else{slips++;chk=Math.max(0,chk-1);foot.textContent="You slip and slide back. "+slips+" / 2 slips.";notes.push("Slipped on bark "+c[0]+" — "+pick.toLowerCase()+" output was wrong.")}
+        }
+        setTimeout(next,650);
+      }});
+  }
+};
+/* 4. Water Walking — changing conditions round by round */
+MG.water=function(a,tier){
+  var rounds=tier.rounds,notes=[],dist=0,ok=0;
+  var conds=[
+   ["glass-calm","Hold steady","The mirror surface wants an even flow."],
+   ["wind-rippled","Raise output","Ripples steal bite; push more flow down."],
+   ["choppy from dock traffic","Raise output","Chop knocks your feet around; answer with force."],
+   ["a tugging current","Hold steady","The current carries you; a heavy flow punches through it."],
+   ["a wake rolling under","Ease off","A big wake rewards a soft, quick flow."],
+   ["warm and thin","Ease off","Thin water barely holds; less flow keeps you floating."]];
+  shell("Water Walking","Conditions change every round. Pick the right adjustment and keep crossing; wrong calls cost footing.",
+   function(st,foot){round(0)});
+  function round(i){
+    if(i>=rounds){
+      var sc=Math.max(5,Math.min(100,Math.round(dist/(rounds*3)*70+(ok/rounds)*30)));
+      shellEnd(sc,{score:sc,rounds:rounds,roundsDone:ok,acc:ok/rounds*100,accLabel:"Right calls",mistakes:rounds-ok,extraLabel:"Distance crossed",extraVal:dist+" paces",recKey:"dist",recVal:dist,notes:notes});
+      return}
+    var c=conds[Math.floor(Math.random()*conds.length)];
+    st.innerHTML="<div class='mg-q'>Round "+(i+1)+": the water is <b>"+c[0]+"</b>. "+c[2]+"</div><div class='mg-keys'><button class='mg-key'>Raise output</button><button class='mg-key'>Hold steady</button><button class='mg-key'>Ease off</button></div>";
+    foot.textContent="Distance "+dist+" paces · round "+(i+1)+" / "+rounds+" · best "+(rec("water").dist||0)+" paces";
+    st.querySelectorAll(".mg-key").forEach(function(b){
+      b.onclick=function(){
+        var pick=b.textContent;
+        if(pick===c[1]){ok++;dist+=3;foot.textContent="Solid footing. +3 paces ("+dist+")."}
+        else{
+          var rc=rpgStat("chakraRecovery");var keep=Math.random()<Math.min(0.6,rc/90);
+          if(keep){foot.textContent="Wrong call. You wobble but stay up.";notes.push("Round "+(i+1)+": "+pick.toLowerCase()+" on "+c[0]+" water. Wobbled.")}
+          else{dist=Math.max(0,dist-3);foot.textContent="You lose your footing and wade back.";notes.push("Round "+(i+1)+": went down on "+c[0]+" water.")}
+        }
+        setTimeout(function(){round(i+1)},650);
+      }});
+  }
+};
+/* 5. Weight Training — pick your load, earn every rep */
+MG.weights=function(a,tier){
+  var loads=[[0,"Light bar","",0],[15,"Moderate bar","strength 15",8],[30,"Heavy bar","strength 30",16],[50,"Crushing bar","strength 50",24]];
+  var reps=tier.rounds+2;
+  shellPick("Weight Training","Pick your load, then earn every rep on the timing bar. Heavier loads pay more.",
+    loads.map(function(l){return {label:l[1]+(l[2]?" · needs "+l[2]:""),fn:function(){doSet(l)}}}));
+  function doSet(l){
+    var str=rpgStat("strength");
+    if(str<l[0]){toast("That bar is too heavy for you yet. Build strength first.");run(ACT_BY_ID.wgt,tierCur);return}
+    var sh2=shell("Weight Training · "+l[1],"Press LIFT as the marker crosses the power band. "+reps+" reps. Cramps shrink the band; a second wind opens it.",
+      function(st,foot){rep(0,0)});
+    function rep(i,good){
+      st.innerHTML="<div class='mg-bar'><div class='mg-zone'></div><div class='mg-mark'></div></div><button class='mg-btn'>LIFT</button><div class='mg-round'>Rep "+(i+1)+" / "+reps+" · "+l[1]+"</div>";
+      var zone=st.querySelector(".mg-zone"),mark=st.querySelector(".mg-mark");
+      var ev="";
+      if(i>0&&Math.random()<0.25)ev=Math.random()<0.5?"cramp":"wind";
+      var zw=Math.max(6,tier.zW*(1-mastery("wgt")/400)*(ev==="cramp"?0.55:ev==="wind"?1.4:1));
+      var zl=20+Math.random()*58;zone.style.left=zl+"%";zone.style.width=zw+"%";
+      if(ev)foot.textContent=ev==="cramp"?"A cramp tightens. Band shrinks this rep.":"Second wind! The band opens up.";
+      var pos=0,dir=1,go=true;
+      var iv=setInterval(function(){pos+=dir*(2.5*tier.spd);if(pos>=100){pos=100;dir=-1}if(pos<=0){pos=0;dir=1}mark.style.left=pos+"%"},16);
+      st.querySelector(".mg-btn").onclick=function(){
+        if(!go)return;go=false;clearInterval(iv);
+        var d=Math.abs(pos-(zl+zw/2));var hit=Math.round(100-d*(300/zw))>=55;
+        if(hit)good++;
+        foot.textContent=hit?"Rep "+(i+1)+" clean. "+good+" so far.":"Rep "+(i+1)+" came out sloppy.";
+        setTimeout(function(){
+          if(i+1<reps)rep(i+1,good);
+          else{
+            var sc=Math.max(5,Math.min(100,Math.round(good/reps*70+l[3]+(good===reps?8:0))));
+            shellEnd(sc,{score:sc,rounds:reps,roundsDone:good,acc:good/reps*100,accLabel:"Clean reps",mistakes:reps-good,extraLabel:"Load",extraVal:l[1],recKey:"reps",recVal:good,notes:good===reps?["Every rep clean on the "+l[1].toLowerCase()+". Coach nods."]:[]});
+          }
+        },400);
+      };
+    }
+  }
+};
+/* 6. Sprint Training — flash prompts, hurdles, reaction records */
+MG.sprint=function(a,tier){
+  var n=tier.seq*2,best=9999,miss=0,ok=0;
+  shell("Sprint Training","Answer each flash: open track means RUN, a hurdle means JUMP. Your fastest reaction is the record.",
+    function(st,foot){go(0)});
+  function go(i){
+    if(i>=n){
+      var sc=Math.max(5,Math.min(100,Math.round(ok/n*70+Math.max(0,30-(best>=9999?60:best/12)))));
+      var rr={score:sc,rounds:n,roundsDone:ok,acc:ok/n*100,accLabel:"Clean reactions",mistakes:miss,extraLabel:"Fastest reaction",extraVal:best>=9999?"—":best+" ms"};
+      if(best<9999){rr.recKey="time";rr.recVal=best;rr.recLower=true}
+      shellEnd(sc,rr);return}
+    var hurdle=Math.random()<0.4;
+    st.innerHTML="<div class='mg-q'>"+(hurdle?"A hurdle rises. JUMP!":"Track open. RUN!")+"</div><div class='mg-keys'><button class='mg-key'>RUN</button><button class='mg-key'>JUMP</button></div><div class='tr-bar'><i id='sp-w'></i></div>";
+    var t0=Date.now();var w=Math.max(500,1400-tiersIndex(tier)*220);
+    var fill=st.querySelector("#sp-w");var fiv=setInterval(function(){var rr2=Math.max(0,100-(Date.now()-t0)/w*100);fill.style.width=rr2+"%";if(rr2<=0){settle(null)}},40);
+    var resolved=false;
+    st.querySelectorAll(".mg-key").forEach(function(b){b.onclick=function(){
+      if(resolved)return;
+      var rt=Date.now()-t0;
+      var right=(hurdle&&b.textContent==="JUMP")||(!hurdle&&b.textContent==="RUN");
+      settle(right?rt:null);
+    }});
+    function settle(rt){
+      if(resolved)return;resolved=true;clearInterval(fiv);
+      if(rt==null){miss++;foot.textContent="Late. The moment passed."}
+      else{ok++;if(rt<best)best=rt;foot.textContent=rt<250?"Explosive. "+rt+" ms":rt<420?"Good read. "+rt+" ms":"Slow off the line. "+rt+" ms"}
+      setTimeout(function(){go(i+1)},350);
+    }
+  }
+};
+/* 7. Endurance Training — stages, push on or bank it */
+MG.endurance=function(a,tier){
+  var total=3+tier.rounds,cleared=0,notes=[];
+  shell("Endurance Training","Clear stages one press at a time. After each stage: push on for a bigger haul, or bank what you've earned.",
+    function(st,foot){stage(1)});
+  function stage(i){
+    var w=Math.max(480,1600-tiersIndex(tier)*260-i*90);
+    st.innerHTML="<div class='mg-q'>Stage "+i+" of "+total+". Legs burning. Press HOLD while the marker rides the band.</div><div class='mg-bar'><div class='mg-zone'></div><div class='mg-mark'></div></div><button class='mg-btn'>HOLD</button>";
+    var zone=st.querySelector(".mg-zone"),mark=st.querySelector(".mg-mark");
+    var zw=Math.max(6,tier.zW*(1-mastery("end")/400)),zl=22+Math.random()*54;
+    zone.style.left=zl+"%";zone.style.width=zw+"%";
+    foot.textContent="Stages cleared "+cleared+" · best run "+(rec("end").stage||0);
+    var pos=0,dir=1,go=true;
+    var iv=setInterval(function(){pos+=dir*(2.3*tier.spd+i*0.12);if(pos>=100){pos=100;dir=-1}if(pos<=0){pos=0;dir=1}mark.style.left=pos+"%"},16);
+    st.querySelector(".mg-btn").onclick=function(){
+      if(!go)return;go=false;clearInterval(iv);
+      var d=Math.abs(pos-(zl+zw/2));var sc=Math.round(100-d*(300/zw));
+      if(sc>=50){
+        cleared=i;foot.textContent="Stage "+i+" held.";
+        if(i>=total){endRun(true,"The full course. Nothing left in the tank.");return}
+        st.innerHTML="<div class='mg-q'>Stage "+i+" cleared. Push on, or bank it?</div><div class='mg-keys'><button class='mg-key'>Push on</button><button class='mg-key'>Bank it</button></div>";
+        st.querySelectorAll(".mg-key").forEach(function(b){b.onclick=function(){
+          if(b.textContent==="Push on")setTimeout(function(){stage(i+1)},250);
+          else endRun(true,"Banked the session with legs to spare.")
+        }});
+      } else {notes.push("Fell out at stage "+i+".");endRun(false,"Your legs give out.")}
+    };
+  }
+  function endRun(banked,how){
+    var sc=Math.max(5,Math.min(100,Math.round(cleared/total*82+(banked?8:0))));
+    shellEnd(sc,{score:sc,rounds:total,roundsDone:cleared,extraLabel:"Stages cleared",extraVal:cleared+" / "+total,recKey:"stage",recVal:cleared,notes:notes.concat([how])});
+  }
+};
+
 /* static + pick helpers */
 function shellStatic(t,s,fn){var sh=shell(t,s,function(st){st.innerHTML="<p class='mg-q'>Nothing to train yet.</p>"});if(fn)fn(sh)}
 function shellPick(t,s,opts){
@@ -485,8 +685,9 @@ function render(b){
     list.forEach(function(a){
       var un=met(a);
       var card=document.createElement("div");card.className="rpg-card"+(un?"":" locked");
-      var tiersHTML=tierFor(a).map(function(t){
-        return "<button class='tr-tier' data-t='"+t.id+"'>"+t.n+"</button>"}).join("");
+      var tiersHTML=un?(tierFor(a).map(function(t){
+        return "<button class='tr-tier' data-t='"+t.id+"'>"+t.n+"</button>"}).join("")+lockTiers):TIERS.map(function(t){
+        return "<span class='tr-tier locked'>\U0001F512 "+t.n+"</span>"}).join("");
       var lockTiers=TIERS.filter(function(t){return tierFor(a).indexOf(t)<0}).map(function(t){
         return "<span class='tr-tier locked'>🔒 "+t.n+"</span>"}).join("");
       var m=mastery(a.id);
@@ -494,7 +695,7 @@ function render(b){
         "<p>"+a.desc+"</p>"+
         "<div class='tr-mbar'><i style='width:"+m+"%'></i></div>"+
         "<div class='tr-mmeta'>"+(m?"drill mastery "+m+"%":"untrained")+(recSummary(a.id)?" · "+recSummary(a.id):"")+"</div>"+
-        "<div class='tr-foot2'><span>−"+a.stam+" stamina · up to +"+a.xp+" XP</span><div class='tr-tiers'>"+tiersHTML+(un?lockTiers:"")+"</div></div>"+
+        "<div class='tr-foot2'><span>−"+a.stam+" stamina · up to +"+a.xp+" XP</span><div class='tr-tiers'>"+tiersHTML+"</div></div>"+
         (un?"":"<div class='rpg-lock'>🔒 needs "+reqText(a)+"</div>");
       if(un)card.querySelectorAll(".tr-tier:not(.locked)").forEach(function(btn){
         var t=TIERS.filter(function(x){return x.id===btn.dataset.t})[0];
