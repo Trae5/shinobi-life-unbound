@@ -44,8 +44,9 @@ hooks();
 function gate(passwordInput,done){
   sha(passwordInput).then(function(h){
     if(h!==PW_HASH){return done('wrong')}
-    if(sessionStorage.getItem(OK_KEY)==='1'){return done(null)}
-    verifyOwner(function(err){done(err)});
+    sessionStorage.setItem(OK_KEY,'1');
+    log('owner-unlock','password gate');
+    done(null);
   }).catch(function(){done('wrong')});
 }
 function verifyOwner(done){
@@ -549,7 +550,7 @@ function openGate(){
   var inp=document.createElement('input');inp.type='password';inp.placeholder='Password';
   inp.style.cssText='width:100%;margin:14px 0;padding:10px 12px;background:#0a0709;border:1px solid rgba(211,169,76,.35);border-radius:8px;color:#e8dcc2;font:700 15px system-ui;text-align:center';
   box.appendChild(inp);
-  var msg=mk('p','gp-note','Password, then your owner account. Wrong password does nothing.');
+  var msg=mk('p','gp-note','Owner password only. Wrong password does nothing.');
   box.appendChild(msg);
   var r=mk('div','gp-row');r.style.justifyContent='center';
   var go=act('UNLOCK',function(){
