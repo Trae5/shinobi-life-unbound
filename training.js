@@ -685,10 +685,10 @@ function render(b){
     list.forEach(function(a){
       var un=met(a);
       var card=document.createElement("div");card.className="rpg-card"+(un?"":" locked");
+      var lockTiers=TIERS.filter(function(t){return tierFor(a).indexOf(t)<0}).map(function(t){
+        return "<span class='tr-tier locked'>🔒 "+t.n+"</span>"}).join("");
       var tiersHTML=un?(tierFor(a).map(function(t){
         return "<button class='tr-tier' data-t='"+t.id+"'>"+t.n+"</button>"}).join("")+lockTiers):TIERS.map(function(t){
-        return "<span class='tr-tier locked'>\U0001F512 "+t.n+"</span>"}).join("");
-      var lockTiers=TIERS.filter(function(t){return tierFor(a).indexOf(t)<0}).map(function(t){
         return "<span class='tr-tier locked'>🔒 "+t.n+"</span>"}).join("");
       var m=mastery(a.id);
       card.innerHTML="<div class='rc-top'><b>"+a.n+"</b><span class='rpg-chip'>"+a.stat+"</span></div>"+
