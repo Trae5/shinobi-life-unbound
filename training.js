@@ -1,5 +1,5 @@
 /* ============================================================ */
-/* TRAINING OVERHAUL — v1.2.2 "Every Drill Is A Game"            */
+/* TRAINING OVERHAUL — v1.2.3 "Every Drill Is A Game"            */
 /* BitLife-style, text/menu driven. No 3D, no real-time world.   */
 /* Each activity has its own mechanic, grades D-S, mastery,      */
 /* personal records and rank-scaled difficulty tiers.            */
