@@ -22,18 +22,7 @@ function rpgUnlocked(a){
   if(u.stat)for(var k in u.stat){if(rpgStat(k)<u.stat[k])return false}
   return true;
 }
-function rpgBodyTrain(b){
-  var r=G.rpg;
-  b.innerHTML="<p class='rpg-note'>Training costs stamina, sharpens a stat through a live drill, and pays XP. Repeat the same drill in a row and the gains taper off — vary your routine. Current fatigue: "+Math.round(r.fatigue||0)+"%"+((r.fatigue||0)>=50?" (heavy — gains reduced)":"")+"</p>";
-  RPG.TRAIN.forEach(function(a){
-    var un=rpgUnlocked(a);
-    var card=document.createElement("div");card.className="rpg-card"+(un?"":" locked");
-    var tc=r.trainCount[a.n]||0;
-    card.innerHTML="<div class='rc-top'><b>"+a.n+"</b><span class='rpg-chip'>"+a.stat+"</span></div><p>"+a.desc+"</p><div class='rpg-foot'><span>−"+a.stam+" stamina · +"+a.xp+" XP"+(tc?" · trained "+tc+"× (gains "+Math.round(Math.max(0.3,1-tc*0.06)*100)+"%)":"")+"</span>"+(un?"<button class='rpg-btn'>Train</button>":"<span class='rpg-lock'>🔒 needs "+(a.unlock.lvl?"lvl "+a.unlock.lvl:"")+((a.unlock.lvl&&a.unlock.stat)?" + ":"")+Object.keys(a.unlock.stat||{}).map(function(k){return k+" "+a.unlock.stat[k]}).join(", ")+"</span>")+"</div>";
-    if(un)card.querySelector("button").onclick=function(){rpgTrain(a)};
-    b.appendChild(card);
-  });
-}
+function rpgBodyTrain(b){TRN.render(b)}
 /* ---------- jutsu ---------- */
 function rpgBodyJutsu(b){
   var r=G.rpg;
