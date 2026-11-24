@@ -573,7 +573,10 @@ var ACHIEVEMENTS=[
   {id:"hidden_friend",n:"The Village's Shadow",d:"Befriend a canon legend"},
   {id:"early_grad",n:"Ahead of the Class",d:"Graduate the Academy years early",h:1},
   {id:"students_bloom",n:"Full Bloom",d:"A student you trained makes chunin",h:1},
-  {id:"guardian_bond",n:"The Hand That Raised You",d:"Earn 90+ closeness with the one who raised you",h:1}
+  {id:"guardian_bond",n:"The Hand That Raised You",d:"Earn 90+ closeness with the one who raised you",h:1},
+  {id:"dynasty_line",n:"The Line Continues",d:"Begin a life as the child of a past life",h:1},
+  {id:"legacy_keeper",n:"Legacy Keeper",d:"As the child of a past life, reach chunin or higher",h:1},
+  {id:"full_house",n:"Full House",d:"Raise three or more children with a spouse",h:1}
 ];
 
 /* ============================ data: items, injuries ============================ */
@@ -916,6 +919,7 @@ function poolFor(){
   if(G.rogue)pools.push("rogue");
   if(G.retired)pools.push("retired");
   if(adult())pools.push("adult");
+  if(adult()&&!G.rogue&&!G.retired)pools.push("career");
   return pools;
 }
 var EVS={};/* filled below: {pool: {w:weight, ev:[{t, w, run}]}} */
@@ -1087,6 +1091,7 @@ EVS.adult=[
  {t:"a child",w:2,run:function(){if(!G.family.spouse||G.family.kids.length>=4)return;
    var g=chance(.5)?"m":"f";var kid=newNPC({first:rollName(g),last:G.last,age:0,gender:g,rel:75,kind:"child",clan:G.clanName});
    kid.village=G.village;G.relationships.push(kid);G.family.kids.push(kid);
+   if(G.family.kids.length>=3&&G.family.spouse)award("full_house");
    fbig("A child is born: "+kid.name+". The whole family finds excuses to visit.","big");tl(G.age,"Child born: "+kid.name);
    addStat("happiness",6)}},
  {t:"career crossroads",w:2,run:function(){if(rankRank()<3)return;
@@ -1206,6 +1211,139 @@ EVS.village=[
    G.villageState.prosperity=clamp(G.villageState.prosperity+2,0,100)}}
 ];
 EVS.career=[];
+/* v5.1.0 career pool: real paths for working adults */
+EVS.career=[
+ {t:"career review",w:3,run:function(){var r=rankRank();
+   if(r<=1){addRyo(ri(100,300));addStat("discipline",1);fbig("Your squad file gets its annual stamp: dependable. Dependable pays the rent and buys the good kunai.")}
+   else{var raise=ri(600,1800)*(1+r*.3);addRyo(raise);rep(1);fbig("Annual review: your pay grade steps up "+money(raise)+" a year and your name moves up the duty roster. Someone up top is watching your record.","good")}}},
+ {t:"jonin review board",w:2,run:function(){if(rankRank()!==3||G.age<20)return;if(G.missionStats.total<15||G.reputation<55)return;
+   modal("Jonin Review Board","Career","Three senior jonin, one closed room, your whole file on the table. A jonin vest is not a reward; it is a sentence you serve for the rest of your career.",
+    [{t:"Sit for the review",d:"everything you have built",fn:function(){var pass=(st("taijutsu")+st("ninjutsu")+st("intelligence")+st("leadership")*1.5+G.missionStats.success*2+ri(0,60))>=290;
+       if(pass){promote("Jonin","JONIN — The vest is heavy in a way you did not expect. You are trusted with other people's children now.");award("jonin")}
+       else{fbig("JONIN REVIEW — Close. The board's note reads 'promising, not yet.' It stings less than it should, because you know they are right.","bad");rep(1)}}},
+     {t:"Withdraw the file",d:"come back stronger"}])}},
+ {t:"a student's success",w:2,run:function(){var s=(G.students||[]).filter(function(n){return n.alive});if(!s.length)return;var n=pick(s);
+   if(n.rank==="Genin"&&chance(.45)){n.rank="Chunin";award("students_bloom");rep(2);fbig("Your student "+n.name.split(" ")[0]+" makes chunin. You pretend to be calm about it. You are not calm about it.","rare")}
+   else fbig(n.name.split(" ")[0]+" reports solid progress this year. You read the field report twice and keep it.")}},
+ {t:"teaching rotation",w:2,run:function(){if(rankRank()<3)return;if(chance(.5))return;
+   modal("The Academy Calls","Career","The Academy asks for senior shinobi to run a training rotation. It pays less than the mission board and matters more.",
+    [{t:"Take the rotation",d:"shape the next class",fn:function(){addStat("leadership",3);rep(1);addRyo(ri(200,500));fbig("You spend a season teaching. Twelve children learn to fall without crying about it. You remember every one of them.","good");tl(G.age,"Taught an Academy training rotation")}},
+     {t:"Stay on missions"}])}},
+ {t:"war field promotion",w:1.5,run:function(){if(!G.villageState.warActive||rankRank()!==2)return;if(!chance(.45))return;
+   promote("Chunin","FIELD PROMOTION — Your squad leader falls mid-operation. You take the squad, finish the mission, and the paperwork catches up with you at the hospital.");award("chunin")}},
+ {t:"the pension papers",w:1,run:function(){if(G.age<48||G.retired||G.rogue)return;if(rankRank()<2||G.reputation<40)return;
+   modal("Pension Papers","Career","The retirement office sends papers you have been ignoring for years. A modest pension, a small house stipend, and mornings that belong to you.",
+    [{t:"Sign the papers",d:"retire with honor",fn:function(){G.retired=true;G.retiredYear=G.age;G.career="Retired Shinobi";award("retired");fbig("You sign. The clerk stamps it twice. Walking out, your shoulders sit lower than they have in decades.","good");tl(G.age,"Retired from active service")}},
+     {t:"Stay on the roster",d:"not done yet"}])}},
+ {t:"civilian path",w:3,run:function(){if(G.rank!=="Civilian")return;
+   if(G.age>=25&&chance(.4)){G.career="Shop Owner";addRyo(ri(1500,4000));rep(1);fbig("You open your own "+pick(["noodle stand","tool shop","cloth stall","courier post"])+". The first month is terrifying. The second month is profit.","good");tl(G.age,"Opened a business: "+G.career)}
+   else{addRyo(ri(200,600));fbig("Work is steady this year: "+pick(["the harvest comes in heavy","the docks run triple shifts","a merchant takes you on full-time"])+". It is an honest living, and it is yours.")}}},
+ {t:"council commendation",w:1,run:function(){if(rankRank()<3||G.reputation<70)return;addRyo(ri(800,2000));rep(2);
+   fbig("A commendation arrives under the "+G.villageData.kage+"'s seal: "+pick(["your conduct in the last operation","years of quiet service","a rescue nobody else would attempt"])+". It goes in a frame. Your family pretends not to brag.","rare");tl(G.age,"Received a council commendation")}}
+];
+
+/* v5.1.0: deeper life event variety */
+EVS.child.push(
+ {t:"the hideout",w:2,run:function(){var s=byKind("sibling").filter(function(n){return n.alive});if(!s.length)return;var n=pick(s);
+   relUp(n,6);addStat("happiness",3);addStat("discipline",1);
+   fbig("You and "+n.name.split(" ")[0]+" build a hideout "+pick(["behind the shrine","under the floorboards of the shed","in the hollow tree by the creek"])+". The password is stupid. You would die for it.","good");tl(G.age,"Built a hideout with "+n.name.split(" ")[0])}},
+ {t:"grandmother's garden",w:2,run:function(){var g=byKind("grandparent").concat(byKind("guardian")).filter(function(n){return n.alive})[0];if(!g)return;
+   relUp(g,4);addStat("willpower",1);
+   fbig(g.name.split(" ")[0]+" puts a trowel in your hand and teaches you patience the long way: "+pick(["one tomato at a time","pulling weeds until your back aches","waiting three weeks for one sprout"])+".")}},
+ {t:"the kage's parade",w:1,run:function(){addStat("happiness",3);addStat("confidence",1);
+   fbig("The "+G.villageData.kage+"'s parade passes your street. You stand on your toes the whole time. That night you announce, loudly, what you will be someday. The family lets you have it.","world");tl(G.age,"Watched the "+G.villageData.kage+"'s parade from the front row")}}
+);
+EVS.academy.push(
+ {t:"exam season",w:3,run:function(){var a=G.academy;if(!a)return;
+   modal("Exam Season","Academy","Written exams in two weeks. The library is packed, the training yards are packed, and everyone has a theory about the right way to prepare.",
+    [{t:"Cram the theory",d:"grades up, sleep down",fn:function(){a.grades=clamp((a.grades||0)+3,0,100);addStat("happiness",-1);fbig("You cram until the lanterns burn out. The theory paper bends to you. You sleep for a day and a half after.","good")}},
+     {t:"Drill the practicals",d:"body over paper",fn:function(){addStat("taijutsu",2);addStat("agility",1);a.grades=clamp((a.grades||0)+1,0,100);fbig("You drill shuriken and sparring until your hands know the answers. The written part goes fine. The practical goes great.","good")}},
+     {t:"Rest properly",d:"steady wins",fn:function(){addStat("health",2);addStat("happiness",2);a.grades=clamp((a.grades||0)+1,0,100);fbig("You sleep eight hours a night like some kind of radical. The exams go exactly as well as you are: solidly.","good")}}])}},
+ {t:"rival's challenge",w:2,run:function(){var rv=byKind("rival")[0];if(!rv||!rv.alive)return;
+   modal("A Public Challenge","Rivalry",rv.name.split(" ")[0]+" steps into the training circle in front of the whole class and points: 'You. Right now. Unless you have an excuse ready.'",
+    [{t:"Step in",fn:function(){var win=ri(st("taijutsu")+st("speed"),st("taijutsu")+st("speed")+25)>=ri(45,80);addStat("taijutsu",2);
+       if(win){addStat("confidence",2);rep(1);relUp(rv,2);fbig("You win by a hair in front of everyone. "+rv.name.split(" ")[0]+" shakes your hand hard enough to hurt, which is their way of saying 'next time'.","good")}
+       else{addStat("willpower",2);relUp(rv,3);fbig("You lose, cleanly and publicly. "+rv.name.split(" ")[0]+" nods once, almost respectful. You are in the training yard before sunrise tomorrow.","bad")}}},
+     {t:"Walk away",fn:function(){relUp(rv,-3);addStat("happiness",-1);fbig("You walk. Some of the class understands. "+rv.name.split(" ")[0]+" does not, and says so for a week.","bad")}}])}},
+ {t:"club day",w:2,run:function(){var a=G.academy;if(!a||a.club)return;
+   var club=pick(["shuriken club","tactics society","endurance running club","calligraphy and sealwork circle"]);
+   a.club=club;var s=pick(["taijutsu","intelligence","endurance","chakraControl"]);addStat(s,2);addStat("happiness",1);
+   fbig("You join the "+club+". It meets "+pick(["at dawn, which is a crime","twice a week behind the east hall","in an unofficial classroom that smells like old scrolls"])+". "+cap(s)+" grows and so does your circle.","good");tl(G.age,"Joined the "+club)}},
+ {t:"study group",w:2,run:function(){var fr=byKind("friend").filter(function(n){return n.alive});if(!fr.length)return;var n=pick(fr);
+   var a=G.academy;if(a)a.grades=clamp((a.grades||0)+2,0,100);relUp(n,4);
+   fbig("You and "+n.name.split(" ")[0]+" start a study group that is half studying and half arguing about hand seals. The arguing is the part that works.","good")}}
+);
+EVS.genin.push(
+ {t:"the trust test",w:1.5,run:function(){var s=G.sensei;if(!s||!s.alive)return;
+   modal("Sensei's Test","Team",s.name.split(" ")[0]+" schedules a 'routine assessment' at dawn, then takes you two-thirds of the way up the cliff and asks what you would do if the mission and your squad could not both survive.",
+    [{t:"Answer honestly",fn:function(){relUp(s,8);addStat("willpower",2);fbig("You answer with the truth, ugly parts included. "+s.name.split(" ")[0]+" nods slowly. Something between you settles into place for good.","good");tl(G.age,"Passed your sensei's trust test")}},
+     {t:"Give the textbook answer",fn:function(){relUp(s,2);fbig("You recite the manual. "+s.name.split(" ")[0]+" writes something in your file that you are never allowed to read.","bad")}}])}},
+ {t:"first C-rank jitters",w:2,run:function(){if(G.missionStats.total>2)return;
+   addStat("discipline",1);fbig("The night before your first C-rank, nobody sleeps. Your teammate laughs too loudly. You polish the same kunai forty times. By morning it is just work, which is the whole secret.","good")}}
+);
+EVS.shinobi.push(
+ {t:"the war draft",w:1.5,run:function(){if(G.age<15||!G.era||G.era.war<.12)return;if(G.villageState&&G.villageState.drafted)return;
+   G.villageState=G.villageState||{};G.villageState.drafted=true;
+   modal("The Draft","War","Notice comes down through the channels: able shinobi are called to the border. Your name is on the list. It was always going to be.",
+    [{t:"Volunteer for the front line",d:"where it counts",fn:function(){rep(3);addStat("taijutsu",2);addStat("willpower",2);
+       if(chance(.25)){var ij=pick(INJURIES);addStat("health",-ij.sev*ri(3,7));fbig("The front line teaches its lessons in ink and bandages. You come back with a "+ij.n+" and a field promotion candidacy.","bad")}
+       else fbig("You serve at the front for a season. You come back thinner, harder, and with stories you will tell for the rest of your life.","world");tl(G.age,"Served a tour at the front during the war")}},
+     {t:"Request garrison duty",d:"hold the walls",fn:function(){addRyo(ri(300,900));addStat("discipline",2);fbig("You hold the walls all winter. Less glory, more boring, and every village needs someone boring and reliable at the gate.","good")}}])}},
+ {t:"mentor's passing",w:1,run:function(){var cands=byKind("mentor").concat(byKind("sensei")).filter(function(n){return n.alive&&n.age>=58});if(!cands.length)return;var n=pick(cands);
+   n.alive=false;addStat("willpower",3);addStat("happiness",-5);
+   fbig(n.name.split(" ")[0]+" dies "+pick(["in the autumn, quietly, between one cup of tea and the next","at their post, the way they always said they wanted","surrounded by students, arguing to the last about your footwork"])+". The village lowers its flags. You carry their last lesson everywhere now.","world");tl(G.age,"Lost "+n.name)}},
+ {t:"the scar",w:1,run:function(){if(G.flags&&G.flags.scarred)return;addStat("health",-6);addStat("willpower",4);
+   G.flags=G.flags||{};G.flags.scarred=true;
+   var spot=pick(["across the ribs","from shoulder to elbow","over the left eye","across both hands"]);
+   fbig("The wound closes but the scar stays: "+spot+". It aches before rain. Medic-nin can fix most things; they cannot fix a story your body now tells.","bad");tl(G.age,"Carried out a wound that left a permanent scar")}},
+ {t:"a summons",w:1,run:function(){if(rankRank()<3||G.reputation<70)return;
+   modal("A Summons","Honor","A courier finds you with a summons: the "+G.villageData.kage+"'s council wants you in the tower, "+pick(["this evening","at first bell","before the third hour"]),
+    [{t:"Answer the summons",fn:function(){rep(2);addRyo(ri(500,1500));fbig("The meeting is short. A difficult task, a longer leash, and trust in writing. You walk out taller than you walked in.","rare");tl(G.age,"Summoned to the "+G.villageData.kage+"'s council")}},
+     {t:"Send regrets",fn:function(){rep(-1);fbig("You decline. The courier's face says the council does not often hear that word.","bad")}}])}}
+);
+EVS.adult.push(
+ {t:"anniversary",w:3,run:function(){var sp=G.family.spouse;if(!sp||!sp.alive)return;
+   relUp(sp,5);addStat("happiness",2);
+   fbig("Your anniversary with "+sp.name.split(" ")[0]+": "+pick(["you recreate the first dinner, badly, on purpose","they find the gift you hid three months ago in eleven minutes","you walk the village wall at night like you did before the wedding","the whole family pretends the meal is normal and fails beautifully"])+".","good");tl(G.age,"Celebrated an anniversary with "+sp.name.split(" ")[0])}},
+ {t:"spouse's dream",w:2,run:function(){var sp=G.family.spouse;if(!sp||!sp.alive)return;
+   var d=pick(["open a tea house","take a posting in the border garrison","train for the chunin exams late","write the village's first cookbook"]);
+   modal("Their Dream","Family",sp.name.split(" ")[0]+" brings it up over dinner, the careful way people bring up things they have wanted for years: "+d+".",
+    [{t:"Help make it happen",d:"it costs something",fn:function(){addRyo(-500);relUp(sp,8);addStat("happiness",2);fbig("You empty some savings and a lot of evenings into it. Watching them light up is worth both.","good");tl(G.age,"Helped "+sp.name.split(" ")[0]+" pursue their dream")}},
+     {t:"Talk them out of it",d:"steady, not kind",fn:function(){relUp(sp,-6);fbig("You list the risks until the dream folds itself away. Dinner ends early. The subject does not come up again, which is not the same as gone.","bad")}}])}},
+ {t:"the in-laws",w:2,run:function(){var sp=G.family.spouse;if(!sp||!sp.alive)return;rep(1);addStat("happiness",1);
+   fbig("Dinner with "+sp.name.split(" ")[0]+"'s family: "+pick(["your mother-in-law interrogates you like a border guard and hugs you like a son at the door","you catch their father telling your story, slightly improved, to the neighbors","it goes so smoothly someone must have briefed everyone in advance"])+".","good")}}
+);
+EVS.family.push(
+ {t:"the heirloom",w:1.5,run:function(){var g=byKind("grandparent").concat(byKind("guardian")).filter(function(n){return n.alive})[0];if(!g||G.age<10)return;
+   addStat("willpower",2);tl(G.age,"Received the family heirloom");
+   fbig(g.name.split(" ")[0]+" takes you aside and presses the family's "+pick(["old war tag","worn prayer beads","twin-pronged kunai","travel-worn ledger of names"])+" into your hands. 'It has outlived better people than us. Make it proud.'","rare");}},
+ {t:"sibling in trouble",w:2,run:function(){var s=byKind("sibling").filter(function(n){return n.alive&&n.age>=10});if(!s.length)return;var n=pick(s);
+   modal("The Broken Window","Family",n.name.split(" ")[0]+" appears at your door, pale: the merchant guild's front window, a thrown kunai, a dare gone sideways. The guild master is asking who did it.",
+    [{t:"Cover for them",fn:function(){relUp(n,8);addStat("discipline",-2);addRyo(-ri(50,150));fbig("You take the blame and the fine. "+n.name.split(" ")[0]+" owes you one forever, and knows it.","good")}},
+     {t:"March them to apologize",fn:function(){relUp(n,-4);addStat("discipline",3);fbig("You drag them to the guild master yourself. The apology is genuine and mortifying. Your parents hear about both parts.","good")}},
+     {t:"Stay out of it",fn:function(){addStat("happiness",-1);fbig("You keep your hands clean. "+n.name.split(" ")[0]+" handles it alone, and something small between you goes quiet for a year.","bad")}}])}}
+);
+EVS.village.push(
+ {t:"the nine-tails night",w:.3,run:function(){if(G.eraId!=="kyubi"||G.village!=="konoha"||G.age<5)return;if(G.flags&&G.flags.foxtale)return;
+   G.flags=G.flags||{};G.flags.foxtale=true;addStat("happiness",-6);addStat("willpower",4);
+   fbig("One night the sky over the village turns the color of a wound. A fox with nine tails stands taller than the towers, and a yellower light answers it. The village survives, changed. Everyone remembers where they stood; now you do too.","world");tl(G.age,"Survived the Nine-Tails night",true)}},
+ {t:"the first academy class",w:.4,run:function(){if(G.eraId!=="founding"||G.age<8||!inAcademy())return;
+   addStat("intelligence",2);tl(G.age,"Attended the first academy class of the village");
+   fbig("Your class is among the first the new academy has ever taught. The instructor is a war veteran with no textbook, so he teaches what he lived. Nobody misses a word.","world")}},
+ {t:"clan raid",w:.4,run:function(){if(G.eraId!=="warring")return;
+   modal("Burning at the Edge","War","Smoke rises from the far fields: a rival clan's riders, here for grain and for the message burning grain sends.",
+    [{t:"Stand and fight",fn:function(){var win=ri(st("taijutsu")+st("speed"),st("taijutsu")+st("speed")+20)>=ri(50,80);
+       if(win){addStat("taijutsu",3);rep(2);fbig("You fight at the treeline with the adults. The riders take nothing and leave two of their own. The village learns your name early.","good");tl(G.age,"Helped repel a rival clan's raid")}
+       else{var ij=pick(INJURIES);addStat("health",-ij.sev*ri(3,8));addStat("willpower",3);fbig("You hold longer than anyone expected, and pay for it: a "+ij.n+". The granary survives. So do you.","bad")}}},
+     {t:"Get the little ones to the cellar",fn:function(){addStat("discipline",2);relUp(byKind("mother")[0]||byKind("guardian")[0]||{name:"The village"},4);fbig("You spend the raid in the dark with the smallest children, keeping them quiet with a story you invent as you go. Every adult notices who kept the children calm.","good")}}])}},
+ {t:"akatsuki rumor",w:.3,run:function(){if(G.eraId!=="shippuden")return;
+   addStat("perception",1);fbig("Travelers whisper at the inn about robed strangers with cloud-marked cloaks "+pick(["asking after jinchuriki","buying information and not paying","seen twice where rumors say once"])+". The mission board quietly redoubles the escort rates.","world")}}
+);
+EVS.awaken.push(
+ {t:"dormant bloodline stirs",w:.25,run:function(){if(!G.kkg||G.kkgKnown)return;
+   if(tryKGAwake())return;
+   fbig("You dream of a pattern you cannot name and wake with your hands folded in a seal nobody taught you. Whatever sleeps in your blood turns over and goes back to sleep. For now.","rare")}}
+);
 
 /* ============================ jutsu & training ============================ */
 function reqText(j){
@@ -1449,6 +1587,7 @@ function applyCareerOffer(){
 }
 function promote(rank,msg){
   G.rank=rank;G.career=rank;
+  if(G.legacyParent&&rankRank()>=3&&!includes(G.achievements,"legacy_keeper"))award("legacy_keeper");
   if(msg)fbig(msg,"good");tl(G.age,"Promoted to "+rank);
   rep(rank==="Chunin"?5:rank==="Jonin"?8:rank==="Kage"?30:2);
   addStat("confidence",3);
@@ -1686,7 +1825,7 @@ function deleteSlot(idx){
 }
 function legacyLog(){return loadJSON(LS_LEGACY,[])}
 function pushLegacy(entry){
-  var l=legacyLog();l.unshift(entry);if(l.length>60)l=l.slice(0,60);
+  var l=legacyLog();l.unshift(entry);if(l.length>100)l=l.slice(0,100);
   saveJSON(LS_LEGACY,l);
 }
 
@@ -1723,7 +1862,7 @@ function lifeBiography(){
 }
 function showDeath(){
   var g=gradeOf();
-  pushLegacy({name:G.name,grade:g.g,score:g.score,rank:G.rank,priorRank:G.priorRank,career:G.career,age:G.age,clan:G.clanName,deathCause:G.deathCause,village:G.villageName,era:G.eraName,rogue:G.rogue,kkg:G.kkgKnown,achievements:(G.achievements||[]).map(function(id){var a=ACHIEVEMENTS.find(function(x){return x.id===id});return a?a.n:id}),missionStats:G.missionStats,ryo:G.ryo,reputation:G.reputation,bounty:G.bounty,biography:lifeBiography(),timeline:G.timeline,date:new Date().toISOString()});
+  pushLegacy({name:G.name,grade:g.g,score:g.score,rank:G.rank,priorRank:G.priorRank,career:G.career,age:G.age,clan:G.clanName,deathCause:G.deathCause,village:G.villageName,era:G.eraName,rogue:G.rogue,kkg:G.kkgKnown,achievements:(G.achievements||[]).map(function(id){var a=ACHIEVEMENTS.find(function(x){return x.id===id});return a?a.n:id}),missionStats:G.missionStats,ryo:G.ryo,reputation:G.reputation,bounty:G.bounty,biography:lifeBiography(),timeline:G.timeline,spouse:G.family.spouse?G.family.spouse.name:null,kids:G.family.kids.filter(function(k){return k.alive}).map(function(k){return k.name}),spec:G.spec?specName():null,jutsuMastered:G.jutsu?Object.keys(G.jutsu).filter(function(id){return G.jutsu[id]&&G.jutsu[id].mastery>=3}).length:0,talents:(G.talents||[]).map(function(t){return t.t}),date:new Date().toISOString()});
   var deadIds=loadJSON("shinobi_sprint_dead_v1",{})||{};if(G.cid){deadIds[G.cid]=true;saveJSON("shinobi_sprint_dead_v1",deadIds)}   if(typeof clearActiveDeathSlot==="function")clearActiveDeathSlot();
   var card=$("#deathCard");card.innerHTML="";
   card.appendChild(el("div","tag","the end of a life"));
@@ -1752,6 +1891,13 @@ function startAsDescendant(kid){
   child.familyWealth=G.familyWealth==="wealthy"?"comfortable":G.familyWealth;
   child.familyHistory="Your parent was "+(G.rank==="Kage"?"the "+G.villageData.kage+" of "+G.villageName:"a "+G.rank.toLowerCase()+" of "+G.villageName)+" whose name still opens doors.";
   child.legacyParent={name:G.name,rank:G.rank,grade:gradeOf().g};
+  if(!includes(child.achievements,"dynasty_line"))child.achievements.push("dynasty_line");
+  /* legacy rewards: an honored parent's name and purse follow the child */
+  var lg=gradeOf().g||"";
+  if(lg.indexOf("A")===0){
+    child.ryo+=ri(800,2500);child.stats.reputation=clamp((child.stats.reputation||0)+8,0,100);
+    child.familyHistory+=" An honored name in the line opens doors and purses: the family sends you off with savings and a reputation that arrives before you do.";
+  }
   /* inheritance: some stats seed from parent, never maxed */
   ["chakra","intelligence","taijutsu","ninjutsu","chakraControl"].forEach(function(k){
     child.stats[k]=clamp(Math.round((child.stats[k]+G.stats[k]*.25)/1.1),0,80);
@@ -2454,7 +2600,7 @@ function renderSettings(){
   backup.appendChild(el("span","muted","Cloud saves sync automatically when available. A local recovery copy is also kept on this browser. Export a backup before clearing browser data or changing devices."));
   var backupActs=el("div","acts");
   var exportBtn=el("button","btn","Export backup");exportBtn.onclick=function(){try{var data={app:"Shinobi Life Unbound",format:1,exportedAt:new Date().toISOString(),slots:slots()};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="shinobi-life-unbound-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast("Backup exported")}catch(e){toast("Couldn't export backup")}};
-  var importBtn=el("button","btn ghost","Import backup");importBtn.onclick=function(){var input=document.createElement("input");input.type="file";input.accept="application/json,.json";input.onchange=function(){var file=input.files&&input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||data.app!=="Shinobi Life Unbound"||!Array.isArray(data.slots))throw Error("Invalid backup");if(!confirm("Import this backup? Existing slots will be replaced by the backup."))return;var clean=[];for(var n=0;n<6;n++){var entry=data.slots[n];clean[n]=entry&&entry.g&&entry.g.first?entry:null}for(var n=0;n<6;n++){if(clean[n])saveSlot(n,clean[n]);else deleteSlot(n)}saveJSON("shinobi_sprint_local_recovery_v1",slots());toast("Backup imported");renderSettings()}catch(e){toast("Invalid or unsupported backup file")}};reader.readAsText(file)};input.click()};
+  var importBtn=el("button","btn ghost","Import backup");importBtn.onclick=function(){var input=document.createElement("input");input.type="file";input.accept="application/json,.json";input.onchange=function(){var file=input.files&&input.files[0];if(!file)return;if(file.size>4*1024*1024){toast("That file is too large to be a backup");return}var reader=new FileReader();reader.onload=function(){try{var raw=JSON.parse(reader.result);if(!raw||typeof raw!=="object"||raw.app!=="Shinobi Life Unbound"||!Array.isArray(raw.slots))throw Error("Invalid backup");if(raw.format!=null&&raw.format!==1)throw Error("Unsupported format");var deep=function(v){if(Array.isArray(v)){var o=[];for(var i=0;i<v.length&&i<2000;i++)o[i]=deep(v[i]);return o}if(v&&typeof v==="object"){var o={};for(var k in v){if(k==="__proto__"||k==="constructor"||k==="prototype")continue;o[k]=deep(v[k])}return o}return v};var data=deep(raw);var good=[],ok=0;for(var n=0;n<6;n++){var entry=data.slots[n];var pass=false;if(entry&&typeof entry==="object"&&entry.g&&typeof entry.g==="object"&&typeof entry.g.first==="string"&&entry.g.first&&typeof entry.g.age==="number"&&entry.g.stats&&typeof entry.g.stats==="object"&&typeof entry.g.alive==="boolean"&&entry.g.timeline===undefined||entry&&entry.g&&entry.g.timeline){pass=true;try{JSON.stringify(entry)}catch(e2){pass=false}}good[n]=pass?entry:null;if(pass)ok++}if(!ok){toast("No valid saves found in that file");return}if(!confirm("Import this backup? "+ok+" valid save"+(ok===1?"":"s")+" found. Existing slots will be replaced by the backup."))return;for(var n=0;n<6;n++){if(good[n])saveSlot(n,good[n]);else deleteSlot(n)}saveJSON("shinobi_sprint_local_recovery_v1",slots());toast("Backup imported: "+ok+" save"+(ok===1?"":"s"));renderSettings()}catch(e){toast("Invalid or unsupported backup file")}};reader.readAsText(file)};input.click()};
   backupActs.appendChild(exportBtn);backupActs.appendChild(importBtn);backup.appendChild(backupActs);
   backup.appendChild(el("span","muted","Recovery copy: "+(loadJSON("shinobi_sprint_local_recovery_v1",null)?"available":"created on your next save")));
   v.appendChild(backup);
@@ -2480,7 +2626,7 @@ function showLegacy(){
     row.appendChild(el("div","grade",e.grade));
     var who=el("div","who");
     who.appendChild(el("b",null,e.name+(e.kkg?" · "+e.kkg:"")+(e.rogue?" · missing-nin":"")));
-    who.appendChild(el("span",null,e.rank+" · died at "+e.age+" · "+e.village+" · "+e.era+" · "+e.score+" legacy"));     if(e.clan)who.appendChild(el("span",null,"Clan: "+e.clan));     if(e.deathCause)who.appendChild(el("span",null,"Cause of death: "+e.deathCause));     if(e.priorRank||e.career)who.appendChild(el("span",null,"Career: "+(e.career||e.rank)+(e.priorRank?" · Previous rank: "+e.priorRank:"")));     if(e.achievements&&e.achievements.length)who.appendChild(el("span",null,"Achievements: "+e.achievements.join(", ")));     if(e.biography)who.appendChild(el("div","dbio",e.biography));
+    who.appendChild(el("span",null,e.rank+" · died at "+e.age+" · "+e.village+" · "+e.era+" · "+e.score+" legacy"));     if(e.clan)who.appendChild(el("span",null,"Clan: "+e.clan));     if(e.deathCause)who.appendChild(el("span",null,"Cause of death: "+e.deathCause));     if(e.priorRank||e.career)who.appendChild(el("span",null,"Career: "+(e.career||e.rank)+(e.priorRank?" · Previous rank: "+e.priorRank:"")));     if(e.spec)who.appendChild(el("span",null,"Specialization: "+e.spec));     if(e.spouse)who.appendChild(el("span",null,"Married: "+e.spouse));     if(e.kids&&e.kids.length)who.appendChild(el("span",null,"Children: "+e.kids.join(", ")));     if(e.jutsuMastered)who.appendChild(el("span",null,"Techniques mastered: "+e.jutsuMastered));     if(e.talents&&e.talents.length)who.appendChild(el("span",null,"Talents: "+e.talents.join(", ")));     if(e.achievements&&e.achievements.length)who.appendChild(el("span",null,"Achievements: "+e.achievements.join(", ")));     if(e.biography)who.appendChild(el("div","dbio",e.biography));
     row.appendChild(who);
     card.appendChild(row);
   });
@@ -2840,7 +2986,9 @@ function loadGame(idx){
 }
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
-var UPDATES=[{d:"Nov 22, 2026",t:"The RPG Overhaul",b:"Version 5.0.0. Life Unbound is now a playable shinobi RPG. A new Train tab opens The Way of the Shinobi: fifteen live drills (timing bars, reaction flashes, moving targets, seal sequences, steadiness holds, endurance taps, tactical calls and live sparring) that train twelve stats, chakra capacity, control, recovery, strength, speed, stamina, taijutsu, ninjutsu, genjutsu, intelligence, hand seal speed and perception, with XP, levels, fatigue and diminishing returns that reward a varied routine. A jutsu library of 64 techniques across 16 disciplines and ranks E through S: learn them from six teachers, from scrolls won on missions, from your clan, or through deeds, then practice them from Learned to Mastered, cutting cost and cooldown while raising power, and equip a loadout sized to your rank. Chakra development has a real progression screen and the chakra paper test reveals your elemental affinity. Interactive turn-based combat: attack, taijutsu chains, your equipped jutsu, defend, substitution, chakra charging, items, analysis and retreat against enemies whose behavior reads rank, health and chakra, with status effects, cooldowns and elemental visuals. Sparring against academy students, teammates, your rival and elite jonin at three difficulties. Missions from D to S run in playable stages with choices, skill checks and real combat. Exams are played: the graduation written test, chakra trial and practical bout, the full Chunin exam with survival and a tournament bracket, and jonin and Anbu advancement. A nine-branch skill tree spends level points your way. The life simulator drives it all: age, rank, clan, village, bonds and reputation shape what you can learn and who you meet. Saves migrate safely and nothing resets."},{d:"Nov 22, 2026",t:"The Complete Clan Overhaul",b:"Version 4.1.0. The clan system is rebuilt from the ground up. Seven rarity tiers: common, uncommon, rare, epic, legendary, mythical, and two secret clans that cannot appear in normal rolls at all. A full roster of 45 clans, adding the Otsutsuki, Hagoromo, Chinoike, Jugo, Iburi, Tsuchigumo, Onikuma, Hoki, Kohaku, Izuno, Lee and Ryu bloodlines, with Uzumaki now correctly Legendary. Every clan carries a real, named passive that touches actual math: stats, training speed, technique mastery, exams, missions, recovery, reputation, bond growth, tracking, evasion and resistances. Bonuses are derived live from your clan, so they can never stack or duplicate across refreshes, saves or age-ups. Weighted clan rolls now run at 48 / 27 / 15 / 7 / 2.5 / 0.5 percent, shifted by luck and owner controls, with clan roll history kept on your record. Twelve new clan techniques to unlock, from the Adamantine Sealing Chains to the Sixty-Four Palms. The clan tab is a new collection: search, rarity filters, full clan cards with passives and abilities, and a Forbidden Registry where the secret clans can be found at one in two million. Existing saves migrate safely: your clan stays yours, only its rarity label updates to the new scale."},{d:"Nov 22, 2026",t:"Age Up Never Leaves The Top",b:"Version 4.0.6. The AGE UP button is now a true pinned header: it lives at the very top of the game screen on every tab, sits just below the status bar instead of covering it, and never scrolls away no matter how far down you go. One year is always one tap away. Everything else is untouched."},{d:"Nov 22, 2026",t:"Talks Fix & Scene Continue",b:"Version 4.0.5. Fixed the two bugs QA caught in live play: every conversation from the People tab (Spend time, Face them and the rest) opens again, an internal name helper had gone missing and silenced them all; and the Continue button after an event summary now dismisses properly, so the year summary and the next year always load instead of waiting forever. Also tuned the title intro to hand you to the main menu on its own after about 6 seconds."},{d:"Nov 22, 2026",t:"Mission Board Fix",b:"Version 4.0.4. Fixed the mission board: the briefing lost track of the mission's rank and reward before the field, so outcomes miscalculated and pay, reputation and the record could not update. Missions now resolve at the right rank and reward, and every success and failure lands in the record. Also fixed loading a save: lives were reloading with a fresh random clan roll, so the clan tab could say you were clanless when you were not. Your real clan is now kept across saves."},{d:"Nov 22, 2026",t:"Age Up Moves To The Top",b:"Version 4.0.3. The AGE UP button now sits at the very top of the home screen and stays pinned there while you scroll, so one year is always one tap away. No more scrolling down for it. Everything else is untouched."},{d:"Nov 22, 2026",t:"Bridge Fix Round Two",b:"Version 4.0.2. The wiring bug behind the last fix had more strands: a second batch of the game core (year events, ranks, bonds, academy, the fate system) was still out of reach of the story and fate layers, so AGE UP could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every connection is exposed now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched."},
+var UPDATES=[
+{d:"Nov 24, 2026",t:"The Deeper Life Update",b:"Version 5.1.0. The simulator goes deeper on every axis. Careers become a real path: a new career event pool runs promotion boards, war field promotions, teaching rotations, student successes, civilian trades, council honors and a real retirement decision. Academy life gains exam season preparation choices, club days, study groups and rival challenges with stakes. Family life deepens: hideouts, gardens, heirlooms, a sibling who needs covering for, and a long night caring for a sick parent. Marriage gains anniversaries, a spouse's dream to support or discourage, and in-law dinners. Life-changing events land: war drafts, the loss of a mentor, scars that stay, and a summons from the Kage's council. Rare bloodline stirrings can wake a dormant kekkei genkai years early. Hidden history events fire by era: the Nine-Tails night in Konoha, the founding era's first academy class, warring-states clan raids, and Akatsuki rumors. Three new generational honors: The Line Continues, Legacy Keeper, and Full House. Descendants of high-honor lives now inherit family savings and a name that arrives before they do. The Legacy Hall keeps spouse, children, specialization, mastered techniques and talents for up to 100 past lives. Save import is hardened against malformed files, and every version display now reads the same number."},
+{d:"Nov 22, 2026",t:"The RPG Overhaul",b:"Version 5.0.0. Life Unbound is now a playable shinobi RPG. A new Train tab opens The Way of the Shinobi: fifteen live drills (timing bars, reaction flashes, moving targets, seal sequences, steadiness holds, endurance taps, tactical calls and live sparring) that train twelve stats, chakra capacity, control, recovery, strength, speed, stamina, taijutsu, ninjutsu, genjutsu, intelligence, hand seal speed and perception, with XP, levels, fatigue and diminishing returns that reward a varied routine. A jutsu library of 64 techniques across 16 disciplines and ranks E through S: learn them from six teachers, from scrolls won on missions, from your clan, or through deeds, then practice them from Learned to Mastered, cutting cost and cooldown while raising power, and equip a loadout sized to your rank. Chakra development has a real progression screen and the chakra paper test reveals your elemental affinity. Interactive turn-based combat: attack, taijutsu chains, your equipped jutsu, defend, substitution, chakra charging, items, analysis and retreat against enemies whose behavior reads rank, health and chakra, with status effects, cooldowns and elemental visuals. Sparring against academy students, teammates, your rival and elite jonin at three difficulties. Missions from D to S run in playable stages with choices, skill checks and real combat. Exams are played: the graduation written test, chakra trial and practical bout, the full Chunin exam with survival and a tournament bracket, and jonin and Anbu advancement. A nine-branch skill tree spends level points your way. The life simulator drives it all: age, rank, clan, village, bonds and reputation shape what you can learn and who you meet. Saves migrate safely and nothing resets."},{d:"Nov 22, 2026",t:"The Complete Clan Overhaul",b:"Version 4.1.0. The clan system is rebuilt from the ground up. Seven rarity tiers: common, uncommon, rare, epic, legendary, mythical, and two secret clans that cannot appear in normal rolls at all. A full roster of 45 clans, adding the Otsutsuki, Hagoromo, Chinoike, Jugo, Iburi, Tsuchigumo, Onikuma, Hoki, Kohaku, Izuno, Lee and Ryu bloodlines, with Uzumaki now correctly Legendary. Every clan carries a real, named passive that touches actual math: stats, training speed, technique mastery, exams, missions, recovery, reputation, bond growth, tracking, evasion and resistances. Bonuses are derived live from your clan, so they can never stack or duplicate across refreshes, saves or age-ups. Weighted clan rolls now run at 48 / 27 / 15 / 7 / 2.5 / 0.5 percent, shifted by luck and owner controls, with clan roll history kept on your record. Twelve new clan techniques to unlock, from the Adamantine Sealing Chains to the Sixty-Four Palms. The clan tab is a new collection: search, rarity filters, full clan cards with passives and abilities, and a Forbidden Registry where the secret clans can be found at one in two million. Existing saves migrate safely: your clan stays yours, only its rarity label updates to the new scale."},{d:"Nov 22, 2026",t:"Age Up Never Leaves The Top",b:"Version 4.0.6. The AGE UP button is now a true pinned header: it lives at the very top of the game screen on every tab, sits just below the status bar instead of covering it, and never scrolls away no matter how far down you go. One year is always one tap away. Everything else is untouched."},{d:"Nov 22, 2026",t:"Talks Fix & Scene Continue",b:"Version 4.0.5. Fixed the two bugs QA caught in live play: every conversation from the People tab (Spend time, Face them and the rest) opens again, an internal name helper had gone missing and silenced them all; and the Continue button after an event summary now dismisses properly, so the year summary and the next year always load instead of waiting forever. Also tuned the title intro to hand you to the main menu on its own after about 6 seconds."},{d:"Nov 22, 2026",t:"Mission Board Fix",b:"Version 4.0.4. Fixed the mission board: the briefing lost track of the mission's rank and reward before the field, so outcomes miscalculated and pay, reputation and the record could not update. Missions now resolve at the right rank and reward, and every success and failure lands in the record. Also fixed loading a save: lives were reloading with a fresh random clan roll, so the clan tab could say you were clanless when you were not. Your real clan is now kept across saves."},{d:"Nov 22, 2026",t:"Age Up Moves To The Top",b:"Version 4.0.3. The AGE UP button now sits at the very top of the home screen and stays pinned there while you scroll, so one year is always one tap away. No more scrolling down for it. Everything else is untouched."},{d:"Nov 22, 2026",t:"Bridge Fix Round Two",b:"Version 4.0.2. The wiring bug behind the last fix had more strands: a second batch of the game core (year events, ranks, bonds, academy, the fate system) was still out of reach of the story and fate layers, so AGE UP could still die mid-year and the CHOOSE YOUR FATE step could fail to appear. Every connection is exposed now and verified live: age up runs the full year, the fate roll shows after the clan reveal, and People, Record and Character all open. Saves untouched."},
 {d:"Nov 22, 2026",t:"Age-Up Fix & The People Tab",b:"Version 4.0.1. Fixed the bug that made AGE UP do nothing when clicked: the new Hearts & Voices systems could not reach the game core, so the click died silently before a single year passed. It now ages you up every time, runs the year\u2019s events and closes with the Year Summary. The People tab and the Record tab are really on the bottom bar now (and the Character tab opens again), and enrolling in the Academy fills your classroom with people to talk to. Everything else is untouched."},
 {d:"Nov 22, 2026",t:"Hearts & Voices",b:"Version 4.0.0. Shinobi: Life Unbound is now a true life simulator. A new People tab puts everyone in this life on one screen: bond meters, what each person remembers about you, and a Spend time button that opens real conversations where your answers branch and every reply is shaped by who they are. Six voices (bold, steady, sharp, warm, distant, easygoing) speak and remember differently. Choices leave seeds: keep the pouch you found, spread a friend's secret, give your word as a child, and the consequences come back years later. Personality deepens: your dominant traits unlock new dialogue options and decide who you are becoming, from The Shield to The Storm. New life events (first words, the new kid, a dinner with edges, the lantern stranger) and bond and feud milestones now fire on their own. Existing saves, menus, character systems and progression are untouched."},
 {d:"Nov 22, 2026",t:"Roll Your Own Clan",b:"Version 3.2.0. The bloodline is yours to roll now. After the dice of birth forge your origin and trait, the clan step hands you three spins: each one rolls a real clan from your village\u2019s bloodline pool at full rarity odds, you keep the one you want or spin again, and the clan you keep becomes your surname. Used all three? You keep the last roll. Rather walk alone? A quiet option lets you stay clanless, a civilian with nothing but your own name. Village pools still respect their lands, rare and mythical clans stay rare, and existing saves are untouched."},
@@ -2899,7 +3047,7 @@ $("#btn-ageup").onclick=function(){AGEUP_SPENT=0;ageUp();try{if(window.LIFE&&LIF
   function menuOpen(id){
     try{
       if(id==="btn-ach"){var lines=ACHIEVEMENTS.map(function(x){var got=G&&G.achievements&&includes(G.achievements,x.id);return x.h&&!got?"? ? ? (a hidden honor)":x.n+" ("+x.d+")"}).join("\n");modalSafe("Achievements","Achievements",ACHIEVEMENTS.length+" honors a shinobi can earn in a single life, some hidden until discovered:\n\n"+lines)}
-      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version 2.2.2\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Replay Intro",d:"Watch the cinematic opening again",fn:function(){cinePlay(function(){})}},{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
+      else if(id==="btn-settings"){modalSafe("Settings","Settings","Version "+GAME_VERSION+"\n\nAuto-update: when a new version goes live, the game starts a 30-second countdown and refreshes itself.\nAutosave: every age-up lands in the first empty slot.\nSaves live in this browser only.\n\nCareful: clearing your browser data clears every life you have lived.",[{t:"Replay Intro",d:"Watch the cinematic opening again",fn:function(){cinePlay(function(){})}},{t:"Reset all data",d:"Deletes every save and legacy record",fn:function(){if(confirm("Delete ALL saves and legacy records? This cannot be undone.")){try{localStorage.removeItem(LS_SLOTS);localStorage.removeItem(LS_LEGACY);localStorage.removeItem(LS_ACH)}catch(e){}toast("All data cleared");setTitleRyo()}}},{t:"Close"}])}
       else if(id==="btn-credits"){modalSafe("Credits","Credits","SHINOBI: LIFE UNBOUND\nA Naruto universe life simulator.\n\nBuilt by Trae5, with a little help from Fo.\n\nEvery life here is fiction. Respect the source material.")}
       else if(id==="btn-exit"){modalSafe("Farewell","Exit","The village will be here when you return.\n\nSafe travels, shinobi.",[{t:"Leave",fn:function(){try{window.close()}catch(e){}setTimeout(function(){toast("Close this tab whenever you're ready")},200)}},{t:"Stay"}])}
       else if(id==="btn-back"){$("#screen-creator").classList.remove("on");$("#screen-title").classList.add("on")}
@@ -3001,7 +3149,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="5.0.5";
+var GAME_VERSION="5.1.0";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");

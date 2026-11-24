@@ -584,6 +584,57 @@ function pickTemplate(used){
 /* shape: {id,cat,rar,w,once,gate(),build()->scene} */
 var TPL=[];
 
+/* ---- v5.1.0 deeper-life scenes ---- */
+TPL.push({id:"fam_photo",cat:"Family",rar:"common",w:4,gate:function(){return G.age>=7&&famAlive().length>0},
+ build:function(){var n=pick(famAlive());
+  return{t:"The Photograph",cat:"Family",loc:"Home",art:"🖼️",
+   lines:["Digging through a storage chest, you find a photograph you have never been shown: "+n.name.split(" ")[0]+", years younger, "+pick(["standing beside someone whose face has been worn away by thumbprints","in a uniform you have never seen them wear","laughing in a way you have never once heard","holding a baby that is not you"])+"."],
+   choices:[
+    {t:"Ask about it tonight",res:["They tell you the story over dinner. Some of it. The parts they skip, you learn to notice.","You learn something true about them, and they learn you noticed."],fn:function(){FX.rel(n,8);FX.add("intelligence",1);FX.mem(n,"the photograph","befriended")}},
+    {t:"Put it back carefully",res:["You slide it back under the cloth exactly as you found it. Some doors you open when they open themselves."],fn:function(){FX.tr("disciplined",5);FX.add("happiness",1)}}]}}});
+TPL.push({id:"fam_sick",cat:"Family",rar:"common",w:4,gate:function(){return G.age>=8&&famAlive().length>0},
+ build:function(){var n=pick(famAlive());
+  return{t:"The Long Night",cat:"Family",loc:"Home",art:"🕯️",
+   lines:[n.name.split(" ")[0]+" has been sick for three days. The fever will not break, the house has gone quiet around it, and tonight they are worse."],
+   choices:[
+    {t:"Sit up with them",res:["You soak the cloth, wring it, lay it down, and start again. Near dawn the fever turns. They never say thank you. They never have to."],fn:function(){FX.rel(n,10);FX.add("happiness",-1);FX.add("endurance",2);FX.mem(n,"the long night","befriended")}},
+    {t:"Keep the house running",res:["You cook, wash, and keep the small ones distracted from the quiet room. Running a house is a kind of strength nobody grades."],fn:function(){FX.tr("disciplined",6);FX.add("endurance",1)}},
+    {t:"Train anyway",res:["You get your hours in. The guilt is quiet and permanent, and the training is real too."],fn:function(){FX.tr("disciplined",4);FX.add("taijutsu",1);FX.rel(n,-3)}}]}}});
+TPL.push({id:"fr_walk",cat:"Friendship",rar:"common",w:5,gate:function(){return G.age>=8&&classmates().length>0},
+ build:function(){var n=pick(classmates());
+  return{t:"The Long Walk Home",cat:"Friendship",loc:"The road",art:"🌇",
+   lines:["Something went wrong today and the whole class saw it: "+pick(["you froze during the demonstration","your transformation jutsu came out backwards","you laughed at the wrong moment and it was at the wrong person","you got the answer wrong and someone repeated it all afternoon"])+"."+n.name.split(" ")[0]+" falls into step with you on the walk home and says nothing at all."],
+   choices:[
+    {t:"Tell them what actually happened",res:["They listen the whole way. At your gate they say, 'That's not what it looked like from where I sat.' You believe them."],fn:function(){FX.rel(n,9);FX.mem(n,"the long walk home","befriended");FX.add("happiness",2)}},
+    {t:"Joke about it first",res:["The joke lands. They laugh, then one beat later, mean it: 'Yeah. Rough one.' It helps more than the silence would have."],fn:function(){FX.rel(n,5);FX.add("happiness",3)}},
+    {t:"Walk faster",res:["You get home alone. The wall of your room is a worse audience than they would have been."],fn:function(){FX.add("happiness",-2);FX.tr("loner",4)}}]}}});
+TPL.push({id:"riv_measure",cat:"Rivalry",rar:"common",w:4,gate:function(){return G.age>=8&&byKind("rival").length>0},
+ build:function(){var n=byKind("rival")[0];
+  return{t:"The Measure",cat:"Rivalry",loc:"The Academy",art:"🎯",
+   lines:["The class rankings go up and "+n.name.split(" ")[0]+" has circled both your names, yours above, and written one word beside them: 'again'.",
+    "Everyone pretends not to watch what you do about it."],
+   choices:[
+    {t:"Train until dark",res:["You stay until the instructor locks the yard. Your hands are raw and your head is clear. There will be a next time, and you will be ready."],fn:function(){FX.add("taijutsu",2);FX.add("willpower",1);FX.rel(n,1)}},
+    {t:"Study how they win",res:["You spend a week watching them fight. Their left step always drags. It is the most useful thing anyone has ever accidentally taught you."],fn:function(){FX.add("intelligence",2);FX.add("perception",1)}},
+    {t:"Ask them to train together",res:["Long pause. 'Only because you'd get worse without me.' Two hours later you are both better, and neither of you admits it."],fn:function(){FX.rel(n,6);FX.add("taijutsu",1)}}]}}});
+TPL.push({id:"era_times",cat:"World",rar:"common",w:3,
+ build:function(){var en=(G.eraName||"this era");
+  return{t:"The Times Change",cat:"World",loc:"Village",art:"📜",
+   lines:["The elders talk about it again tonight: how "+en+" "+pick(["is not what their generation was promised","keeps reshaping what a shinobi is even for","has made the old skills either priceless or useless, depending who you ask"])+".",
+    "You are growing up inside a history they keep comparing you to."],
+   choices:[
+    {t:"Listen until the fire dies",res:["You hear more than the story: you hear what they are afraid of. It is useful knowledge, older than any scroll."],fn:function(){FX.add("intelligence",2);FX.add("happiness",1)}},
+    {t:"Decide your era is yours",res:["Their history is theirs. Whatever this time is becoming, you intend to meet it as it arrives, not as it used to be."],fn:function(){FX.tr("ambitious",6)}}]}}});
+TPL.push({id:"vill_roof",cat:"Village",rar:"common",w:4,gate:function(){return G.age>=6},
+ build:function(){
+  return{t:"From the Rooftop",cat:"Village",loc:"The rooftops",art:"🌆",
+   lines:["From the tile ridge of the storeroom you can see the training grounds: jonin moving through drills with a violence so smooth it looks like weather.",
+    "Nobody knows you are up here. The dusk goes on for a long time."],
+   choices:[
+    {t:"Copy their stances from memory",res:["You drill the footwork until your legs shake. Half of it is wrong. The half that is right will take years to unlearn wrong."],fn:function(){FX.add("taijutsu",1);FX.add("chakraControl",1);FX.add("happiness",1)}},
+    {t:"Just watch, and want it",res:["You sit until the lanterns come on, completely quiet, completely certain. Some nights are the beginning of things."],fn:function(){FX.tr("ambitious",5);FX.add("willpower",1)}}]}}});
+
+
 /* ---- FAMILY ---- */
 TPL.push({id:"fam_pride",cat:"Family",rar:"common",w:7,gate:function(){return famAlive().length&&G.age>=4},
  build:function(){var n=pick(famAlive());var prouder=trait("disciplined")>50||st("intelligence")>50;
