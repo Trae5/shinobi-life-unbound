@@ -373,13 +373,19 @@ function tbLifeSeen(id){return G.tbSeenTB&&G.tbSeenTB[id]?true:false}
 
 function tbPickHost(){
   var bag=[];
+  if(!G.tbRecent)G.tbRecent={};
   TB_EV.forEach(function(e){
     if(tbLifeSeen(e.id)&&e.once)return;
     var ok=false;try{ok=e.gate()}catch(x){ok=false}
-    if(ok)bag.push([e,e.w])});
+    if(!ok)return;
+    var last=G.tbRecent[e.id];
+    if(last!=null&&(G.age-last)<5)return;
+    if(last==null&&(G.age-last)<0)return;
+    bag.push([e,e.w])});
   if(!bag.length)return null;
   var e=weighted(bag);if(!e)return null;
   tbMarkLifeSeen(e.id);
+  G.tbRecent[e.id]=G.age;
   return function(){return e.build()}}
 
 /* ---------- 1. the first voice ---------- */
