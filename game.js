@@ -1799,7 +1799,18 @@ function deserializeG(o){
    "clanLeader","examDone","jutsu","inventory","deathCause","bio","kkg","kkgKnown","nature","natureKnown",
    "familyWealth","familyHistory","latentKG","cid","born"].forEach(function(k){c[k]=o[k]});
   c.stats=o.stats;c.academy=o.academy;
-  if(!c.household)c.household=o.household||"normal";
+  /* the living world comes from the save, never a fresh roll: loading must not re-roll clan, surname, family or relationships */
+  if(Array.isArray(o.relationships)&&o.relationships.length){
+    c.relationships=JSON.parse(JSON.stringify(o.relationships));
+    if(o.last)c.last=o.last;
+    c.name=[c.first,c.last].filter(Boolean).join(" ");
+    if(o.personality&&typeof o.personality==="object")c.personality=o.personality;
+    c.household=o.household||c.household;
+    c.family.parents=c.relationships.filter(function(n){return n.kind==="father"||n.kind==="mother"||n.kind==="guardian"||n.kind==="grandparent"});
+    c.family.siblings=c.relationships.filter(function(n){return n.kind==="sibling"});
+    c.rival=(o.rival&&c.relationships.some(function(n){return n.id===o.rival}))?o.rival:null;
+  }
+  if(!c.household)c.household="normal";
   c.trained=o.trained||{};c.flags=o.flags||{};
   c.clanName=o.clanName||null;
   if(c.clanName){var cl=CLANS.find(function(x){return x.n===c.clanName});
@@ -2990,6 +3001,7 @@ function loadGame(idx){
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
 var UPDATES=[
+{d:"Nov 24, 2026",t:"The Save Loader Fix",b:"Version 2.0.3. Loading a save no longer re-rolls your life behind the scenes. A loader bug rebuilt every loaded life with a fresh random clan: your surname could come back as a clan you never rolled, your whole family was replaced with strangers, and every relationship (spouse, children, teammates, sensei, rival and students) was wiped. Loaded lives now restore exactly who and what you saved: family, bonds, name, personality and household all come from the save. Existing saves load clean."},
 {d:"Nov 24, 2026",t:"The Spar Payout Fix",b:"Version 2.0.2. The sparring cards now show the XP a fight actually pays at your chosen difficulty instead of a flat promise: easy pays 70 percent of the listed reward, normal pays the full rate, hard pays 135. Switch difficulty and the card updates with it."},{d:"Nov 24, 2026",t:"The QA Fix Pass",b:"Version 2.0.1. Live QA found real bugs and they are fixed: jutsu costs no longer show NaN chakra (a passive stat was never initialized), the spar HUD no longer shows NaN HP and NaN win chance, and jutsu you can actually cast are wired into every new life from the start (six academy techniques come pre-learned, three equipped, so the first spar is playable). Finishing a training drill now always moves your mastery a little even on a rough run, the title bar shows your exact stamina, a save confirmation pops the moment a new life begins, and the cinematic opening plays about forty percent faster with Skip Intro available from the very first second. Existing saves migrate cleanly."},
 {d:"Nov 24, 2026",t:"The BitShippuden Port",b:"Version 2.0.0. The full feature set from BitShippuden, the Roblox game with 738,000 visits, now lives here. CODE ECONOMY: a Codes button joins the title screen; five codes are live right now (SAGA, BARYON, TOMOE, HYUGA, TOURNAMENT), each paying ry\u014d and stat boosts into a code vault that drains into your life the moment one is active. The owner console gains a Codes tab for adding and retiring codes, and the codes screen teases the next drop. BLOODLINE SCORE: a score that never resets and follows your bloodline, not your life \u2014 every achievement +2, every combat victory +3, every defeat +1, every redemption +5. SEAL CHAINS & WIN%: every strike now opens a timed kanji chain; landing it boosts the blow up to 36%, your chain skill feeds a live WIN% meter, and the meter reads every fight turn by turn. Saves untouched."},
 {d:"Nov 24, 2026",t:"The Bloodline & Awakening Overhaul",b:"Version 1.3.0. Every clan now carries a lifetime bloodline system: hidden potential sealed at birth, clan-exclusive childhood events, awakening conditions that never show their odds, and evolutions from lore. The Uchiha get a full Sharingan journey (dormant to three tomoe, Mangekyo with a unique pattern and power, vision that fades with use, the rare kinsman's rite, and a lineage-gated Rinnegan). The Hyuga get a non-trauma Byakugan path with a hidden Tenseigan. Every other clan has its own ladder, mastery and rare branch. The Clan page is now a Bloodline menu. Existing saves keep everything and gain the system silently."},
@@ -3156,7 +3168,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.0.2";
+var GAME_VERSION="2.0.3";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");
