@@ -1695,6 +1695,7 @@ function ageUp(){
   if(G.age>=90&&!includes(G.achievements,"centenarian"))award("centenarian");
   var gdn=byKind("guardian").concat(byKind("grandparent")).filter(function(n){return n.alive})[0];if(gdn&&gdn.rel>=90&&!includes(G.achievements,"guardian_bond"))award("guardian_bond");
   if(G.villageState.warActive&&rankRank()>=1&&!includes(G.achievements,"war_survivor")&&G.age>12)award("war_survivor");
+  if(G.tb&&G.villageState.warActive&&rankRank()>=1&&G.age>12&&!includes(G.achievements,"burden_village"))award("burden_village");
   /* discovery */
   var woke=tryKGAwake();
   if(!woke)tryNatureDiscover();
@@ -1744,6 +1745,7 @@ function ageUp(){
     if(G.sensei&&!G.sensei.alive)G.sensei=null;
     if(GRAD&&G.alive&&inAcademy()){var gr=GRAD;GRAD=null;graduateExam(gr.forced)}
     else GRAD=null;
+    try{if(window.TAILED)TAILED.ageTick()}catch(e){}
     saveSlot("auto");
   }
   render();
@@ -1751,7 +1753,7 @@ function ageUp(){
 var AGEUP_SPENT=0;
 function dieOf(cause){
   if(!G||!G.alive)return;
-  G.alive=false;G.deathCause=cause;
+  G.alive=false;G.deathCause=cause;try{if(window.TAILED)tbOnDeath()}catch(e){}
   feed("You die at age "+G.age+" of "+cause+".","bad");
   showDeath();
 }
@@ -1784,7 +1786,7 @@ function serializeG(){
     kkg:c.kkg,kkgKnown:c.kkgKnown,nature:c.nature,natureKnown:c.natureKnown,secondary:c.secondary,
     age:c.age,alive:c.alive,rank:c.rank,career:c.career,stats:c.stats,ryo:c.ryo,fatigue:c.fatigue,
     academy:c.academy,missionStats:c.missionStats,reputation:c.reputation,bounty:c.bounty,rogue:c.rogue,
-    rogueYears:c.rogueYears,priorRank:c.priorRank,achievements:c.achievements,feed:c.feed,timeline:c.timeline,
+    rogueYears:c.rogueYears,priorRank:c.priorRank,achievements:c.achievements,feed:c.feed,timeline:c.timeline,tb:c.tb||null,tbW:c.tbW||null,
     villageState:c.villageState,retired:c.retired,retiredYear:c.retiredYear,bestFriend:c.bestFriend,
     clanLeader:c.clanLeader,examDone:c.examDone,jutsu:c.jutsu,inventory:c.inventory,deathCause:c.deathCause,
     relationships:c.relationships,teammateIds:c.teammates.map(function(n){return n.id}),
@@ -1811,6 +1813,7 @@ function deserializeG(o){
     c.rival=(o.rival&&c.relationships.some(function(n){return n.id===o.rival}))?o.rival:null;
   }
   if(!c.household)c.household="normal";
+  c.tb=o.tb||null;c.tbW=o.tbW||null;try{if(c.tb)tbEnsure()}catch(e){}
   c.trained=o.trained||{};c.flags=o.flags||{};
   c.clanName=o.clanName||null;
   if(c.clanName){var cl=CLANS.find(function(x){return x.n===c.clanName});
@@ -1874,7 +1877,7 @@ function lifeBiography(){
 }
 function showDeath(){
   var g=gradeOf();
-  pushLegacy({name:G.name,grade:g.g,score:g.score,rank:G.rank,priorRank:G.priorRank,career:G.career,age:G.age,clan:G.clanName,deathCause:G.deathCause,village:G.villageName,era:G.eraName,rogue:G.rogue,kkg:G.kkgKnown,achievements:(G.achievements||[]).map(function(id){var a=ACHIEVEMENTS.find(function(x){return x.id===id});return a?a.n:id}),missionStats:G.missionStats,ryo:G.ryo,reputation:G.reputation,bounty:G.bounty,biography:lifeBiography(),timeline:G.timeline,spouse:G.family.spouse?G.family.spouse.name:null,kids:G.family.kids.filter(function(k){return k.alive}).map(function(k){return k.name}),spec:G.spec?specName():null,jutsuMastered:G.jutsu?Object.keys(G.jutsu).filter(function(id){return G.jutsu[id]&&G.jutsu[id].mastery>=3}).length:0,talents:(G.talents||[]).map(function(t){return t.t}),date:new Date().toISOString()});
+  pushLegacy({name:G.name,grade:g.g,score:g.score,rank:G.rank,priorRank:G.priorRank,career:G.career,age:G.age,clan:G.clanName,deathCause:G.deathCause,village:G.villageName,era:G.eraName,rogue:G.rogue,kkg:G.kkgKnown,achievements:(G.achievements||[]).map(function(id){var a=ACHIEVEMENTS.find(function(x){return x.id===id});return a?a.n:id}),missionStats:G.missionStats,ryo:G.ryo,reputation:G.reputation,bounty:G.bounty,biography:lifeBiography(),timeline:G.timeline,spouse:G.family.spouse?G.family.spouse.name:null,kids:G.family.kids.filter(function(k){return k.alive}).map(function(k){return k.name}),spec:G.spec?specName():null,tb:(G.tb&&B(G.tb.b))?B(G.tb.b).name+" ("+B(G.tb.b).n+"-Tails)":null,jutsuMastered:G.jutsu?Object.keys(G.jutsu).filter(function(id){return G.jutsu[id]&&G.jutsu[id].mastery>=3}).length:0,talents:(G.talents||[]).map(function(t){return t.t}),date:new Date().toISOString()});
   var deadIds=loadJSON("shinobi_sprint_dead_v1",{})||{};if(G.cid){deadIds[G.cid]=true;saveJSON("shinobi_sprint_dead_v1",deadIds)}   if(typeof clearActiveDeathSlot==="function")clearActiveDeathSlot();
   var card=$("#deathCard");card.innerHTML="";
   card.appendChild(el("div","tag","the end of a life"));
@@ -2111,7 +2114,7 @@ function renderNav(){
 }
 function switchView(v){VIEW=v;render()}
 function renderView(){
-  ["home","character","family","academy","missions","clan","inventory","people","story","settings"].forEach(function(v){
+  ["home","character","beast","family","academy","missions","clan","inventory","people","story","settings"].forEach(function(v){
     $("#view-"+v).classList.toggle("on",VIEW===v);
   });
   var aw=document.querySelector(".ageupwrap");if(aw)aw.style.display=(VIEW==="home")?"":"none";
@@ -2122,6 +2125,7 @@ function renderView(){
   else if(VIEW==="missions")renderMissions();
   else if(VIEW==="rpg")rpgOpen();
   else if(VIEW==="clan")renderClan();
+  else if(VIEW==="beast"){if(window.TAILED)try{TAILED.render()}catch(e){}}
   else if(VIEW==="inventory")renderInventory();
   else if(VIEW==="people"){if(window.SOCIAL&&SOCIAL.renderPeople){try{SOCIAL.renderPeople()}catch(e){}}}
   else if(VIEW==="story"){if(window.LIFE&&LIFE.renderStory){try{LIFE.renderStory()}catch(e){}}}
@@ -2238,6 +2242,8 @@ function renderCharacter(){
   [["Name",G.name],["Age",G.age],["Village",G.villageName],["Clan",G.clanName||"none"],["Bloodline",G.kkg?(G.kkgKnown?G.kkg+" (awakened)":G.kkg+" (dormant)"):"none"],["Chakra nature",G.natureKnown?G.nature:"undiscovered"],["Personality",G.personality.n+" — "+G.personality.d],["Specialization",G.spec?specName():"none"],["Household",G.household||"normal"],["Missions",G.missionStats.total+" ("+G.missionStats.success+" success, "+G.missionStats.fail+" failed)"],["Reputation",Math.round(G.reputation)]].forEach(function(r){
     kv.appendChild(el("b",null,r[0]));kv.appendChild(el("span",null,String(r[1])));
   });
+  if(window.TAILED){var tbc=null;try{tbc=TAILED.chipRow()}catch(e){}
+    if(tbc){kv.appendChild(el("b",null,tbc[0]));kv.appendChild(el("span",null,String(tbc[1])))}}
   p.appendChild(kv);
   var acts=el("div","acts");acts.style.marginTop="12px";
   var b1=el("button","act");b1.appendChild(el("b",null,"✋ Jutsu"));b1.appendChild(el("span",null,"learn & train techniques"));b1.onclick=showJutsuModal;acts.appendChild(b1);
@@ -2639,7 +2645,7 @@ function showLegacy(){
     row.appendChild(el("div","grade",e.grade));
     var who=el("div","who");
     who.appendChild(el("b",null,e.name+(e.kkg?" · "+e.kkg:"")+(e.rogue?" · missing-nin":"")));
-    who.appendChild(el("span",null,e.rank+" · died at "+e.age+" · "+e.village+" · "+e.era+" · "+e.score+" legacy"));     if(e.clan)who.appendChild(el("span",null,"Clan: "+e.clan));     if(e.deathCause)who.appendChild(el("span",null,"Cause of death: "+e.deathCause));     if(e.priorRank||e.career)who.appendChild(el("span",null,"Career: "+(e.career||e.rank)+(e.priorRank?" · Previous rank: "+e.priorRank:"")));     if(e.spec)who.appendChild(el("span",null,"Specialization: "+e.spec));     if(e.spouse)who.appendChild(el("span",null,"Married: "+e.spouse));     if(e.kids&&e.kids.length)who.appendChild(el("span",null,"Children: "+e.kids.join(", ")));     if(e.jutsuMastered)who.appendChild(el("span",null,"Techniques mastered: "+e.jutsuMastered));     if(e.talents&&e.talents.length)who.appendChild(el("span",null,"Talents: "+e.talents.join(", ")));     if(e.achievements&&e.achievements.length)who.appendChild(el("span",null,"Achievements: "+e.achievements.join(", ")));     if(e.biography)who.appendChild(el("div","dbio",e.biography));
+    who.appendChild(el("span",null,e.rank+" · died at "+e.age+" · "+e.village+" · "+e.era+" · "+e.score+" legacy"));     if(e.clan)who.appendChild(el("span",null,"Clan: "+e.clan));     if(e.deathCause)who.appendChild(el("span",null,"Cause of death: "+e.deathCause));     if(e.priorRank||e.career)who.appendChild(el("span",null,"Career: "+(e.career||e.rank)+(e.priorRank?" · Previous rank: "+e.priorRank:"")));     if(e.spec)who.appendChild(el("span",null,"Specialization: "+e.spec));     if(e.spouse)who.appendChild(el("span",null,"Married: "+e.spouse));     if(e.kids&&e.kids.length)who.appendChild(el("span",null,"Children: "+e.kids.join(", ")));     if(e.jutsuMastered)who.appendChild(el("span",null,"Techniques mastered: "+e.jutsuMastered));     if(e.tb)who.appendChild(el("span",null,"Jinchuriki of the "+e.tb));     if(e.talents&&e.talents.length)who.appendChild(el("span",null,"Talents: "+e.talents.join(", ")));     if(e.achievements&&e.achievements.length)who.appendChild(el("span",null,"Achievements: "+e.achievements.join(", ")));     if(e.biography)who.appendChild(el("div","dbio",e.biography));
     row.appendChild(who);
     card.appendChild(row);
   });
@@ -2900,6 +2906,7 @@ function beginLife(){
   $("#screen-game").classList.add("on");
   feed("You were born: "+G.name+" of "+(G.clanName?"clan "+G.clanName+" in ":"")+G.villageName+", "+G.eraName+".","big");
   tl(0,G.bio);
+  try{if(window.TAILED)TAILED.birthRoll()}catch(e){}
   saveSlot("auto");
   toast("Life saved. It autosaves from here on every age-up.");
   VIEW="home";VTAB="feed";render();
@@ -3001,6 +3008,7 @@ function loadGame(idx){
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
 var UPDATES=[
+{d:"Nov 24, 2026",t:"Tailed Beasts & Jinchuriki",b:"Version 2.1.0. The nine legends are in the world. Every life can now, very rarely, carry a Tailed Beast: one in a few hundred births begins with a seal already in place, and mid-life paths (a village desperate for a vessel, a fallen host beast offered by consent, a beast that chooses you after a measured chakra surge) can make a jinchuriki of a life that was not born one. A new Beast tab carries the whole system: portrait, chakra access, bond, seal stability, beast influence, the seven progression milestones from Sealed Host to Complete Cooperation, and a running seal history. The beast is a relationship, not a stat boost: each of the nine has its own personality, voice, patience and price, bond moves only through choices in the twenty-plus dedicated events (the first voice behind the seal, the test, the offer, the rejection, the night it finally speaks its own history), and bond never rises just because a year passed. Seal stability frays under control failures and unstable years, instability scenes can burn chakra, call mentors or end lives, and the village reacts in stages from rumor to open knowledge with missions, suspicion, respect and fear to match. Non-hosts get the system too: world events carry rumors, archive records, sightings, council politics and meetings with living NPC hosts of the era. Eight new achievements, Legacy Hall records hosted lives, and new lives never inherit the previous one beast. Existing saves migrate cleanly."},
 {d:"Nov 24, 2026",t:"The Save Loader Fix",b:"Version 2.0.3. Loading a save no longer re-rolls your life behind the scenes. A loader bug rebuilt every loaded life with a fresh random clan: your surname could come back as a clan you never rolled, your whole family was replaced with strangers, and every relationship (spouse, children, teammates, sensei, rival and students) was wiped. Loaded lives now restore exactly who and what you saved: family, bonds, name, personality and household all come from the save. Existing saves load clean."},
 {d:"Nov 24, 2026",t:"The Spar Payout Fix",b:"Version 2.0.2. The sparring cards now show the XP a fight actually pays at your chosen difficulty instead of a flat promise: easy pays 70 percent of the listed reward, normal pays the full rate, hard pays 135. Switch difficulty and the card updates with it."},{d:"Nov 24, 2026",t:"The QA Fix Pass",b:"Version 2.0.1. Live QA found real bugs and they are fixed: jutsu costs no longer show NaN chakra (a passive stat was never initialized), the spar HUD no longer shows NaN HP and NaN win chance, and jutsu you can actually cast are wired into every new life from the start (six academy techniques come pre-learned, three equipped, so the first spar is playable). Finishing a training drill now always moves your mastery a little even on a rough run, the title bar shows your exact stamina, a save confirmation pops the moment a new life begins, and the cinematic opening plays about forty percent faster with Skip Intro available from the very first second. Existing saves migrate cleanly."},
 {d:"Nov 24, 2026",t:"The BitShippuden Port",b:"Version 2.0.0. The full feature set from BitShippuden, the Roblox game with 738,000 visits, now lives here. CODE ECONOMY: a Codes button joins the title screen; five codes are live right now (SAGA, BARYON, TOMOE, HYUGA, TOURNAMENT), each paying ry\u014d and stat boosts into a code vault that drains into your life the moment one is active. The owner console gains a Codes tab for adding and retiring codes, and the codes screen teases the next drop. BLOODLINE SCORE: a score that never resets and follows your bloodline, not your life \u2014 every achievement +2, every combat victory +3, every defeat +1, every redemption +5. SEAL CHAINS & WIN%: every strike now opens a timed kanji chain; landing it boosts the blow up to 36%, your chain skill feeds a live WIN% meter, and the meter reads every fight turn by turn. Saves untouched."},
@@ -3168,7 +3176,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.0.3";
+var GAME_VERSION="2.1.0";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");
