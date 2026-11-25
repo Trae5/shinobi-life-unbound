@@ -2125,7 +2125,7 @@ function renderView(){
   else if(VIEW==="missions")renderMissions();
   else if(VIEW==="rpg")rpgOpen();
   else if(VIEW==="clan")renderClan();
-  else if(VIEW==="beast"){if(window.TAILED)try{TAILED.render()}catch(e){}}
+  else if(VIEW==="beast"){if(window.TAILED)try{TAILED.render()}catch(e){console.error("beast render failed:",e)}}
   else if(VIEW==="inventory")renderInventory();
   else if(VIEW==="people"){if(window.SOCIAL&&SOCIAL.renderPeople){try{SOCIAL.renderPeople()}catch(e){}}}
   else if(VIEW==="story"){if(window.LIFE&&LIFE.renderStory){try{LIFE.renderStory()}catch(e){}}}
