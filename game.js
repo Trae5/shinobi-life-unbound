@@ -3214,7 +3214,7 @@ try{
     "dieOf":dieOf,"serializeG":serializeG,"deserializeG":deserializeG,"enrollAcademy":enrollAcademy,"ageUp":ageUp,"ccClear":ccClear,"ccFinalGo":ccFinalGo,"rollClan":rollClan,"trainGain":trainGain,
     "tryKGAwake":tryKGAwake,"tryNatureDiscover":tryNatureDiscover,"pickEvent":pickEvent,
     "CLANS":CLANS,"JUTSU":JUTSU,"KKG":KKG,"VILLAGES":VILLAGES,"NAV":NAV,"modal":modal,"panel":panel,"ACHIEVEMENTS":ACHIEVEMENTS,"loadJSON":loadJSON,"saveJSON":saveJSON,
-    "includes":includes,"logClanRoll":logClanRoll,"saveSlot":saveSlot,"slots":slots,"clanCfg":clanCfg,"CLAN_CFG_KEY":CLAN_CFG_KEY,"secretRollClan":secretRollClan,"activeCodes":activeCodes,"addCode":addCode};
+    "includes":includes,"logClanRoll":logClanRoll,"saveSlot":saveSlot,"slots":slots,"clanCfg":clanCfg,"CLAN_CFG_KEY":CLAN_CFG_KEY,"secretRollClan":secretRollClan};
   for(var __k in __exp){try{Object.defineProperty(window,__k,{value:__exp[__k],configurable:true,writable:true})}catch(__e){}}
   Object.defineProperty(window,"G",{get:function(){return G},set:function(__v){G=__v},configurable:true});
   Object.defineProperty(window,"CC",{get:function(){return CC},set:function(__v){CC=__v},configurable:true});
