@@ -3213,7 +3213,7 @@ try{
     "addRyo":addRyo,"addStat":addStat,"rep":rep,"relUp":relUp,"promote":promote,"award":award,"byKind":byKind,"rankRank":rankRank,"closeCard":closeCard,"render":render,"renderView":renderView,"switchView":switchView,
     "dieOf":dieOf,"serializeG":serializeG,"deserializeG":deserializeG,"enrollAcademy":enrollAcademy,"ageUp":ageUp,"ccClear":ccClear,"ccFinalGo":ccFinalGo,"rollClan":rollClan,"trainGain":trainGain,
     "tryKGAwake":tryKGAwake,"tryNatureDiscover":tryNatureDiscover,"pickEvent":pickEvent,
-    "ERAS":ERAS,"KKG":KKG,"VILLAGES":VILLAGES,"NAV":NAV,"modal":modal,"panel":panel,"ACHIEVEMENTS":ACHIEVEMENTS};
+    "ERAS":ERAS,"KKG":KKG,"VILLAGES":VILLAGES,"NAV":NAV,"modal":modal,"panel":panel,"ACHIEVEMENTS":ACHIEVEMENTS,"loadJSON":loadJSON,"saveJSON":saveJSON};
   for(var __k in __exp){try{Object.defineProperty(window,__k,{value:__exp[__k],configurable:true,writable:true})}catch(__e){}}
   Object.defineProperty(window,"G",{get:function(){return G},set:function(__v){G=__v},configurable:true});
   Object.defineProperty(window,"CC",{get:function(){return CC},set:function(__v){CC=__v},configurable:true});
