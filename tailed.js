@@ -652,7 +652,7 @@ var TB_ACQ=[
  {t:"The Chakra Surge",w:TB_CFG.sealEventW*0.6,run:function(){
    modal("A Chakra Like No Other","Tailed Beast","A sealing team passing through your village has measured your chakra with instruments built for measuring siege weapons. The readings do not make sense, they say, unless... They do not finish the sentence. They keep looking at you.",
     [{t:"Ask what they mean",fn:function(){var bid=tbPickBeastId();
-       modal("The Beast Chooses","Tailed Beast","'The readings match a specific signature,' the lead seal master says finally. 'A '+B(bid).title+", uncontained. And signatures like that... choose.' The implication lands in the room like a dropped blade.",
+       modal("The Beast Chooses","Tailed Beast","'The readings match a specific signature,' the lead seal master says finally. 'A '+B(bid).title+', uncontained. And signatures like that... choose.' The implication lands in the room like a dropped blade.",
         [{t:"Let it choose you",d:"become a jinchuriki",fn:function(){tbGive(bid,"the beast chose you after a measured chakra surge");
            fbig("No rite. No cage. One night of fever dreams, and when you wake, something vast is curled around your chakra like it has always lived there.","big");
            tl(G.age,"Chosen by the "+B(bid).title);G.tb.soonVoice=true}},
