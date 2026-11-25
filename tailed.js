@@ -255,6 +255,7 @@ function tbLine(){var b=tbBeast();if(!b)return"";return b.lines[Math.floor(Math.
 var TB_MS=["Sealed Host","First Chakra Connection","Chakra Recognition","Partial Cooperation","Stable Chakra Access","Advanced Synchronization","Complete Cooperation"];
 function tbCheckMS(){var t=tbGet();if(!t)return;var r=TB_CFG.milestoneReq;
   function has(i){return t.ms.indexOf(String(i))>=0}
+  if(!has(0))t.ms.push("0"); /* Sealed Host: carrying the seal is the starting milestone */
   function grant(i){if(has(i))return;t.ms.push(String(i));
     var add=i>=1&&i<=6?(4+i):0;if(add)addStat("chakra",add);
     fbig("MILESTONE — "+TB_MS[i]+". The seal shifts. Your chakra deepens (+ "+add+" Chakra).","big");
@@ -901,11 +902,11 @@ function renderBeast(){
   /* milestones */
   var mp=panel("progression","Milestones");
   TB_MS.forEach(function(name,i){
-    var has=t.ms.indexOf(String(i))>=0;
+    var has=(i===0)||t.ms.indexOf(String(i))>=0;
     var row=el("div","list-row"+(has?" tb-done":""));
     var who=el("div","who");
     who.appendChild(el("b",null,(has?"\u2713 ":"\u25CB ")+name));
-    who.appendChild(el("span",null,has?"unlocked":"locked"));
+    who.appendChild(el("span",null,has?(i===0?"you carry the seal":"unlocked"):"locked"));
     row.appendChild(who);mp.appendChild(row)});
   p.appendChild(mp);
   /* history */
