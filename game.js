@@ -1989,6 +1989,7 @@ function render(){
   $("#t-clan").innerHTML=esc(G.clanName||"No clan")+"<small>Clan</small>";
   $("#t-rank").innerHTML=esc(G.rogue?"Rogue":G.rank)+"<small>Rank</small>";
   $("#t-era").innerHTML=esc(G.era.name)+"<small>Era</small>";
+  $("#t-stam").innerHTML=Math.max(0,Math.floor(G.stats.stamina||0))+"<small>Stamina</small>";
   $("#t-ryo").textContent="🪙 "+money(G.ryo);
   var notifs=G.feed.filter(function(e){return /big|good|bad|rare|ach/.test(e.cls)}).slice(0,5);
   var bd=$("#bellDot");bd.textContent=notifs.length;bd.style.display=notifs.length?"":"none";
@@ -2600,7 +2601,7 @@ function renderSettings(){
   var backup=panel("save-data","Save protection");
   backup.appendChild(el("span","muted","Cloud saves sync automatically when available. A local recovery copy is also kept on this browser. Export a backup before clearing browser data or changing devices."));
   var backupActs=el("div","acts");
-  var exportBtn=el("button","btn","Export backup");exportBtn.onclick=function(){try{var data={app:"Shinobi Life Unbound",format:1,exportedAt:new Date().toISOString(),slots:slots()};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="shinobi-life-unbound-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast("Backup exported")}catch(e){toast("Couldn't export backup")}};
+  var exportBtn=el("button","btn","Export backup");exportBtn.onclick=function(){try{var data={app:"Shinobi Life Unbound",format:0,exportedAt:new Date().toISOString(),slots:slots()};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="shinobi-life-unbound-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast("Backup exported")}catch(e){toast("Couldn't export backup")}};
   var importBtn=el("button","btn ghost","Import backup");importBtn.onclick=function(){var input=document.createElement("input");input.type="file";input.accept="application/json,.json";input.onchange=function(){var file=input.files&&input.files[0];if(!file)return;if(file.size>4*1024*1024){toast("That file is too large to be a backup");return}var reader=new FileReader();reader.onload=function(){try{var raw=JSON.parse(reader.result);if(!raw||typeof raw!=="object"||raw.app!=="Shinobi Life Unbound"||!Array.isArray(raw.slots))throw Error("Invalid backup");if(raw.format!=null&&raw.format!==1)throw Error("Unsupported format");var deep=function(v){if(Array.isArray(v)){var o=[];for(var i=0;i<v.length&&i<2000;i++)o[i]=deep(v[i]);return o}if(v&&typeof v==="object"){var o={};for(var k in v){if(k==="__proto__"||k==="constructor"||k==="prototype")continue;o[k]=deep(v[k])}return o}return v};var data=deep(raw);var good=[],ok=0;for(var n=0;n<6;n++){var entry=data.slots[n];var pass=false;if(entry&&typeof entry==="object"&&entry.g&&typeof entry.g==="object"&&typeof entry.g.first==="string"&&entry.g.first&&typeof entry.g.age==="number"&&entry.g.stats&&typeof entry.g.stats==="object"&&typeof entry.g.alive==="boolean"&&entry.g.timeline===undefined||entry&&entry.g&&entry.g.timeline){pass=true;try{JSON.stringify(entry)}catch(e2){pass=false}}good[n]=pass?entry:null;if(pass)ok++}if(!ok){toast("No valid saves found in that file");return}if(!confirm("Import this backup? "+ok+" valid save"+(ok===1?"":"s")+" found. Existing slots will be replaced by the backup."))return;for(var n=0;n<6;n++){if(good[n])saveSlot(n,good[n]);else deleteSlot(n)}saveJSON("shinobi_sprint_local_recovery_v1",slots());toast("Backup imported: "+ok+" save"+(ok===1?"":"s"));renderSettings()}catch(e){toast("Invalid or unsupported backup file")}};reader.readAsText(file)};input.click()};
   backupActs.appendChild(exportBtn);backupActs.appendChild(importBtn);backup.appendChild(backupActs);
   backup.appendChild(el("span","muted","Recovery copy: "+(loadJSON("shinobi_sprint_local_recovery_v1",null)?"available":"created on your next save")));
@@ -2889,24 +2890,25 @@ function beginLife(){
   feed("You were born: "+G.name+" of "+(G.clanName?"clan "+G.clanName+" in ":"")+G.villageName+", "+G.eraName+".","big");
   tl(0,G.bio);
   saveSlot("auto");
+  toast("Life saved. It autosaves from here on every age-up.");
   VIEW="home";VTAB="feed";render();
 }
 /* ============================ cinematic new-life intro ============================ */
 var CINE_LINES=[
- {t:"In a world where villages are built upon strength\u2026",at:1800},
- {t:"Where clans carry bloodlines passed down for generations\u2026",at:6000},
- {t:"And where the name you are born with can shape your future\u2026",at:10200},
- {t:"Not every shinobi is destined for greatness.",at:16400},
- {t:"Some are forgotten.",at:20000},
- {t:"Some become legends.",at:22200},
- {t:"And some change the world without ever intending to.",at:24600},
- {t:"Your story doesn\u2019t begin with a choice of power.",at:30200},
- {t:"It begins with a birth.",at:33400},
- {t:"A name.",at:39600},
- {t:"A village.",at:41600},
- {t:"A bloodline you never chose.",at:43600},
- {t:"Everything else\u2026",at:46400},
- {t:"\u2026is up to you.",at:48400}
+ {t:"In a world where villages are built upon strength\u2026",at:1080},
+ {t:"Where clans carry bloodlines passed down for generations\u2026",at:3600},
+ {t:"And where the name you are born with can shape your future\u2026",at:6120},
+ {t:"Not every shinobi is destined for greatness.",at:9840},
+ {t:"Some are forgotten.",at:12000},
+ {t:"Some become legends.",at:13320},
+ {t:"And some change the world without ever intending to.",at:14760},
+ {t:"Your story doesn\u2019t begin with a choice of power.",at:18120},
+ {t:"It begins with a birth.",at:20040},
+ {t:"A name.",at:23760},
+ {t:"A village.",at:24960},
+ {t:"A bloodline you never chose.",at:26160},
+ {t:"Everything else\u2026",at:27840},
+ {t:"\u2026is up to you.",at:29040}
 ];
 var CINE_TOTAL=52100;
 var CINE=null;
@@ -2959,12 +2961,12 @@ function cinePlay(done){
   var sk=$("#cine-skip");if(sk)sk.onclick=cineEnd;
   c.hidden=false;c.classList.remove("out");c.classList.add("on");
   var grps=[".g1",".g2",".g3",".g4",".g5"].map(function(q){return c.querySelector(q)});
-  var marks=[[0,0],[9800,1],[15600,2],[29400,3],[36500,4]];
+  var marks=[[0,0],[5880,1],[9360,2],[17640,3],[21900,4]];
   marks.forEach(function(m){CINE.timers.push(setTimeout(function(){if(!CINE)return;
     grps.forEach(function(g,j){if(g)g.classList.toggle("on",j===m[1])})},m[0]))});
   CINE_LINES.forEach(function(L){CINE.timers.push(setTimeout(function(){if(CINE&&!CINE.stopped){cineSub(L.t);cineSay(L.t)}},L.at))});
-  CINE.timers.push(setTimeout(function(){if(CINE)cineHeart(CINE.ac)},36500));
-  CINE.timers.push(setTimeout(function(){if(CINE&&!CINE.stopped){$("#cine").classList.add("out");CINE.timers.push(setTimeout(cineEnd,1700))}},50500));
+  CINE.timers.push(setTimeout(function(){if(CINE)cineHeart(CINE.ac)},21900));
+  CINE.timers.push(setTimeout(function(){if(CINE&&!CINE.stopped){$("#cine").classList.add("out");CINE.timers.push(setTimeout(cineEnd,1700))}},30300));
 }
 function newLife(){
   cinePlay(function(){
@@ -2988,6 +2990,7 @@ function loadGame(idx){
 function allIndex(s){var all=slots();for(var i=0;i<all.length;i++)if(all[i]===s)return i;return 0}
 /* update log: every pushed update gets an entry here, the title chip reads the newest one */
 var UPDATES=[
+{d:"Nov 24, 2026",t:"The QA Fix Pass",b:"Version 2.0.1. Live QA found real bugs and they are fixed: jutsu costs no longer show NaN chakra (a passive stat was never initialized), the spar HUD no longer shows NaN HP and NaN win chance, and jutsu you can actually cast are wired into every new life from the start (six academy techniques come pre-learned, three equipped, so the first spar is playable). Finishing a training drill now always moves your mastery a little even on a rough run, the title bar shows your exact stamina, a save confirmation pops the moment a new life begins, and the cinematic opening plays about forty percent faster with Skip Intro available from the very first second. Existing saves migrate cleanly."},
 {d:"Nov 24, 2026",t:"The BitShippuden Port",b:"Version 2.0.0. The full feature set from BitShippuden, the Roblox game with 738,000 visits, now lives here. CODE ECONOMY: a Codes button joins the title screen; five codes are live right now (SAGA, BARYON, TOMOE, HYUGA, TOURNAMENT), each paying ry\u014d and stat boosts into a code vault that drains into your life the moment one is active. The owner console gains a Codes tab for adding and retiring codes, and the codes screen teases the next drop. BLOODLINE SCORE: a score that never resets and follows your bloodline, not your life \u2014 every achievement +2, every combat victory +3, every defeat +1, every redemption +5. SEAL CHAINS & WIN%: every strike now opens a timed kanji chain; landing it boosts the blow up to 36%, your chain skill feeds a live WIN% meter, and the meter reads every fight turn by turn. Saves untouched."},
 {d:"Nov 24, 2026",t:"The Bloodline & Awakening Overhaul",b:"Version 1.3.0. Every clan now carries a lifetime bloodline system: hidden potential sealed at birth, clan-exclusive childhood events, awakening conditions that never show their odds, and evolutions from lore. The Uchiha get a full Sharingan journey (dormant to three tomoe, Mangekyo with a unique pattern and power, vision that fades with use, the rare kinsman's rite, and a lineage-gated Rinnegan). The Hyuga get a non-trauma Byakugan path with a hidden Tenseigan. Every other clan has its own ladder, mastery and rare branch. The Clan page is now a Bloodline menu. Existing saves keep everything and gain the system silently."},
         {d:"Nov 24, 2026",t:"The Training Overhaul",b:"Version 1.3.0. Every drill is its own game now. Fifteen training activities each got a bespoke mechanic: chakra meditation is a focus meter with streak bonuses, control exercises drift and spill, tree climbing reads bark condition checkpoint by checkpoint, water walking changes conditions every round, weights scale by load and rank, sprints are pure reaction with hurdles, endurance stages pay more the longer you push, taijutsu drills answer combos before the window closes, targets and kunai test distance and timing, hand seals grow with mastery, jutsu practice drills each technique through five mastery stages, genjutsu drills hide one impossible detail per scene, tactical sims grade your calls, and sparring keeps a full win-loss record. Grades now run D through S with full session results: score, accuracy, mistakes, stat gains, XP, drill mastery, personal records and NEW RECORD flashes. Difficulty tiers (Beginner, Intermediate, Advanced, Elite) unlock with rank and stats, mastery and records persist in every save slot, and anti-farm rules (fatigue, tapering, soft caps) keep grinding honest."},
@@ -3153,7 +3156,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.0.0";
+var GAME_VERSION="2.0.1";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");

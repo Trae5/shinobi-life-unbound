@@ -63,7 +63,7 @@ function finish(a,tier,res){
   var lvl0=r.level;rpgAddXp(xpg);
   /* mastery */
   var m0=mastery(a.id);
-  var mg=Math.max(0,(res.score/100)*3.2*(1-m0/130));
+  var mg=Math.max(0.2,(res.score/100)*3.2*(1-m0/130));
   var m1=Math.min(100,Math.round((m0+mg)*10)/10);
   r.trainMast[a.id]=m1;
   /* records */

@@ -13,6 +13,10 @@ function rpgInit(G){
   if(r.loadout==null)r.loadout=[];if(r.scrolls==null)r.scrolls=[];
   if(r.exams==null)r.exams=[];if(r.missions==null)r.missions=[];
   if(r.combat==null)r.combat={wins:0,losses:0,spars:0,record:[]};
+  if(!Object.keys(r.jutsu).length&&!(r.loadout&&r.loadout.length)){
+    ["Basic Kunai Strike","Shuriken Throw","Clone Technique","Substitution Technique","Transformation Technique","Escape Art"].forEach(function(n){r.jutsu[n]={mastery:0,age:G.age||0}});
+    r.loadout=["Basic Kunai Strike","Clone Technique","Shuriken Throw"];
+  }
   return r;
 }
 function rpgXpFor(l){return Math.floor(120*Math.pow(l,1.45))}
@@ -24,7 +28,7 @@ function rpgAddXp(n){
 }
 function rpgRankSlots(){var rk=(G.rank||"");if(/Hokage|Kage|Anbu/i.test(rk))return 8;if(/Jonin/i.test(rk))return 7;if(/Chunin/i.test(rk))return 5;if(/Genin/i.test(rk))return 4;return 3}
 function rpgPassive(){
-  var a={jutPow:0,cdCut:0,crit:0,counter:0,def:0,eva:0,init:0,pen:0,shieldMul:0,hpRegen:0,genRes:0,genPow:0,elLearn:0,elPow:0,slots:0,stat:{}};
+  var a={jutPow:0,cdCut:0,crit:0,counter:0,def:0,eva:0,init:0,chakraEff:0,pen:0,shieldMul:0,hpRegen:0,genRes:0,genPow:0,elLearn:0,elPow:0,slots:0,stat:{}};
   var r=G.rpg||{};
   (r.skills?Object.keys(r.skills):[]).forEach(function(id){
     var nd=null;RPG.SKILLTREE.nodes.forEach(function(n){if(n.id===id)nd=n});

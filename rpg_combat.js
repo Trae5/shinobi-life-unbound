@@ -41,7 +41,7 @@ function rpgCombatStart(opts){
   if(!e){toast("No opponent found.");return}
   var c=rpgCalc();
   RC={ctx:opts.context||"event",diff:opts.diff||"normal",onEnd:opts.onEnd||null,
-    turn:1,pHp:c.maxHp,pCh:Math.round(c.maxCh*0.7),pSt:c.maxSt,eHP:e.hp,e:e,
+    turn:1,pHP:c.maxHp,pCh:Math.round(c.maxCh*0.7),pSt:c.maxSt,eHP:e.hp,e:e,
     pDef:0,pEva:0,pBuffAtk:0,pBuffDef:0,eBuffAtk:0,eBuffDef:0,eSeal:0,pSeal:0,
     cd:{},pStatus:[],eStatus:[],log:[],over:false,chargeTurns:0,analyze:0,retreats:0};
   if(opts.context==="spar"){G.rpg.combat.spars=(G.rpg.combat.spars||0)+1}
