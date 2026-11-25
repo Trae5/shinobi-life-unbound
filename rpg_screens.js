@@ -147,7 +147,7 @@ function rpgBodySpar(b){
   [["academy","Spar an academy student","A fellow student, still learning their feet."],["teammate","Spar your teammate","Your own squadmate. They know your habits."],["rival","Challenge your rival","Personal. Pride on the line."],["jonin","Challenge an elite jonin","Way above your weight. Glory or bruises."]].forEach(function(o){
     var e=RPG.ENEMIES.filter(function(x){return x.id===o[0]})[0];
     var c=document.createElement("div");c.className="rpg-card";
-    c.innerHTML="<div class='rc-top'><b>"+o[1]+"</b><span class='rpg-chip'>T"+e.tier+" · +"+e.xp+" XP</span></div><p>"+o[2]+"</p><div class='rpg-foot'><span></span><button class='rpg-btn'>Spar</button></div>";
+    c.innerHTML="<div class='rc-top'><b>"+o[1]+"</b><span class='rpg-chip'>T"+e.tier+" · +"+Math.round(e.xp*({easy:0.7,normal:1,hard:1.35}[r._sparDiff||"easy"]||1))+" XP</span></div><p>"+o[2]+"</p><div class='rpg-foot'><span></span><button class='rpg-btn'>Spar</button></div>";
     c.querySelector("button").onclick=function(){rpgClose();rpgCombatStart({enemyId:o[0],context:"spar",diff:G.rpg._sparDiff||"easy",onEnd:function(res){rpgOpen("spar")}})};
     b.appendChild(c);
   });
