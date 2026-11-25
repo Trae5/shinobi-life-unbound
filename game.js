@@ -3176,7 +3176,7 @@ function showRetire(){
 }
 function modalSafe(){try{paperModal.apply(null,arguments)}catch(e){try{toast("Something went wrong opening that menu") }catch(_){}}}
 /* ============================ update watch ============================ */
-var GAME_VERSION="2.1.1";
+var GAME_VERSION="2.1.2";
 (function(){var fv=document.getElementById("t-ver-text");if(fv)fv.textContent="Version "+GAME_VERSION})();
 function updStatus(text,upd){
   var s=document.getElementById("t-status");
@@ -3213,11 +3213,14 @@ try{
     "addRyo":addRyo,"addStat":addStat,"rep":rep,"relUp":relUp,"promote":promote,"award":award,"byKind":byKind,"rankRank":rankRank,"closeCard":closeCard,"render":render,"renderView":renderView,"switchView":switchView,
     "dieOf":dieOf,"serializeG":serializeG,"deserializeG":deserializeG,"enrollAcademy":enrollAcademy,"ageUp":ageUp,"ccClear":ccClear,"ccFinalGo":ccFinalGo,"rollClan":rollClan,"trainGain":trainGain,
     "tryKGAwake":tryKGAwake,"tryNatureDiscover":tryNatureDiscover,"pickEvent":pickEvent,
-    "ERAS":ERAS,"KKG":KKG,"VILLAGES":VILLAGES,"NAV":NAV,"modal":modal,"panel":panel,"ACHIEVEMENTS":ACHIEVEMENTS,"loadJSON":loadJSON,"saveJSON":saveJSON};
+    "CLANS":CLANS,"JUTSU":JUTSU,"KKG":KKG,"VILLAGES":VILLAGES,"NAV":NAV,"modal":modal,"panel":panel,"ACHIEVEMENTS":ACHIEVEMENTS,"loadJSON":loadJSON,"saveJSON":saveJSON,
+    "includes":includes,"logClanRoll":logClanRoll,"saveSlot":saveSlot,"slots":slots,"clanCfg":clanCfg,"CLAN_CFG_KEY":CLAN_CFG_KEY,"secretRollClan":secretRollClan,"activeCodes":activeCodes,"addCode":addCode};
   for(var __k in __exp){try{Object.defineProperty(window,__k,{value:__exp[__k],configurable:true,writable:true})}catch(__e){}}
   Object.defineProperty(window,"G",{get:function(){return G},set:function(__v){G=__v},configurable:true});
   Object.defineProperty(window,"CC",{get:function(){return CC},set:function(__v){CC=__v},configurable:true});
   Object.defineProperty(window,"VIEW",{get:function(){return VIEW},set:function(__v){VIEW=__v},configurable:true});
   Object.defineProperty(window,"CARD_HOLD",{get:function(){return CARD_HOLD},set:function(__v){CARD_HOLD=__v},configurable:true});
+  Object.defineProperty(window,"LS_ACH",{get:function(){return LS_ACH},set:function(__v){LS_ACH=__v},configurable:true});
+  Object.defineProperty(window,"LS_SLOTS",{get:function(){return LS_SLOTS},set:function(__v){LS_SLOTS=__v},configurable:true});
 }catch(__e){}
 })();
