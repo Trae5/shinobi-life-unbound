@@ -1786,7 +1786,7 @@ function serializeG(){
     kkg:c.kkg,kkgKnown:c.kkgKnown,nature:c.nature,natureKnown:c.natureKnown,secondary:c.secondary,
     age:c.age,alive:c.alive,rank:c.rank,career:c.career,stats:c.stats,ryo:c.ryo,fatigue:c.fatigue,
     academy:c.academy,missionStats:c.missionStats,reputation:c.reputation,bounty:c.bounty,rogue:c.rogue,
-    rogueYears:c.rogueYears,priorRank:c.priorRank,achievements:c.achievements,feed:c.feed,timeline:c.timeline,tb:c.tb||null,tbW:c.tbW||null,
+    rogueYears:c.rogueYears,priorRank:c.priorRank,achievements:c.achievements,feed:c.feed,timeline:c.timeline,tb:c.tb||null,tbW:c.tbW||null,tbSeenTB:c.tbSeenTB||null,
     villageState:c.villageState,retired:c.retired,retiredYear:c.retiredYear,bestFriend:c.bestFriend,
     clanLeader:c.clanLeader,examDone:c.examDone,jutsu:c.jutsu,inventory:c.inventory,deathCause:c.deathCause,
     relationships:c.relationships,teammateIds:c.teammates.map(function(n){return n.id}),
@@ -1813,7 +1813,7 @@ function deserializeG(o){
     c.rival=(o.rival&&c.relationships.some(function(n){return n.id===o.rival}))?o.rival:null;
   }
   if(!c.household)c.household="normal";
-  c.tb=o.tb||null;c.tbW=o.tbW||null;try{if(c.tb)tbEnsure()}catch(e){}
+  c.tb=o.tb||null;c.tbW=o.tbW||null;c.tbSeenTB=o.tbSeenTB||null;try{if(c.tb)tbEnsure()}catch(e){}
   c.trained=o.trained||{};c.flags=o.flags||{};
   c.clanName=o.clanName||null;
   if(c.clanName){var cl=CLANS.find(function(x){return x.n===c.clanName});
